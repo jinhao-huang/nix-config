@@ -5,9 +5,20 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    # Optional: Declarative tap management
+    homebrew-core = {
+      url = "github:homebrew/homebrew-core";
+      flake = false;
+    };
+    homebrew-cask = {
+      url = "github:homebrew/homebrew-cask";
+      flake = false;
+    };
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs }:
+  outputs = inputs@{ self, nix-darwin, nixpkgs, nix-homebrew, homebrew-core, homebrew-cask, ... }:
   let
     configuration = { pkgs, ... }: {
       # List packages installed in system profile. To search by name, run:
@@ -21,6 +32,34 @@
           pkgs.typst
           pkgs.imagemagick
         ];
+      
+      homebrew = {
+        enable = true;
+        onActivation = {
+          cleanup = "zap";
+          upgrade = true;
+          autoUpdate = true;
+        };
+
+        casks = [
+          "1password"
+          "airbuddy"
+          "app-cleaner"
+          "betterdisplay"
+          "cleanshot"
+          "coteditor"
+          "obsidian"
+          "omnigraffle"
+          "orbstack"
+          "raycast"
+          "rustdesk"
+          "tower"
+          "typora"
+          "visual-studio-code"
+          "warp"
+          "zotero"
+        ];
+      };
 
       # Necessary for using flakes on this system.
       nix.settings.experimental-features = "nix-command flakes";
@@ -30,6 +69,8 @@
 
       # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
+
+      system.primaryUser = "jinhaohuang";
 
       # Used for backwards compatibility, please read the changelog before changing.
       # $ darwin-rebuild changelog
@@ -43,7 +84,36 @@
     # Build darwin flake using:
     # $ darwin-rebuild build --flake .#mac
     darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {
-      modules = [ configuration ];
+      modules = [
+        ({ config, ... }: {
+          homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
+        })
+        configuration
+        nix-homebrew.darwinModules.nix-homebrew
+        {
+          nix-homebrew = {
+            # Install Homebrew under the default prefix
+            enable = true;
+
+            # Apple Silicon Only: Also install Homebrew under the default Intel prefix for Rosetta 2
+            enableRosetta = false;
+
+            # User owning the Homebrew prefix
+            user = "jinhaohuang";
+
+            # Optional: Declarative tap management
+            taps = {
+              "homebrew/homebrew-core" = homebrew-core;
+              "homebrew/homebrew-cask" = homebrew-cask;
+            };
+
+            # Optional: Enable fully-declarative tap management
+            #
+            # With mutableTaps disabled, taps can no longer be added imperatively with `brew tap`.
+            mutableTaps = false;
+          };
+        }
+      ];
     };
   };
 }
