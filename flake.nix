@@ -18,6 +18,8 @@
           pkgs.rustup
           pkgs.uv
           pkgs.fnm
+          pkgs.typst
+          pkgs.imagemagick
         ];
 
       # Necessary for using flakes on this system.
