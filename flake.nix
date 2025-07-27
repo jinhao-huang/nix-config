@@ -14,6 +14,10 @@
       # $ nix-env -qaP | grep wget
       environment.systemPackages =
         [ pkgs.vim
+          pkgs.git
+          pkgs.rustup
+          pkgs.uv
+          pkgs.fnm
         ];
 
       # Necessary for using flakes on this system.
