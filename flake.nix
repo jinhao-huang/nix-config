@@ -40,9 +40,6 @@
           environment.systemPackages = [
             pkgs.vim
             pkgs.git
-            pkgs.rustup
-            pkgs.uv
-            pkgs.fnm
           ];
 
           homebrew = {

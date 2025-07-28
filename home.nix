@@ -20,6 +20,9 @@
   programs.home-manager.enable = true;
 
   home.packages = with pkgs; [
+    rustup
+    uv
+    fnm
     typst
     imagemagick
     mas
