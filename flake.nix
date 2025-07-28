@@ -59,6 +59,13 @@
           "warp"
           "zotero"
         ];
+
+        masApps = {
+          "Amphetamine" = 937984704;
+          "Bob" = 1630034110;
+          "PastePal" = 1503446680;
+          "Canary Mail" = 1236045954;
+        };
       };
 
       # Necessary for using flakes on this system.
