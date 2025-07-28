@@ -22,5 +22,6 @@
   home.packages = with pkgs; [
     typst
     imagemagick
+    mas
   ];
 }
