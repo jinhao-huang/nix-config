@@ -98,6 +98,11 @@
           users.users.jinhaohuang.home = "/Users/jinhaohuang";
 
           security.pam.services.sudo_local.touchIdAuth = true;
+
+          system.defaults = {
+            finder.AppleShowAllExtensions = true;
+            finder.FXPreferredViewStyle = "clmv";
+          };
         };
     in
     {
