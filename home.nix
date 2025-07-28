@@ -23,5 +23,7 @@
     typst
     imagemagick
     mas
+    nil
+    nixfmt-rfc-style
   ];
 }
