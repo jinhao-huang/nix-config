@@ -25,6 +25,7 @@
     fnm
     typst
     imagemagick
+    svg2pdf
     mas
     nil
     nixfmt-rfc-style
