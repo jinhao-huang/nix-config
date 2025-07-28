@@ -80,6 +80,8 @@
       nixpkgs.hostPlatform = "aarch64-darwin";
 
       users.users.jinhaohuang.home = "/Users/jinhaohuang";
+
+      security.pam.services.sudo_local.touchIdAuth = true;
     };
   in
   {
