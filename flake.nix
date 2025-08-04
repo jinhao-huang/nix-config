@@ -152,5 +152,13 @@
           }
         ];
       };
-    };
+
+      homeConfigurations."linux-deployment" = home-manager.lib.homeManagerConfiguration {
+        pkgs = pkgs-linux; # Use the linux nixpkgs
+        
+        # Pass the new deployment.nix file to the modules
+        modules = [ ./deployment.nix ];
+        
+        extraSpecialArgs = { inherit inputs; };
+      };
 }
