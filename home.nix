@@ -30,4 +30,11 @@
     nil
     nixfmt-rfc-style
   ];
+
+  programs.zsh.sessionVariables = {
+    EDITOR = "vim";
+  };
+
+  programs.zsh.enable = true;
+
 }
