@@ -154,7 +154,7 @@
       };
 
       homeConfigurations."linux-deployment" = home-manager.lib.homeManagerConfiguration {
-        pkgs = pkgs-linux; # Use the linux nixpkgs
+        pkgs = import inputs.nixpkgs { system = "x86_64-linux"; }; # Use the linux nixpkgs
 
         # Pass the new deployment.nix file to the modules
         modules = [ ./deployment.nix ];
