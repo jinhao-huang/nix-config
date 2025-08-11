@@ -37,7 +37,8 @@
 
   programs.zsh.enable = true;
 
-  home.file.".zshrc" = {
-    source = ./zshrc.conf;
-  };
+  programs.zsh.initContent = ''
+    eval "$(fnm env --use-on-cd)"
+  '';
+
 }
