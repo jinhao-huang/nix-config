@@ -31,14 +31,36 @@
     nixfmt-rfc-style
   ];
 
-  programs.zsh.sessionVariables = {
-    EDITOR = "vim";
+  programs.zsh = {
+    enable = true;
+
+    initContent = ''
+      eval "$(fnm env --use-on-cd)"
+    '';
+
+    sessionVariables = {
+      EDITOR = "vim";
+    };
+
+    oh-my-zsh = {
+      enable = true;
+      plugins = [
+        "git"
+      ];
+    };
+
+    enableAutosuggestions = true; # Enable autosuggestions (gray inline completions)
+    syntaxHighlighting.enable = true; # Enable syntax highlighting
   };
 
-  programs.zsh.enable = true;
+  programs.starship = {
+    enable = true;
+    # Automatically integrate with Zsh (enabled by default, included here for clarity)
+    enableZshIntegration = true;
 
-  programs.zsh.initContent = ''
-    eval "$(fnm env --use-on-cd)"
-  '';
+    settings = {
+      add_newline = false;
+    };
+  };
 
 }
