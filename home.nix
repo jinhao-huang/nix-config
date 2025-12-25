@@ -31,16 +31,16 @@
     nixfmt-rfc-style
   ];
 
+  home.sessionVariables = {
+    EDITOR = "vim";
+  };
+
   programs.zsh = {
     enable = true;
 
     initContent = ''
       eval "$(fnm env --use-on-cd)"
     '';
-
-    sessionVariables = {
-      EDITOR = "vim";
-    };
 
     oh-my-zsh = {
       enable = true;
@@ -49,7 +49,7 @@
       ];
     };
 
-    enableAutosuggestions = true; # Enable autosuggestions (gray inline completions)
+    autosuggestion.enable = true; # Enable autosuggestions (gray inline completions)
     syntaxHighlighting.enable = true; # Enable syntax highlighting
   };
 
