@@ -63,4 +63,8 @@
     };
   };
 
+  programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true; # Automatically configure Zsh hooks
+  };
 }
