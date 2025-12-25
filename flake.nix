@@ -60,6 +60,7 @@
               "obsidian"
               "omnigraffle"
               "orbstack"
+              "proton-mail"
               "raycast"
               "rustdesk"
               "tower"
