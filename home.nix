@@ -19,6 +19,10 @@
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
+  imports = [
+    ./modules/starship
+  ];
+
   home.packages = with pkgs; [
     rustup
     uv
@@ -51,16 +55,6 @@
 
     autosuggestion.enable = true; # Enable autosuggestions (gray inline completions)
     syntaxHighlighting.enable = true; # Enable syntax highlighting
-  };
-
-  programs.starship = {
-    enable = true;
-    # Automatically integrate with Zsh (enabled by default, included here for clarity)
-    enableZshIntegration = true;
-
-    settings = {
-      add_newline = false;
-    };
   };
 
   programs.zoxide = {
