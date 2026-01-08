@@ -25,6 +25,7 @@ in
 
   imports = [
     ./modules/starship
+    ./modules/git
   ];
 
   home.packages = with pkgs; [
@@ -39,35 +40,6 @@ in
     nixfmt-rfc-style
     claude-code
   ];
-
-  programs.git = {
-    enable = true;
-    userName = "Jinhao Huang";
-    inherit userEmail;
-    ignores = [ ".DS_Store" ];
-
-    signing = {
-      key = gitSigningKey;
-      signByDefault = true;
-    };
-
-    extraConfig = {
-      init.defaultBranch = "main";
-      push.autoSetupRemote = true;
-      gpg = {
-        format = "ssh";
-        ssh = {
-          program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
-          allowedSignersFile = "~/.config/git/allowed_signers";
-        };
-      };
-    };
-  };
-
-  # Declaratively generate the allowed_signers file
-  xdg.configFile."git/allowed_signers".text = ''
-    ${userEmail} ${gitSigningKey}
-  '';
 
   programs.vim = {
     enable = true;
