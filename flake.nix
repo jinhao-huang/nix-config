@@ -18,6 +18,8 @@
     };
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    claude-code.url = "github:sadjow/claude-code-nix";
   };
 
   outputs =
@@ -29,12 +31,15 @@
       homebrew-core,
       homebrew-cask,
       home-manager,
+      claude-code,
       ...
     }:
     let
       configuration =
         { pkgs, ... }:
         {
+          nixpkgs.config.allowUnfree = true;
+
           # List packages installed in system profile. To search by name, run:
           # $ nix-env -qaP | grep wget
           environment.systemPackages = [
@@ -115,6 +120,7 @@
             { config, ... }:
             {
               homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
+              nixpkgs.overlays = [ claude-code.overlays.default ];
             }
           )
           configuration

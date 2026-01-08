@@ -33,6 +33,7 @@
     mas
     nil
     nixfmt-rfc-style
+    claude-code
   ];
 
   home.sessionVariables = {
