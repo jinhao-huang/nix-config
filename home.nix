@@ -1,5 +1,9 @@
 { config, pkgs, ... }:
 
+let
+  userEmail = "me@jinhaohuang.com";
+  gitSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFgb0OhbTZQuqxdcczlzlsEbOGUszYHfo+qI/lbQEUqR";
+in
 {
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
@@ -36,8 +40,38 @@
     claude-code
   ];
 
-  home.sessionVariables = {
-    EDITOR = "vim";
+  programs.git = {
+    enable = true;
+    userName = "Jinhao Huang";
+    inherit userEmail;
+    ignores = [ ".DS_Store" ];
+
+    signing = {
+      key = gitSigningKey;
+      signByDefault = true;
+    };
+
+    extraConfig = {
+      init.defaultBranch = "main";
+      push.autoSetupRemote = true;
+      gpg = {
+        format = "ssh";
+        ssh = {
+          program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+          allowedSignersFile = "~/.config/git/allowed_signers";
+        };
+      };
+    };
+  };
+
+  # Declaratively generate the allowed_signers file
+  xdg.configFile."git/allowed_signers".text = ''
+    ${userEmail} ${gitSigningKey}
+  '';
+
+  programs.vim = {
+    enable = true;
+    defaultEditor = true;
   };
 
   programs.zsh = {
