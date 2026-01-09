@@ -33,6 +33,7 @@
     nil
     nixfmt-rfc-style
     claude-code
+    _1password-cli
   ];
 
   programs = {
