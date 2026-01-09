@@ -17,8 +17,6 @@
   home.stateVersion = "25.05";
 
   # Let Home Manager install and manage itself.
-  programs.home-manager.enable = true;
-
   imports = [
     ./modules/starship
     ./modules/git
@@ -37,31 +35,42 @@
     claude-code
   ];
 
-  programs.vim = {
-    enable = true;
-    defaultEditor = true;
-  };
+  programs = {
+    home-manager.enable = true;
 
-  programs.zsh = {
-    enable = true;
-
-    initContent = ''
-      eval "$(fnm env --use-on-cd)"
-    '';
-
-    oh-my-zsh = {
+    vim = {
       enable = true;
-      plugins = [
-        "git"
-      ];
+      defaultEditor = true;
     };
 
-    autosuggestion.enable = true; # Enable autosuggestions (gray inline completions)
-    syntaxHighlighting.enable = true; # Enable syntax highlighting
+    zsh = {
+      enable = true;
+
+      initContent = ''
+        eval "$(fnm env --use-on-cd)"
+      '';
+
+      oh-my-zsh = {
+        enable = true;
+        plugins = [
+          "git"
+        ];
+      };
+
+      autosuggestion.enable = true; # Enable autosuggestions (gray inline completions)
+      syntaxHighlighting.enable = true; # Enable syntax highlighting
+    };
+
+    direnv = {
+      enable = true;
+      enableZshIntegration = true;
+      nix-direnv.enable = true;
+    };
+
+    zoxide = {
+      enable = true;
+      enableZshIntegration = true; # Automatically configure Zsh hooks
+    };
   };
 
-  programs.zoxide = {
-    enable = true;
-    enableZshIntegration = true; # Automatically configure Zsh hooks
-  };
 }
