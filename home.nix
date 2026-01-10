@@ -20,7 +20,10 @@
   imports = [
     ./modules/starship
     ./modules/git
+    ./modules/claude-code
   ];
+
+  modules.claude-code.enable = true;
 
   home.packages = with pkgs; [
     rustup
@@ -32,8 +35,6 @@
     mas
     nil
     nixfmt-rfc-style
-    claude-code
-    _1password-cli
   ];
 
   programs = {

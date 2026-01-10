@@ -44,7 +44,6 @@
             { config, ... }:
             {
               homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
-              nixpkgs.overlays = [ claude-code.overlays.default ];
             }
           )
           ./modules/darwin/default.nix
@@ -55,8 +54,7 @@
             home-manager.useUserPackages = true;
             home-manager.users.jinhaohuang = ./home.nix;
 
-            # Optionally, use home-manager.extraSpecialArgs to pass
-            # arguments to home.nix
+            home-manager.extraSpecialArgs = { inherit inputs; };
           }
         ];
       };
