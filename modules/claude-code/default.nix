@@ -12,11 +12,19 @@ let
   cfg = config.modules.claude-code;
 in
 {
+  imports = [ inputs.claude-code.homeManagerModules.default ];
+
   options.modules.claude-code = {
     enable = mkEnableOption "Claude Code configuration and aliases";
   };
 
   config = mkIf cfg.enable {
+    programs.claude-code = {
+      enable = true;
+      # Explicitly use the package from the input flake to ensure it matches your expectations
+      package = inputs.claude-code.packages.${pkgs.system}.default;
+    };
+
     # Define GLM environment config (using 1Password references)
     # Output: ~/.config/claude-code/profiles/glm.env
     xdg.configFile."claude-code/profiles/glm.env".text = ''
@@ -32,7 +40,6 @@ in
 
     # Ensure 1Password CLI is available
     home.packages = [
-      inputs.claude-code.packages.${pkgs.system}.default
       pkgs._1password-cli
     ];
   };
