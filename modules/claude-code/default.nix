@@ -12,16 +12,15 @@ let
   cfg = config.modules.claude-code;
 in
 {
-  imports = [ inputs.claude-code.homeManagerModules.default ];
-
   options.modules.claude-code = {
     enable = mkEnableOption "Claude Code configuration and aliases";
   };
 
   config = mkIf cfg.enable {
+    # Use the built-in Home Manager module
     programs.claude-code = {
       enable = true;
-      # Explicitly use the package from the input flake to ensure it matches your expectations
+      # Use the package from the flake input
       package = inputs.claude-code.packages.${pkgs.system}.default;
     };
 
