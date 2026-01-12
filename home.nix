@@ -21,13 +21,14 @@
     ./modules/starship
     ./modules/git
     ./modules/claude-code
+    ./modules/uv
   ];
 
   modules.claude-code.enable = true;
+  modules.uv.enable = true;
 
   home.packages = with pkgs; [
     rustup
-    uv
     fnm
     typst
     imagemagick
