@@ -35,7 +35,7 @@
     svg2pdf
     mas
     nil
-    nixfmt-rfc-style
+    nixfmt
   ];
 
   programs = {

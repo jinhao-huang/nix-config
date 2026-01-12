@@ -21,7 +21,7 @@ in
     programs.claude-code = {
       enable = true;
       # Use the package from the flake input
-      package = inputs.claude-code.packages.${pkgs.system}.default;
+      package = inputs.claude-code.packages.${pkgs.stdenv.hostPlatform.system}.default;
     };
 
     # Define GLM environment config (using 1Password references)

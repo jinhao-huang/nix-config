@@ -7,7 +7,6 @@ in
 {
   programs.git = {
     enable = true;
-    inherit userName userEmail;
     ignores = [ ".DS_Store" ];
 
     signing = {
@@ -15,7 +14,11 @@ in
       signByDefault = true;
     };
 
-    extraConfig = {
+    settings = {
+      user = {
+        name = userName;
+        email = userEmail;
+      };
       init.defaultBranch = "main";
       push.autoSetupRemote = true;
       gpg = {
