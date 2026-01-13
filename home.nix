@@ -22,10 +22,12 @@
     ./modules/git
     ./modules/claude-code
     ./modules/uv
+    ./modules/gemini-cli
   ];
 
   modules.claude-code.enable = true;
   modules.uv.enable = true;
+  modules.gemini-cli.enable = true;
 
   home.packages = with pkgs; [
     rustup
