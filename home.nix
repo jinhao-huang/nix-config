@@ -24,12 +24,14 @@
     ./modules/uv
     ./modules/gemini-cli
     ./modules/opencode
+    ./modules/zed
   ];
 
   modules.claude-code.enable = true;
   modules.uv.enable = true;
   modules.gemini-cli.enable = true;
   modules.opencode.enable = true;
+  modules.zed.enable = true;
 
   home.packages = with pkgs; [
     rustup
