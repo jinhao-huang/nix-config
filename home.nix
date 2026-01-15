@@ -23,11 +23,13 @@
     ./modules/claude-code
     ./modules/uv
     ./modules/gemini-cli
+    ./modules/opencode
   ];
 
   modules.claude-code.enable = true;
   modules.uv.enable = true;
   modules.gemini-cli.enable = true;
+  modules.opencode.enable = true;
 
   home.packages = with pkgs; [
     rustup
