@@ -25,6 +25,7 @@
     ./modules/gemini-cli
     ./modules/opencode
     ./modules/zed
+    ./modules/common
   ];
 
   modules.claude-code.enable = true;
@@ -32,6 +33,9 @@
   modules.gemini-cli.enable = true;
   modules.opencode.enable = true;
   modules.zed.enable = true;
+
+  # Configuration repository path relative to home directory
+  modules.repoRelativePath = "nix-config";
 
   home.packages = with pkgs; [
     rustup
