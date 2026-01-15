@@ -37,6 +37,7 @@
       "typora"
       "visual-studio-code"
       "warp"
+      "zed"
       "zotero"
     ];
 
