@@ -18,6 +18,9 @@ in
   config = mkIf cfg.enable {
     programs.opencode = {
       enable = true;
+      settings = {
+        plugin = [ "opencode-gemini-auth" ];
+      };
     };
   };
 }
