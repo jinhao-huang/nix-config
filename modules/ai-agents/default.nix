@@ -22,5 +22,9 @@ in
     # Link OpenCode rules
     xdg.configFile."opencode/AGENTS.md".source =
       config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/rules.md";
+
+    # Link OpenCode agents
+    xdg.configFile."opencode/agent".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/agents";
   };
 }
