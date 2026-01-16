@@ -24,6 +24,7 @@
     ./modules/uv
     ./modules/gemini-cli
     ./modules/opencode
+    ./modules/ai-agents
     ./modules/zed
     ./modules/common
   ];
@@ -32,6 +33,7 @@
   modules.uv.enable = true;
   modules.gemini-cli.enable = true;
   modules.opencode.enable = true;
+  modules.ai-agents.enable = true;
   modules.zed.enable = true;
 
   # Configuration repository path relative to home directory
