@@ -48,7 +48,6 @@
     mas
     nil
     nixfmt
-    tableplus
   ];
 
   programs = {

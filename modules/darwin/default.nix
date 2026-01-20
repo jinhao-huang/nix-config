@@ -33,6 +33,7 @@
       "proton-mail"
       "raycast"
       "rustdesk"
+      "tableplus"
       "tower"
       "typora"
       "visual-studio-code"
