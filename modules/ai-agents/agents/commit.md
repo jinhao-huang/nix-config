@@ -1,6 +1,6 @@
 ---
 description: Generate commit messages
-mode: primary
+mode: all
 model: zhipuai-coding-plan/glm-4.7
 permission:
   edit: deny
