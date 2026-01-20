@@ -73,16 +73,15 @@ Use the body to explain the *motivation* and detailed changes.
 2. **Analyze** the staged changes (`git diff --cached`).
 3. **Draft** the commit message strictly following the Output Schema.
 4. **Present** the draft message to the user.
-5. **Interact** using the `question` tool immediately:
-   - **Header**: "Commit?"
-   - **Question**: "Do you want to proceed with this commit message?"
+5. **Interact** using the `question` tool immediately with following parameter:
+   - **Question**: : <The generated commit message>
+   - **Header**: "Do you want to commit?"
    - **Options**:
-     - Label: "Yes, Commit", Description: "Execute git commit with this message"
-     - Label: "Edit", Description: "Provide feedback to modify the message"
+     - Label: "Commit", Description: "Execute git commit with this message"
      - Label: "Cancel", Description: "Abort the process"
 6. **Handle Response**:
-   - If **Yes, Commit**: Execute `git commit -m "..."`.
-   - If **Edit** (or user provides input): Incorporate feedback, regenerate the message, and **repeat from Step 3**.
+   - If **Commit**: Execute `git commit -m "..."`.
+   - If user provides text input: Incorporate feedback, regenerate the message, and **repeat from Step 3**.
    - If **Cancel**: Stop execution.
 
 ### Negative Constraints
