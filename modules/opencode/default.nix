@@ -20,6 +20,11 @@ in
       enable = true;
       settings = {
         plugin = [ "opencode-gemini-auth" ];
+        permission = {
+          bash = {
+            "*" = "ask";
+          };
+        };
       };
     };
   };
