@@ -74,8 +74,8 @@ Use the body to explain the *motivation* and detailed changes.
 3. **Draft** the commit message strictly following the Output Schema.
 4. **Present** the draft message to the user.
 5. **Interact** using the `question` tool immediately with following parameter:
-   - **Question**: : <The generated commit message>
-   - **Header**: "Do you want to commit?"
+   - **Question**: <The generated commit message>
+   - **Header**: "Commit?"
    - **Options**:
      - Label: "Commit", Description: "Execute git commit with this message"
      - Label: "Cancel", Description: "Abort the process"
