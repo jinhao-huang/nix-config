@@ -53,6 +53,7 @@
     pkgs-unstable.mas
     nil
     nixfmt
+    _1password-cli
   ];
 
   programs = {
