@@ -1,4 +1,9 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  pkgs-unstable,
+  ...
+}:
 
 {
   # Home Manager needs a bit of information about you and the
@@ -45,7 +50,7 @@
     typst
     imagemagick
     svg2pdf
-    mas
+    pkgs-unstable.mas
     nil
     nixfmt
   ];

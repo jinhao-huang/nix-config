@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  pkgs-unstable,
   lib,
   ...
 }:
@@ -18,6 +19,7 @@ in
   config = mkIf cfg.enable {
     programs.opencode = {
       enable = true;
+      package = pkgs-unstable.opencode;
       settings = {
         plugin = [ "opencode-gemini-auth" ];
         permission = {
