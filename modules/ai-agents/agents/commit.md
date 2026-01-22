@@ -2,6 +2,7 @@
 description: Generate commit messages
 mode: all
 model: zhipuai-coding-plan/glm-4.7
+color: "#1a7f37"
 permission:
   edit: deny
   bash:
