@@ -70,12 +70,16 @@ Use the body to explain the *motivation* and detailed changes.
 2. **Analyze** the staged changes (`git diff --cached`).
 3. **Draft** the commit message strictly following the Output Schema.
 4. **Present** the draft message to the user.
-5. **Interact** using the `question` tool immediately with following parameter:
-   - **Question**: <The generated commit message>
-   - **Header**: "Commit?"
-   - **Options**:
-     - Label: "Commit", Description: "Execute git commit with this message"
-     - Label: "Cancel", Description: "Abort the process"
+ 5. **Interact** using the `question` tool immediately with **strictly** the following parameters:
+    - **questions**: [
+      - **question**: "Do you want to execute git commit with this message?\n\n<The generated commit message - MUST use the full commit message including header and body>"
+      - **header**: "Commit?"
+      - **options**:
+        - Label: "Commit", Description: "Execute git commit with this message"
+        - Label: "Cancel", Description: "Abort the process"
+    ]
+    
+    **CRITICAL**: You MUST use the EXACT parameters above. The `questions` parameter must be an array containing a single object with `question`, `header`, and `options`. The `question` field MUST start with "Do you want to execute git commit with this message?" followed by two newlines and the complete generated commit message (both header and body). Do NOT modify, summarize, or abbreviate the question, header, or options.
 6. **Handle Response**:
    - If **Commit**: Execute `git commit -m "..."`.
    - If user provides text input: Incorporate feedback, regenerate the message, and **repeat from Step 3**.
