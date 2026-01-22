@@ -5,11 +5,7 @@ model: zhipuai-coding-plan/glm-4.7
 permission:
   edit: deny
   bash:
-    "*": ask
-    "git diff*": allow
-    "git log*": allow
-    "git status": allow
-    "grep *": allow
+    "git commit*": ask
   question: allow
 ---
 

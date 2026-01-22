@@ -25,6 +25,18 @@ in
         permission = {
           bash = {
             "*" = "ask";
+            "ls *" = "allow";
+            "grep *" = "allow";
+            "cat *" = "allow";
+            "find *" = "allow";
+            "pwd *" = "allow";
+            "git status*" = "allow";
+            "git log*" = "allow";
+            "git diff*" = "allow";
+            "git show*" = "allow";
+            "git branch*" = "allow";
+            "git commit*" = "deny";
+            "git push*" = "deny";
           };
         };
       };
