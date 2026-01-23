@@ -65,6 +65,10 @@
       defaultEditor = true;
     };
 
+    gpg = {
+      enable = true;
+    };
+
     zsh = {
       enable = true;
 
