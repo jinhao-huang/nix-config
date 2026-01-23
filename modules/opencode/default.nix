@@ -17,8 +17,12 @@ let
       context7 = {
         type = "local";
         command = [
-          "npx"
-          "-y"
+          "mise"
+          "exec"
+          "pnpm"
+          "--"
+          "pnpm"
+          "dlx"
           "@upstash/context7-mcp"
           "--api-key"
           "{{ op://Dev/Context7-OpenCode/credential }}"
@@ -69,14 +73,14 @@ in
     home.activation.injectOpencodeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       if [ -z "$DRY_RUN_CMD" ]; then
         OP_CMD="${pkgs._1password-cli}/bin/op"
-        
+
         if [ -x "$OP_CMD" ]; then
            target="${config.xdg.configHome}/opencode/config.json"
            tpl="${config.xdg.configHome}/opencode/config.json.tpl"
 
            # Remove existing config if it's a symlink (managed by HM) or file
            rm -f "$target"
-           
+
            # Inject secrets
            # Note: This requires 'op' to be authenticated
            echo "Injecting secrets into opencode/config.json using $OP_CMD..."
