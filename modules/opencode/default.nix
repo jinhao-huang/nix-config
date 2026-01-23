@@ -38,6 +38,9 @@ let
         "cat *" = "allow";
         "find *" = "allow";
         "pwd *" = "allow";
+        "echo *" = "allow";
+        "head *" = "allow";
+        "tail *" = "allow";
         "git status*" = "allow";
         "git log*" = "allow";
         "git diff*" = "allow";
