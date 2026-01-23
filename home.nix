@@ -31,6 +31,7 @@
     ./modules/opencode
     ./modules/ai-agents
     ./modules/zed
+    ./modules/mise
     ./modules/common
   ];
 
@@ -40,13 +41,13 @@
   modules.opencode.enable = true;
   modules.ai-agents.enable = true;
   modules.zed.enable = true;
+  modules.mise.enable = true;
 
   # Configuration repository path relative to home directory
   modules.repoRelativePath = "nix-config";
 
   home.packages = with pkgs; [
     rustup
-    fnm
     typst
     imagemagick
     svg2pdf
@@ -66,10 +67,6 @@
 
     zsh = {
       enable = true;
-
-      initContent = ''
-        eval "$(fnm env --use-on-cd)"
-      '';
 
       oh-my-zsh = {
         enable = true;
