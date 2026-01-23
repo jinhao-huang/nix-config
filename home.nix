@@ -79,12 +79,6 @@
       syntaxHighlighting.enable = true; # Enable syntax highlighting
     };
 
-    direnv = {
-      enable = true;
-      enableZshIntegration = true;
-      nix-direnv.enable = true;
-    };
-
     zoxide = {
       enable = true;
       enableZshIntegration = true; # Automatically configure Zsh hooks
