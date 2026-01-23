@@ -48,6 +48,16 @@ let
       };
     };
   };
+
+  configFileTpl =
+    pkgs.runCommand "config.json.tpl"
+      {
+        nativeBuildInputs = [ pkgs.jq ];
+        jsonContent = builtins.toJSON settings;
+      }
+      ''
+        echo "$jsonContent" | jq '.' > $out
+      '';
 in
 {
   options.modules.opencode = {
@@ -60,15 +70,7 @@ in
       package = pkgs-unstable.opencode;
     };
 
-    xdg.configFile."opencode/config.json.tpl".source =
-      pkgs.runCommand "config.json.tpl"
-        {
-          nativeBuildInputs = [ pkgs.jq ];
-          jsonContent = builtins.toJSON settings;
-        }
-        ''
-          echo "$jsonContent" | jq '.' > $out
-        '';
+    xdg.configFile."opencode/config.json.tpl".source = configFileTpl;
 
     home.activation.injectOpencodeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       if [ -z "$DRY_RUN_CMD" ]; then
@@ -76,10 +78,12 @@ in
 
         if [ -x "$OP_CMD" ]; then
            target="${config.xdg.configHome}/opencode/config.json"
-           tpl="${config.xdg.configHome}/opencode/config.json.tpl"
+           tpl="${configFileTpl}"
 
-           # Remove existing config if it's a symlink (managed by HM) or file
-           rm -f "$target"
+           if [ -e "$target" ]; then
+             chmod u+w "$target" || true
+             rm -f "$target"
+           fi
 
            # Inject secrets
            # Note: This requires 'op' to be authenticated
