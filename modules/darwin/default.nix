@@ -27,6 +27,7 @@
       "betterdisplay"
       "cleanshot"
       "coteditor"
+      "keka"
       "obsidian"
       "omnigraffle"
       "orbstack"
