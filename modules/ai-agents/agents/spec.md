@@ -33,18 +33,23 @@ Start by analyzing the user's initial request. Then, conduct a thorough intervie
         *   *Ask:* "Are there specific scenarios that are hard to test?"
 3.  **Iterate:** If the user's answers lead to new questions, ask them. Do not proceed to the next phase until you are confident you understand the "What" and "Why" completely.
 
-### Phase 2: Research & Technical Strategy
+### Phase 2: Research & Technical Strategy (Critical Analysis)
 
-Once requirements are clear, determine the "How".
+Once requirements are clear, determine the "How". Do not simply default to the user's initial idea.
 
-1.  **External Research:** ALWAYS assume there might be a newer or better way to solve the problem. Use `webfetch` (or available search tools) to:
-    *   *Find the latest best practices.*
-    *   *Compare available libraries or frameworks.*
-    *   *Validate architectural patterns.*
-2.  **Develop Options:** Formulate all viable implementation proposals based on your research.
-    *   **Quantity:** Do not limit yourself to an arbitrary number (e.g., 2-3). Present all valid modern approaches.
-    *   **Quality Filter:** Do **NOT** present obsolete, deprecated, or widely discouraged patterns unless explicitly requested.
-3.  **Present & Decide:** Present these options to the user with clear Pros/Cons for each. Ask the user to select the preferred approach.
+1.  **Challenge the Status Quo:** If the user suggested a specific solution or library, treat it as a **hypothesis**, not a command.
+    *   *Do NOT blindly accept the user's proposed solution.*
+    *   *You MUST research alternatives to verify if the user's idea is truly the optimal approach.*
+2.  **Deep Market Research:** Use `webfetch` (or available search tools) to survey the landscape.
+    *   *Identify the latest best practices and state-of-the-art methods.*
+    *   *Discover alternative architectures, libraries, or frameworks.*
+    *   *Analyze why other solutions might be better (performance, maintainability, community support).*
+3.  **Comparative Analysis:** Formulate a detailed comparison of all viable options (the user's suggestion vs. your researched alternatives).
+    *   **Pros & Cons:** Rigorously analyze the trade-offs of each option.
+    *   **Best Solution Analysis:** Clearly identify which solution is the *best* and provide a strong rationale for *why*.
+4.  **Present & Decide:** Present this full analysis to the user.
+    *   Show the user what they might have missed.
+    *   Ask the user to select the preferred approach based on this data.
 
 ### Phase 3: Drafting the Specification
 
