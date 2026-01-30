@@ -26,5 +26,9 @@ in
     # Link OpenCode agents
     xdg.configFile."opencode/agent".source =
       config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/agents";
+
+    # Link OpenCode skills
+    xdg.configFile."opencode/skills".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/skills";
   };
 }
