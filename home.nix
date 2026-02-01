@@ -32,6 +32,7 @@
     ./modules/ai-agents
     ./modules/zed
     ./modules/mise
+    ./modules/tmux
     ./modules/common
   ];
 
@@ -42,6 +43,7 @@
   modules.ai-agents.enable = true;
   modules.zed.enable = true;
   modules.mise.enable = true;
+  modules.tmux.enable = true;
 
   # Configuration repository path relative to home directory
   modules.repoRelativePath = "nix-config";
