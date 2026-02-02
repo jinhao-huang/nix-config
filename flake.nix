@@ -17,6 +17,10 @@
       url = "github:homebrew/homebrew-cask";
       flake = false;
     };
+    homebrew-steipete = {
+      url = "github:steipete/homebrew-tap";
+      flake = false;
+    };
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 

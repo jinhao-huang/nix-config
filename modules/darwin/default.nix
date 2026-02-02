@@ -26,6 +26,7 @@
       "app-cleaner"
       "betterdisplay"
       "cleanshot"
+      "steipete/homebrew-tap/codexbar"
       "coteditor"
       "keka"
       "obsidian"
@@ -92,6 +93,7 @@
     taps = {
       "homebrew/homebrew-core" = inputs.homebrew-core;
       "homebrew/homebrew-cask" = inputs.homebrew-cask;
+      "steipete/homebrew-tap" = inputs.homebrew-steipete;
     };
 
     # Optional: Enable fully-declarative tap management
