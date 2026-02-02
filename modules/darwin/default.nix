@@ -20,6 +20,10 @@
       autoUpdate = true;
     };
 
+    brews = [
+      "mas"
+    ];
+
     casks = [
       "1password"
       "airbuddy"

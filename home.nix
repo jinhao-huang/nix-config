@@ -53,7 +53,6 @@
     typst
     imagemagick
     svg2pdf
-    pkgs-unstable.mas
     nil
     nixfmt
     _1password-cli
