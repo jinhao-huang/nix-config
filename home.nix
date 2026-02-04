@@ -28,6 +28,7 @@
     ./modules/claude-code
     ./modules/uv
     ./modules/gemini-cli
+    ./modules/codex
     ./modules/opencode
     ./modules/ai-agents
     ./modules/zed
@@ -39,6 +40,7 @@
   modules.claude-code.enable = true;
   modules.uv.enable = true;
   modules.gemini-cli.enable = true;
+  modules.codex.enable = true;
   modules.opencode.enable = true;
   modules.ai-agents.enable = true;
   modules.zed.enable = true;
