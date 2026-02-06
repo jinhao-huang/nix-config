@@ -25,6 +25,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     claude-code.url = "github:sadjow/claude-code-nix";
+    codex-cli-nix.url = "github:sadjow/codex-cli-nix";
 
     oh-my-tmux = {
       url = "github:gpakosz/.tmux";
