@@ -1,2 +1,29 @@
 {
+    "git_panel": {
+        "tree_view": true
+    },
+    "features": {
+        "edit_prediction_provider": "copilot"
+    },
+    "git": {
+        "inline_blame": {
+            "enabled": false,
+            "show_commit_summary": false
+        }
+    },
+    "vim_mode": true,
+    "soft_wrap": "editor_width",
+    "autosave": "on_focus_change",
+    "session": {
+        "trust_all_worktrees": true
+    },
+    "languages": {
+        "TSX": {
+            "formatter": {
+                "language_server": {
+                    "name": "prettier"
+                }
+            }
+        }
+    }
 }
