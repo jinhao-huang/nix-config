@@ -18,5 +18,7 @@ in
   config = mkIf cfg.enable {
     xdg.configFile."zed/settings.json".source =
       config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/zed/settings.json";
+    xdg.configFile."zed/keymap.json".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/zed/keymap.json";
   };
 }
