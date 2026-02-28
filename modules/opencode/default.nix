@@ -50,6 +50,11 @@ let
         "git push*" = "deny";
       };
     };
+    agent = {
+      free = {
+        permission = "allow";
+      };
+    };
   };
 
   configFileTpl =
