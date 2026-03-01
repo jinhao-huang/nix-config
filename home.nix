@@ -51,7 +51,6 @@
   modules.repoRelativePath = "nix-config";
 
   home.packages = with pkgs; [
-    rustup
     typst
     imagemagick
     svg2pdf
