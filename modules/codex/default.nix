@@ -20,7 +20,7 @@ in
   config = mkIf cfg.enable {
     programs.codex = {
       enable = true;
-      package = inputs.codex-cli-nix.packages.${system}.default;
+      package = inputs.llm-agents.packages.${system}.codex;
     };
   };
 }

@@ -24,8 +24,7 @@
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
-    claude-code.url = "github:sadjow/claude-code-nix";
-    codex-cli-nix.url = "github:sadjow/codex-cli-nix";
+    llm-agents.url = "github:numtide/llm-agents.nix";
 
     oh-my-tmux = {
       url = "github:gpakosz/.tmux";
@@ -43,7 +42,6 @@
       homebrew-core,
       homebrew-cask,
       home-manager,
-      claude-code,
       ...
     }:
     {

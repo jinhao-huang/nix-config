@@ -10,6 +10,7 @@ with lib;
 
 let
   cfg = config.modules.claude-code;
+  system = pkgs.stdenv.hostPlatform.system;
 in
 {
   options.modules.claude-code = {
@@ -20,8 +21,7 @@ in
     # Use the built-in Home Manager module
     programs.claude-code = {
       enable = true;
-      # Use the package from the flake input
-      package = inputs.claude-code.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      package = inputs.llm-agents.packages.${system}."claude-code";
     };
   };
 }

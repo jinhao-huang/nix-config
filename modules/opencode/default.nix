@@ -1,8 +1,8 @@
 {
   config,
   pkgs,
-  pkgs-unstable,
   lib,
+  inputs,
   ...
 }:
 
@@ -10,6 +10,7 @@ with lib;
 
 let
   cfg = config.modules.opencode;
+  system = pkgs.stdenv.hostPlatform.system;
 
   settings = {
     plugin = [ "opencode-gemini-auth" ];
@@ -75,7 +76,7 @@ in
   config = mkIf cfg.enable {
     programs.opencode = {
       enable = true;
-      package = pkgs-unstable.opencode;
+      package = inputs.llm-agents.packages.${system}.opencode;
     };
 
     xdg.configFile."opencode/config.json.tpl".source = configFileTpl;
