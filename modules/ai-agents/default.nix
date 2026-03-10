@@ -30,5 +30,9 @@ in
     # Link OpenCode skills
     xdg.configFile."opencode/skills".source =
       config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/skills";
+
+    # Link OpenCode commands
+    xdg.configFile."opencode/commands".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/commands";
   };
 }
