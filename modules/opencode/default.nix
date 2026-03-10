@@ -13,7 +13,6 @@ let
   system = pkgs.stdenv.hostPlatform.system;
 
   settings = {
-    plugin = [ "opencode-gemini-auth" ];
     mcp = {
       context7 = {
         type = "local";
