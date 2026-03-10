@@ -47,8 +47,8 @@ let
         "git diff*" = "allow";
         "git show*" = "allow";
         "git branch*" = "allow";
-        "git commit*" = "deny";
-        "git push*" = "deny";
+        "git commit*" = "ask";
+        "git push*" = "ask";
       };
     };
     agent = {
