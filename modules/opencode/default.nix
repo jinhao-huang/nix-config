@@ -20,6 +20,7 @@ let
         command = [
           "mise"
           "exec"
+          "node@lts"
           "pnpm"
           "--"
           "pnpm"
