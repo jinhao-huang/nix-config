@@ -1,8 +1,7 @@
 ---
 description: Generate commit messages
-mode: all
+mode: subagent
 model: zhipuai-coding-plan/glm-4.7
-color: "#1a7f37"
 permission:
   edit: deny
   bash:
@@ -108,7 +107,3 @@ fix: handle null pointer exception in user list
 
 - Add null check for user data response
 - Verify fix with new unit test
-
-### Example 3: Chore
-
-chore(deps): upgrade react to v18.2.0
