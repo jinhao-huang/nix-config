@@ -1,7 +1,6 @@
 ---
 description: Generate requirements specification (SPEC.md) via deep interview and research
 mode: all
-model: google/gemini-3-pro-preview
 color: "#8A2BE2"
 permission:
   read: allow
