@@ -55,6 +55,9 @@ let
       free = {
         permission = "allow";
       };
+      explore = {
+        model = "zhipuai-coding-plan/glm-4.7";
+      };
     };
   };
 
