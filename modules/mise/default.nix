@@ -20,6 +20,11 @@ in
       enable = true;
       enableBashIntegration = true;
       enableZshIntegration = true;
+      globalConfig = {
+        tools = {
+          "npm:@playwright/cli" = "latest";
+        };
+      };
     };
   };
 }
