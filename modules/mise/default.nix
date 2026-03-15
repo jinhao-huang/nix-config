@@ -11,9 +11,6 @@ with lib;
 let
   cfg = config.modules.mise;
   misePackage = pkgs-unstable.mise;
-  playwrightCli = pkgs.writeShellScriptBin "playwright-cli" ''
-    exec ${lib.getExe misePackage} exec node@lts npm:@playwright/cli@0.1.1 -- playwright-cli "$@"
-  '';
 in
 {
   options.modules.mise = {
@@ -30,7 +27,5 @@ in
         npm.package_manager = "pnpm";
       };
     };
-
-    home.packages = [ playwrightCli ];
   };
 }
