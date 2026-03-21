@@ -37,6 +37,7 @@
       "cleanshot"
       "steipete/homebrew-tap/codexbar"
       "coteditor"
+      "ghostty"
       "keka"
       "obsidian"
       "omnigraffle"
