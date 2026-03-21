@@ -5,7 +5,12 @@
   ...
 }:
 {
+  imports = [
+    ../proton-pass
+  ];
+
   nixpkgs.config.allowUnfree = true;
+  modules.proton-pass.enable = true;
 
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
