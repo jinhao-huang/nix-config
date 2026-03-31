@@ -56,7 +56,7 @@ let
         permission = "allow";
       };
       explore = {
-        model = "zhipuai-coding-plan/glm-4.7";
+        model = "minimax-cn-coding-plan/MiniMax-M2.7";
       };
     };
   };
