@@ -1,7 +1,7 @@
 ---
 description: Generate and execute commit messages
 mode: subagent
-model: zhipuai-coding-plan/glm-4.7
+model: minimax-cn-coding-plan/MiniMax-M2.7
 permission:
   edit: deny
   bash:
