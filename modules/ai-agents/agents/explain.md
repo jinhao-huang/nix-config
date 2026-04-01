@@ -1,7 +1,6 @@
 ---
 description: Detailed code logic explanation and breakdown
 mode: all
-model: minimax-cn-coding-plan/MiniMax-M2.7
 color: "#3b82f6"
 permission:
   read: allow

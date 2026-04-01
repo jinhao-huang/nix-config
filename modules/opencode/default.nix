@@ -11,8 +11,10 @@ with lib;
 let
   cfg = config.modules.opencode;
   system = pkgs.stdenv.hostPlatform.system;
+  smallModel = "minimax-cn-coding-plan/MiniMax-M2.7";
 
   settings = {
+    small_model = smallModel;
     mcp = {
       context7 = {
         type = "local";
@@ -55,8 +57,14 @@ let
       free = {
         permission = "allow";
       };
+      commit = {
+        model = smallModel;
+      };
+      explain = {
+        model = smallModel;
+      };
       explore = {
-        model = "minimax-cn-coding-plan/MiniMax-M2.7";
+        model = smallModel;
       };
     };
   };
