@@ -23,6 +23,11 @@ in
       package = misePackage;
       enableBashIntegration = true;
       enableZshIntegration = true;
+      globalConfig = {
+        tools = {
+          go = "1.24";
+        };
+      };
       settings = {
         npm.package_manager = "pnpm";
       };
