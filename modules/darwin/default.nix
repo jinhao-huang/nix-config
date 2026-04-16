@@ -35,6 +35,7 @@
       "app-cleaner"
       "betterdisplay"
       "cleanshot"
+      "chatgpt"
       "steipete/homebrew-tap/codexbar"
       "coteditor"
       "ghostty"
