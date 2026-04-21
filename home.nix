@@ -52,8 +52,6 @@
 
   home.packages = with pkgs; [
     typst
-    imagemagick
-    svg2pdf
     nil
     nixfmt
     _1password-cli
