@@ -25,6 +25,7 @@
   imports = [
     ./modules/starship
     ./modules/git
+    ./modules/go
     ./modules/claude-code
     ./modules/uv
     ./modules/gemini-cli
@@ -38,6 +39,7 @@
   ];
 
   modules.claude-code.enable = true;
+  modules.go.enable = true;
   modules.uv.enable = true;
   modules.gemini-cli.enable = true;
   modules.codex.enable = true;
