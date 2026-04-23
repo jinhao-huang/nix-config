@@ -23,8 +23,14 @@ in
       package = misePackage;
       enableBashIntegration = true;
       enableZshIntegration = true;
-      settings = {
-        npm.package_manager = "pnpm";
+      globalConfig = {
+        settings = {
+          npm.package_manager = "pnpm";
+          idiomatic_version_file_enable_tools = [ "rust" ];
+        };
+        tools = {
+          rust = "stable";
+        };
       };
     };
   };
