@@ -55,7 +55,9 @@ let
     };
     agent = {
       free = {
-        permission = "allow";
+        permission = {
+          "*" = "allow";
+        };
       };
       commit = {
         model = smallModel;
