@@ -1,7 +1,6 @@
 {
   config,
   pkgs,
-  pkgs-unstable,
   lib,
   ...
 }:
@@ -10,7 +9,12 @@ with lib;
 
 let
   cfg = config.modules.mise;
-  misePackage = pkgs-unstable.mise;
+  direnvPackage = pkgs.direnv.overrideAttrs (_: {
+    doCheck = false;
+  });
+  misePackage = pkgs.mise.override {
+    direnv = direnvPackage;
+  };
 in
 {
   options.modules.mise = {
