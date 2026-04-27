@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  pkgs-unstable,
   lib,
   ...
 }:
@@ -9,10 +10,11 @@ with lib;
 
 let
   cfg = config.modules.mise;
-  direnvPackage = pkgs.direnv.overrideAttrs (_: {
+  # Keep mise on unstable while avoiding direnv's flaky macOS fish test.
+  direnvPackage = pkgs-unstable.direnv.overrideAttrs (_: {
     doCheck = false;
   });
-  misePackage = pkgs.mise.override {
+  misePackage = pkgs-unstable.mise.override {
     direnv = direnvPackage;
   };
 in
