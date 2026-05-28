@@ -71,11 +71,28 @@ let
     };
   };
 
+  tuiSettings = {
+    "$schema" = "https://opencode.ai/tui.json";
+    scroll_acceleration = {
+      enabled = true;
+    };
+  };
+
   configFileTpl =
     pkgs.runCommand "config.json.tpl"
       {
         nativeBuildInputs = [ pkgs.jq ];
         jsonContent = builtins.toJSON settings;
+      }
+      ''
+        echo "$jsonContent" | jq '.' > $out
+      '';
+
+  tuiConfigFile =
+    pkgs.runCommand "tui.json"
+      {
+        nativeBuildInputs = [ pkgs.jq ];
+        jsonContent = builtins.toJSON tuiSettings;
       }
       ''
         echo "$jsonContent" | jq '.' > $out
@@ -93,6 +110,7 @@ in
     };
 
     xdg.configFile."opencode/config.json.tpl".source = configFileTpl;
+    xdg.configFile."opencode/tui.json".source = tuiConfigFile;
 
     home.activation.injectOpencodeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       if [ -z "$DRY_RUN_CMD" ]; then
