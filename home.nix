@@ -21,6 +21,10 @@
   # changes in each release.
   home.stateVersion = "25.05";
 
+  home.sessionPath = [
+    "$HOME/.local/bin"
+  ];
+
   # Let Home Manager install and manage itself.
   imports = [
     ./modules/starship
