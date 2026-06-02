@@ -11,7 +11,7 @@ with lib;
 let
   cfg = config.modules.opencode;
   system = pkgs.stdenv.hostPlatform.system;
-  smallModel = "minimax-cn-coding-plan/MiniMax-M2.7";
+  smallModel = "minimax-cn-coding-plan/MiniMax-M3";
 
   settings = {
     small_model = smallModel;
