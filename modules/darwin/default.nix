@@ -41,6 +41,7 @@
       "coteditor"
       "ghostty"
       "keka"
+      "microsoft-office"
       "obsidian"
       "omnigraffle"
       "orbstack"
