@@ -2,6 +2,7 @@
 description: Generate and execute a commit from staged changes
 agent: commit
 subtask: false
+model: zhipuai-coding-plan/glm-5.2 
 ---
 
 Run the commit workflow now.
