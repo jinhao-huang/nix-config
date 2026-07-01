@@ -1,8 +1,8 @@
 {
   config,
   pkgs,
-  pkgs-unstable,
   lib,
+  inputs,
   ...
 }:
 
@@ -10,13 +10,6 @@ with lib;
 
 let
   cfg = config.modules.mise;
-  # Keep mise on unstable while avoiding direnv's flaky macOS fish test.
-  direnvPackage = pkgs-unstable.direnv.overrideAttrs (_: {
-    doCheck = false;
-  });
-  misePackage = pkgs-unstable.mise.override {
-    direnv = direnvPackage;
-  };
 in
 {
   options.modules.mise = {
@@ -26,7 +19,7 @@ in
   config = mkIf cfg.enable {
     programs.mise = {
       enable = true;
-      package = misePackage;
+      package = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.mise;
       enableBashIntegration = true;
       enableZshIntegration = true;
       globalConfig = {

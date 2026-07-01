@@ -66,6 +66,7 @@
     in
     {
       packages = forAllSystems (system: {
+        mise = import ./packages/mise { pkgs = pkgsFor system; };
         proton-pass-cli = import ./packages/proton-pass-cli { pkgs = pkgsFor system; };
       });
 
