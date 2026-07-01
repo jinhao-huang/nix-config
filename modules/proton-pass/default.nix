@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  self,
   ...
 }:
 
@@ -23,14 +24,14 @@ in
       (
         {
           osConfig,
-          pkgs-unstable,
+          pkgs,
           lib,
           ...
         }:
         {
           config = lib.mkIf (osConfig.modules.proton-pass.enable or false) {
             home.packages = [
-              pkgs-unstable.proton-pass-cli
+              self.packages.${pkgs.stdenv.hostPlatform.system}.proton-pass-cli
             ];
           };
         }

@@ -49,7 +49,26 @@
       home-manager,
       ...
     }:
+    let
+      supportedSystems = [
+        "aarch64-darwin"
+        "x86_64-darwin"
+        "aarch64-linux"
+        "x86_64-linux"
+      ];
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+      pkgsFor =
+        system:
+        import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
+    in
     {
+      packages = forAllSystems (system: {
+        proton-pass-cli = import ./packages/proton-pass-cli { pkgs = pkgsFor system; };
+      });
+
       # Build darwin flake using:
       # $ darwin-rebuild build --flake .#mac
       darwinConfigurations."mac" =
