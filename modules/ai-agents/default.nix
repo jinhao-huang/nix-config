@@ -19,6 +19,10 @@ in
     home.file.".claude/CLAUDE.md".source =
       config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/rules.md";
 
+    # Link Codex skills
+    home.file.".agents/skills".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/skills";
+
     # Link OpenCode rules
     xdg.configFile."opencode/AGENTS.md".source =
       config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/rules.md";
