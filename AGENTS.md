@@ -34,6 +34,10 @@ lowercase kebab-case directories, for example `modules/ai-agents` or
 `packages/proton-pass-cli`. Prefer one focused `default.nix` per module or
 package.
 
+Prefer declarative Home Manager or nix-darwin options over activation scripts
+for files, symlinks, and agent configuration. Use activation scripts only for
+runtime migration or conflict handling that cannot be modeled declaratively.
+
 ## Testing Guidelines
 
 There is no separate unit test suite. Treat `nix flake check` and targeted
