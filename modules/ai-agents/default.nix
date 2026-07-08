@@ -8,37 +8,32 @@ with lib;
 
 let
   cfg = config.modules.ai-agents;
+  aiAgentsDir = "${config.modules.repoPath}/modules/ai-agents";
+  mkAiAgentsSymlink =
+    relativePath: config.lib.file.mkOutOfStoreSymlink "${aiAgentsDir}/${relativePath}";
+
+  agents = mkAiAgentsSymlink "agents";
+  commands = mkAiAgentsSymlink "commands";
+  globalGuidelines = mkAiAgentsSymlink "global-guidelines.md";
+  skills = mkAiAgentsSymlink "skills";
 in
 {
   options.modules.ai-agents = {
-    enable = mkEnableOption "AI agents configuration (rules, skills, etc.)";
+    enable = mkEnableOption "AI agents configuration (guidance, skills, etc.)";
   };
 
   config = mkIf cfg.enable {
-    # Link shared agent guidance
-    home.file.".claude/CLAUDE.md".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/global-guidelines.md";
+    # Claude Code
+    home.file.".claude/CLAUDE.md".source = globalGuidelines;
 
-    home.file.".codex/AGENTS.md".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/global-guidelines.md";
+    # Codex
+    home.file.".codex/AGENTS.md".source = globalGuidelines;
+    home.file.".agents/skills".source = skills;
 
-    # Link Codex skills
-    home.file.".agents/skills".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/skills";
-
-    xdg.configFile."opencode/AGENTS.md".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/global-guidelines.md";
-
-    # Link OpenCode agents
-    xdg.configFile."opencode/agent".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/agents";
-
-    # Link OpenCode skills
-    xdg.configFile."opencode/skills".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/skills";
-
-    # Link OpenCode commands
-    xdg.configFile."opencode/commands".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/commands";
+    # OpenCode
+    xdg.configFile."opencode/AGENTS.md".source = globalGuidelines;
+    xdg.configFile."opencode/agent".source = agents;
+    xdg.configFile."opencode/commands".source = commands;
+    xdg.configFile."opencode/skills".source = skills;
   };
 }
