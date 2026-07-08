@@ -15,17 +15,19 @@ in
   };
 
   config = mkIf cfg.enable {
-    # Link Claude Code rules
+    # Link shared agent guidance
     home.file.".claude/CLAUDE.md".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/rules.md";
+      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/global-guidelines.md";
+
+    home.file.".codex/AGENTS.md".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/global-guidelines.md";
 
     # Link Codex skills
     home.file.".agents/skills".source =
       config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/skills";
 
-    # Link OpenCode rules
     xdg.configFile."opencode/AGENTS.md".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/rules.md";
+      config.lib.file.mkOutOfStoreSymlink "${config.modules.repoPath}/modules/ai-agents/global-guidelines.md";
 
     # Link OpenCode agents
     xdg.configFile."opencode/agent".source =
