@@ -25,9 +25,14 @@ in
       globalConfig = {
         settings = {
           npm.package_manager = "pnpm";
-          idiomatic_version_file_enable_tools = [ "rust" ];
+          idiomatic_version_file_enable_tools = [
+            "node"
+            "rust"
+          ];
         };
         tools = {
+          node = "24";
+          pnpm = "11";
           rust = "stable";
         };
       };

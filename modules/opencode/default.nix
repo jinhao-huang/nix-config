@@ -21,12 +21,12 @@ let
         command = [
           "mise"
           "exec"
-          "node@lts"
-          "pnpm"
+          "node@24"
+          "pnpm@11"
           "--"
           "pnpm"
           "dlx"
-          "@upstash/context7-mcp"
+          "@upstash/context7-mcp@3.2.3"
           "--api-key"
           "{{ op://Dev/Context7-OpenCode/credential }}"
         ];
