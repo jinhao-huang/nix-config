@@ -40,6 +40,7 @@
     ./modules/mise
     ./modules/tmux
     ./modules/common
+    ./modules/nix-development
   ];
 
   modules.claude-code.enable = true;
@@ -52,14 +53,13 @@
   modules.zed.enable = true;
   modules.mise.enable = true;
   modules.tmux.enable = true;
+  modules.nix-development.enable = true;
 
   # Configuration repository path relative to home directory
   modules.repoRelativePath = "nix-config";
 
   home.packages = with pkgs; [
     typst
-    nil
-    nixfmt
     _1password-cli
   ];
 
