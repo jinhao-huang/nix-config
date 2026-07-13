@@ -116,6 +116,14 @@ in
 
   home.packages = [ syncProtonPassSshKeys ];
 
+  home.activation.syncProtonPassSshKeys = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ -z "$DRY_RUN_CMD" ]; then
+      if ! ${syncProtonPassSshKeys}/bin/proton-pass-ssh-sync; then
+        echo "Warning: Proton Pass SSH public-key sync was incomplete; usable cached keys were preserved." >&2
+      fi
+    fi
+  '';
+
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
