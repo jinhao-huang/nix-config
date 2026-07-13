@@ -1,8 +1,19 @@
-{ pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   userName = "Jinhao Huang";
   userEmail = "me@jinhaohuang.com";
   gitSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFgb0OhbTZQuqxdcczlzlsEbOGUszYHfo+qI/lbQEUqR";
+  protonPassSocket = "${config.home.homeDirectory}/.ssh/proton-pass-agent.sock";
+
+  gitSshSign = pkgs.writeShellScript "git-ssh-sign" ''
+    export SSH_AUTH_SOCK=${lib.escapeShellArg protonPassSocket}
+    exec ${pkgs.openssh}/bin/ssh-keygen "$@"
+  '';
 in
 {
   programs.git = {
@@ -10,7 +21,7 @@ in
     ignores = [ ".DS_Store" ];
 
     signing = {
-      key = gitSigningKey;
+      key = "key::${gitSigningKey}";
       signByDefault = true;
     };
 
@@ -24,14 +35,13 @@ in
       gpg = {
         format = "ssh";
         ssh = {
-          program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+          program = "${gitSshSign}";
           allowedSignersFile = "~/.config/git/allowed_signers";
         };
       };
     };
   };
 
-  # Declaratively generate the allowed_signers file
   xdg.configFile."git/allowed_signers".text = ''
     ${userEmail} ${gitSigningKey}
   '';
