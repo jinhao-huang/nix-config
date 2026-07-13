@@ -67,6 +67,8 @@
   programs = {
     home-manager.enable = true;
 
+    ripgrep.enable = true;
+
     vim = {
       enable = true;
       defaultEditor = true;
