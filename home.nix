@@ -29,6 +29,7 @@
   imports = [
     ./modules/starship
     ./modules/git
+    ./modules/ssh
     ./modules/go
     ./modules/claude-code
     ./modules/uv
