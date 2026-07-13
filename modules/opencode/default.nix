@@ -11,6 +11,8 @@ with lib;
 let
   cfg = config.modules.opencode;
   system = pkgs.stdenv.hostPlatform.system;
+  protonPassCli = inputs.self.packages.${system}.proton-pass-cli;
+  jsonFormat = pkgs.formats.json { };
   smallModel = "minimax-cn-coding-plan/MiniMax-M3";
 
   settings = {
@@ -28,7 +30,7 @@ let
           "dlx"
           "@upstash/context7-mcp@3.2.3"
           "--api-key"
-          "{{ op://Dev/Context7-OpenCode/credential }}"
+          "{{ pass://Dev/Context7-API Key/OpenCode }}"
         ];
         enabled = true;
       };
@@ -78,25 +80,8 @@ let
     };
   };
 
-  configFileTpl =
-    pkgs.runCommand "config.json.tpl"
-      {
-        nativeBuildInputs = [ pkgs.jq ];
-        jsonContent = builtins.toJSON settings;
-      }
-      ''
-        echo "$jsonContent" | jq '.' > $out
-      '';
-
-  tuiConfigFile =
-    pkgs.runCommand "tui.json"
-      {
-        nativeBuildInputs = [ pkgs.jq ];
-        jsonContent = builtins.toJSON tuiSettings;
-      }
-      ''
-        echo "$jsonContent" | jq '.' > $out
-      '';
+  configFileTpl = jsonFormat.generate "opencode-config.json.tpl" settings;
+  tuiConfigFile = jsonFormat.generate "opencode-tui.json" tuiSettings;
 in
 {
   options.modules.opencode = {
@@ -109,32 +94,36 @@ in
       package = inputs.llm-agents.packages.${system}.opencode;
     };
 
-    xdg.configFile."opencode/config.json.tpl".source = configFileTpl;
     xdg.configFile."opencode/tui.json".source = tuiConfigFile;
 
     home.activation.injectOpencodeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       if [ -z "$DRY_RUN_CMD" ]; then
-        OP_CMD="${pkgs._1password-cli}/bin/op"
+        PASS_CMD="${protonPassCli}/bin/pass-cli"
+        target="${config.xdg.configHome}/opencode/config.json"
+        tpl="${configFileTpl}"
 
-        if [ -x "$OP_CMD" ]; then
-           target="${config.xdg.configHome}/opencode/config.json"
-           tpl="${configFileTpl}"
+        if "$PASS_CMD" test >/dev/null 2>&1; then
+          (
+            umask 077
+            tmp="$(${pkgs.coreutils}/bin/mktemp "$target.tmp.XXXXXX")"
+            trap '[ -z "$tmp" ] || ${pkgs.coreutils}/bin/rm -f "$tmp"' EXIT INT TERM
 
-           if [ -e "$target" ]; then
-             chmod u+w "$target" || true
-             rm -f "$target"
-           fi
-
-           # Inject secrets
-           # Note: This requires 'op' to be authenticated
-           echo "Injecting secrets into opencode/config.json using $OP_CMD..."
-           "$OP_CMD" inject -i "$tpl" -o "$target"
-
-           # Set permissions to read-only (400) to prevent accidental manual edits
-           # and protect the secrets
-           chmod 400 "$target"
+            echo "Injecting Proton Pass secrets into opencode/config.json..."
+            if "$PASS_CMD" inject \
+              --in-file "$tpl" \
+              --out-file "$tmp" \
+              --force \
+              --file-mode 0400 \
+              && ${pkgs.jq}/bin/jq -e . "$tmp" >/dev/null \
+              && ! ${pkgs.gnugrep}/bin/grep -q '{{[[:space:]]*pass://' "$tmp"; then
+              ${pkgs.coreutils}/bin/mv -f "$tmp" "$target"
+              tmp=""
+            else
+              echo "Warning: Proton Pass injection failed; preserving the existing OpenCode configuration." >&2
+            fi
+          )
         else
-           echo "Warning: 'op' command not found at $OP_CMD. Cannot inject secrets."
+          echo "Warning: Proton Pass is not logged in; preserving the existing OpenCode configuration." >&2
         fi
       fi
     '';
