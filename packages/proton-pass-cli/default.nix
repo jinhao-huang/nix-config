@@ -1,24 +1,24 @@
 { pkgs }:
 
 let
-  version = "2.2.1";
+  version = "2.2.3";
   system = pkgs.stdenv.hostPlatform.system;
   assets = {
     aarch64-darwin = {
       name = "pass-cli-macos-aarch64";
-      hash = "sha256-+v1y8gxFy4Fnk/SNhiPObrnQZHhDGSN2fTZ3b96LRQ4=";
+      hash = "sha256-gxjlrznYmXgCFOxixtHCz9x2KLsgNtuo9yr3TJpjxzI=";
     };
     x86_64-darwin = {
       name = "pass-cli-macos-x86_64";
-      hash = "sha256-9lpkph6Quup7olbZsUcgFo8EQPWz1jDRbSffNbRVR5o=";
+      hash = "sha256-K6vfr0ut8cQo1mrNeEN35akxLIo1sftt6hnn6wUa6Dk=";
     };
     aarch64-linux = {
       name = "pass-cli-linux-aarch64";
-      hash = "sha256-W/qSKyieYTM9cIx1x3qdvX0FbwBMg42CO8lIrN+xpa0=";
+      hash = "sha256-NdBabzetuIJEbu81Rfg3hUVEw8BJ2A3Who/i08/qwMs=";
     };
     x86_64-linux = {
       name = "pass-cli-linux-x86_64";
-      hash = "sha256-+RbPDVhFA0aOTOy0EreGV7VUU4IphBc/y5ZWo9GnjOY=";
+      hash = "sha256-cYjwKnweeahg9xZq0sNPei5slhJltwZ34nBPIW3Rdtk=";
     };
   };
   asset = assets.${system} or (throw "proton-pass-cli is not available for ${system}");
