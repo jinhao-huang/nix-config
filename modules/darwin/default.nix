@@ -1,16 +1,42 @@
 {
   pkgs,
+  pkgs-unstable,
   self,
   inputs,
   ...
 }:
 {
   imports = [
+    ./mas-apps.nix
     ../proton-pass
   ];
 
   nixpkgs.config.allowUnfree = true;
   modules.proton-pass.enable = true;
+  modules.mas-apps = {
+    # The release-branch package is significantly slower for metadata queries
+    # on the current macOS version, so use the current implementation.
+    package = pkgs-unstable.mas;
+
+    apps = {
+      "Amphetamine" = {
+        id = 937984704;
+        bundleIdentifier = "com.if.Amphetamine";
+      };
+      "Bob" = {
+        id = 1630034110;
+        bundleIdentifier = "com.hezongyidev.Bob";
+      };
+      "PastePal" = {
+        id = 1503446680;
+        bundleIdentifier = "com.onmyway133.PastePal";
+      };
+      "Canary Mail" = {
+        id = 1236045954;
+        bundleIdentifier = "io.canarymail.mac";
+      };
+    };
+  };
 
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
@@ -24,10 +50,6 @@
       upgrade = false;
       autoUpdate = true;
     };
-
-    brews = [
-      "mas"
-    ];
 
     casks = [
       "1password"
@@ -57,12 +79,6 @@
       "zotero"
     ];
 
-    masApps = {
-      "Amphetamine" = 937984704;
-      "Bob" = 1630034110;
-      "PastePal" = 1503446680;
-      "Canary Mail" = 1236045954;
-    };
   };
 
   nix.settings = {

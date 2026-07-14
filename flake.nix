@@ -80,7 +80,9 @@
           };
         in
         nix-darwin.lib.darwinSystem {
-          specialArgs = { inherit self inputs; };
+          specialArgs = {
+            inherit self inputs pkgs-unstable;
+          };
           modules = [
             (
               { config, ... }:
