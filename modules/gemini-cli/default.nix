@@ -18,7 +18,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    programs.gemini-cli = {
+    programs.antigravity-cli = {
       enable = true;
       package = inputs.llm-agents.packages.${system}."gemini-cli";
     };

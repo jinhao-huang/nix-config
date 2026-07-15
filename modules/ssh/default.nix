@@ -90,19 +90,19 @@ let
         '';
   };
 
-  protonPassHosts = lib.foldl' (hosts: identityHosts: hosts // identityHosts) { } (
+  protonPassSettings = lib.foldl' (hosts: identityHosts: hosts // identityHosts) { } (
     lib.mapAttrsToList (
       identityName: identity:
       lib.mapAttrs (
         _: host:
         {
-          forwardAgent = false;
+          ForwardAgent = false;
         }
         // host
         // {
-          identityAgent = agentSocket;
-          identityFile = "${publicKeyDirectory}/${identityName}.pub";
-          identitiesOnly = true;
+          IdentityAgent = agentSocket;
+          IdentityFile = "${publicKeyDirectory}/${identityName}.pub";
+          IdentitiesOnly = true;
         }
       ) identity.hosts
     ) identities
@@ -131,6 +131,6 @@ in
       "~/.orbstack/ssh/config"
       "~/.ssh/config.local"
     ];
-    matchBlocks = protonPassHosts;
+    settings = protonPassSettings;
   };
 }
