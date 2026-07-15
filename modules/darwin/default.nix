@@ -19,6 +19,10 @@
     package = pkgs-unstable.mas;
 
     apps = {
+      "1Password for Safari" = {
+        id = 1569813296;
+        bundleIdentifier = "com.1password.safari";
+      };
       "Amphetamine" = {
         id = 937984704;
         bundleIdentifier = "com.if.Amphetamine";
@@ -27,13 +31,41 @@
         id = 1630034110;
         bundleIdentifier = "com.hezongyidev.Bob";
       };
+      "Canary Mail" = {
+        id = 1236045954;
+        bundleIdentifier = "io.canarymail.mac";
+      };
+      "Immersive Translate" = {
+        id = 6447957425;
+        bundleIdentifier = "com.immersivetranslate.Immersive-Translate";
+      };
+      "Keynote" = {
+        id = 409183694;
+        bundleIdentifier = "com.apple.iWork.Keynote";
+      };
+      "Numbers" = {
+        id = 409203825;
+        bundleIdentifier = "com.apple.iWork.Numbers";
+      };
+      "Pages" = {
+        id = 409201541;
+        bundleIdentifier = "com.apple.iWork.Pages";
+      };
       "PastePal" = {
         id = 1503446680;
         bundleIdentifier = "com.onmyway133.PastePal";
       };
-      "Canary Mail" = {
-        id = 1236045954;
-        bundleIdentifier = "io.canarymail.mac";
+      "Proton Pass for Safari" = {
+        id = 6502835663;
+        bundleIdentifier = "me.proton.pass.catalyst";
+      };
+      "TestFlight" = {
+        id = 899247664;
+        bundleIdentifier = "com.apple.TestFlight";
+      };
+      "Xcode" = {
+        id = 497799835;
+        bundleIdentifier = "com.apple.dt.Xcode";
       };
     };
   };
