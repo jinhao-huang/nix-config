@@ -4,7 +4,7 @@ mode: all
 color: "#8A2BE2"
 permission:
   read: allow
-  write: ask
+  edit: ask
   question: allow
   webfetch: allow
   glob: allow

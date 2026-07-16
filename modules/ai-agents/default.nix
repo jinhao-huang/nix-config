@@ -32,7 +32,7 @@ in
 
     # OpenCode
     xdg.configFile."opencode/AGENTS.md".source = globalGuidelines;
-    xdg.configFile."opencode/agent".source = agents;
+    xdg.configFile."opencode/agents".source = agents;
     xdg.configFile."opencode/commands".source = commands;
     xdg.configFile."opencode/skills".source = skills;
   };
