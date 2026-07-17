@@ -48,7 +48,7 @@ in
         vim_mode = true;
         soft_wrap = "editor_width";
         autosave = "on_focus_change";
-        session.trust_all_worktrees = true;
+        session.trust_all_worktrees = false;
 
         languages = {
           Nix.language_servers = [
