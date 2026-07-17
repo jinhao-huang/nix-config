@@ -42,10 +42,11 @@ pkgs.stdenvNoCC.mkDerivation {
     runHook postInstall
   '';
 
-  meta = with pkgs.lib; {
+  meta = {
     description = "Command-line interface for Proton Pass";
     homepage = "https://github.com/protonpass/pass-cli";
-    license = licenses.gpl3Only;
+    license = pkgs.lib.licenses.gpl3Only;
+    sourceProvenance = [ pkgs.lib.sourceTypes.binaryNativeCode ];
     mainProgram = "pass-cli";
     platforms = builtins.attrNames assets;
   };

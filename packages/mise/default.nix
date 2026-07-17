@@ -46,10 +46,11 @@ pkgs.stdenvNoCC.mkDerivation {
     runHook postInstall
   '';
 
-  meta = with pkgs.lib; {
+  meta = {
     description = "Polyglot runtime manager, task runner, and environment manager";
     homepage = "https://mise.jdx.dev";
-    license = licenses.mit;
+    license = pkgs.lib.licenses.mit;
+    sourceProvenance = [ pkgs.lib.sourceTypes.binaryNativeCode ];
     mainProgram = "mise";
     platforms = builtins.attrNames assets;
   };
