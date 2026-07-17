@@ -38,7 +38,7 @@
   };
 
   outputs =
-    inputs@{
+    {
       self,
       nix-darwin,
       nixpkgs,
@@ -46,7 +46,10 @@
       nix-homebrew,
       homebrew-core,
       homebrew-cask,
+      homebrew-steipete,
       home-manager,
+      llm-agents,
+      oh-my-tmux,
       ...
     }:
     let
@@ -71,6 +74,15 @@
           inherit system;
           config = nixpkgsConfig;
         };
+      configurationRevision = self.rev or self.dirtyRev or null;
+      customPackages = self.packages.${darwinHost.system};
+      homebrewTaps = {
+        "homebrew/homebrew-core" = homebrew-core;
+        "homebrew/homebrew-cask" = homebrew-cask;
+        "steipete/homebrew-tap" = homebrew-steipete;
+      };
+      llmAgentPackages = llm-agents.packages.${darwinHost.system};
+      masPackage = (mkPkgs nixpkgs-unstable darwinHost.system).mas;
     in
     {
       packages = forAllSystems (
@@ -86,45 +98,44 @@
 
       # Build darwin flake using:
       # $ darwin-rebuild build --flake .#mac
-      darwinConfigurations."mac" =
-        let
-          pkgs-unstable = mkPkgs nixpkgs-unstable darwinHost.system;
-        in
-        nix-darwin.lib.darwinSystem {
-          specialArgs = {
-            inherit self inputs pkgs-unstable;
-            inherit darwinHost;
-          };
-          modules = [
-            (
-              { config, ... }:
-              {
-                homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
-                nixpkgs.config = nixpkgsConfig;
-              }
-            )
-            ./modules/darwin/default.nix
-            nix-homebrew.darwinModules.nix-homebrew
-            home-manager.darwinModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.${darwinHost.username} = ./home.nix;
-
-              home-manager.extraSpecialArgs = {
-                inherit inputs pkgs-unstable darwinHost;
-              };
-            }
-          ];
+      darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {
+        specialArgs = {
+          inherit
+            configurationRevision
+            darwinHost
+            homebrewTaps
+            masPackage
+            ;
         };
+        modules = [
+          (
+            { config, ... }:
+            {
+              homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
+              nixpkgs.config = nixpkgsConfig;
+            }
+          )
+          ./modules/darwin/default.nix
+          nix-homebrew.darwinModules.nix-homebrew
+          home-manager.darwinModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.${darwinHost.username} = ./home.nix;
+
+            home-manager.extraSpecialArgs = {
+              inherit customPackages darwinHost llmAgentPackages;
+              ohMyTmux = oh-my-tmux;
+            };
+          }
+        ];
+      };
 
       homeConfigurations."linux-deployment" = home-manager.lib.homeManagerConfiguration {
         pkgs = mkPkgs nixpkgs "x86_64-linux";
 
         # Pass the new deployment.nix file to the modules
         modules = [ ./deployment.nix ];
-
-        extraSpecialArgs = { inherit inputs; };
       };
     };
 }

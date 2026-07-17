@@ -1,7 +1,7 @@
 {
   darwinHost,
-  inputs,
-  pkgs-unstable,
+  homebrewTaps,
+  masPackage,
   ...
 }:
 
@@ -13,7 +13,7 @@
   modules.mas-apps = {
     # The release-branch package is significantly slower for metadata queries
     # on the current macOS version, so use the current implementation.
-    package = pkgs-unstable.mas;
+    package = masPackage;
 
     apps = {
       "1Password for Safari" = {
@@ -110,11 +110,7 @@
     enableRosetta = false;
     user = darwinHost.username;
 
-    taps = {
-      "homebrew/homebrew-core" = inputs.homebrew-core;
-      "homebrew/homebrew-cask" = inputs.homebrew-cask;
-      "steipete/homebrew-tap" = inputs.homebrew-steipete;
-    };
+    taps = homebrewTaps;
 
     # With mutable taps disabled, taps can no longer be added imperatively.
     mutableTaps = false;

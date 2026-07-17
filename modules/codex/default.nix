@@ -1,13 +1,11 @@
 {
   config,
-  pkgs,
   lib,
-  inputs,
+  llmAgentPackages,
   ...
 }:
 let
   cfg = config.modules.codex;
-  system = pkgs.stdenv.hostPlatform.system;
 in
 {
   options.modules.codex = {
@@ -17,7 +15,7 @@ in
   config = lib.mkIf cfg.enable {
     programs.codex = {
       enable = true;
-      package = inputs.llm-agents.packages.${system}.codex;
+      package = llmAgentPackages.codex;
     };
   };
 }

@@ -1,8 +1,6 @@
 {
-  config,
   darwinHost,
   pkgs,
-  pkgs-unstable,
   ...
 }:
 

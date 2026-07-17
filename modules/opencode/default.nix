@@ -2,13 +2,12 @@
   config,
   pkgs,
   lib,
-  inputs,
+  llmAgentPackages,
   ...
 }:
 
 let
   cfg = config.modules.opencode;
-  system = pkgs.stdenv.hostPlatform.system;
   protonPassCli = config.modules.proton-pass.package;
   jsonFormat = pkgs.formats.json { };
   smallModel = "minimax-cn-coding-plan/MiniMax-M3";
@@ -84,7 +83,7 @@ in
   config = lib.mkIf cfg.enable {
     programs.opencode = {
       enable = true;
-      package = inputs.llm-agents.packages.${system}.opencode;
+      package = llmAgentPackages.opencode;
     };
 
     xdg.configFile."opencode/tui.json".source = tuiConfigFile;

@@ -1,6 +1,6 @@
 {
+  configurationRevision,
   darwinHost,
-  self,
   ...
 }:
 {
@@ -19,7 +19,7 @@
   # programs.fish.enable = true;
 
   # Set Git commit hash for darwin-version.
-  system.configurationRevision = self.rev or self.dirtyRev or null;
+  system.configurationRevision = configurationRevision;
 
   system.primaryUser = darwinHost.username;
 

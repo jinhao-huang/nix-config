@@ -1,8 +1,7 @@
 {
   config,
-  pkgs,
+  customPackages,
   lib,
-  inputs,
   ...
 }:
 let
@@ -16,7 +15,7 @@ in
   config = lib.mkIf cfg.enable {
     programs.mise = {
       enable = true;
-      package = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.mise;
+      package = customPackages.mise;
       enableBashIntegration = true;
       enableZshIntegration = true;
       globalConfig = {

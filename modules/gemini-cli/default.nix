@@ -1,13 +1,11 @@
 {
   config,
-  pkgs,
   lib,
-  inputs,
+  llmAgentPackages,
   ...
 }:
 let
   cfg = config.modules.gemini-cli;
-  system = pkgs.stdenv.hostPlatform.system;
 in
 {
   options.modules.gemini-cli = {
@@ -17,7 +15,7 @@ in
   config = lib.mkIf cfg.enable {
     programs.antigravity-cli = {
       enable = true;
-      package = inputs.llm-agents.packages.${system}."gemini-cli";
+      package = llmAgentPackages."gemini-cli";
     };
   };
 }

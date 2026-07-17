@@ -1,21 +1,19 @@
 {
   config,
-  inputs,
+  customPackages,
   lib,
-  pkgs,
   ...
 }:
 
 let
   cfg = config.modules.proton-pass;
-  system = pkgs.stdenv.hostPlatform.system;
 in
 {
   options.modules.proton-pass = {
     enable = lib.mkEnableOption "Proton Pass user services";
 
-    package = lib.mkPackageOption inputs.self.packages.${system} "proton-pass-cli" {
-      pkgsText = "inputs.self.packages.${system}";
+    package = lib.mkPackageOption customPackages "proton-pass-cli" {
+      pkgsText = "customPackages";
     };
 
     sshAgentSocket = lib.mkOption {
