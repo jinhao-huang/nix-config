@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   pkgs,
   ...
@@ -8,7 +7,7 @@
 
 let
   identities = import ./inventory.nix;
-  protonPassCli = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.proton-pass-cli;
+  protonPassCli = config.modules.proton-pass.package;
   agentSocket = config.modules.proton-pass.sshAgentSocket;
   publicKeyDirectory = "${config.home.homeDirectory}/.ssh/proton-pass";
 

@@ -6,12 +6,10 @@
   ...
 }:
 
-with lib;
-
 let
   cfg = config.modules.opencode;
   system = pkgs.stdenv.hostPlatform.system;
-  protonPassCli = inputs.self.packages.${system}.proton-pass-cli;
+  protonPassCli = config.modules.proton-pass.package;
   jsonFormat = pkgs.formats.json { };
   smallModel = "minimax-cn-coding-plan/MiniMax-M3";
 
@@ -80,10 +78,10 @@ let
 in
 {
   options.modules.opencode = {
-    enable = mkEnableOption "opencode";
+    enable = lib.mkEnableOption "opencode";
   };
 
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     programs.opencode = {
       enable = true;
       package = inputs.llm-agents.packages.${system}.opencode;

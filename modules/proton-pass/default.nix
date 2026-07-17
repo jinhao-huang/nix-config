@@ -8,11 +8,15 @@
 
 let
   cfg = config.modules.proton-pass;
-  protonPassCli = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.proton-pass-cli;
+  system = pkgs.stdenv.hostPlatform.system;
 in
 {
   options.modules.proton-pass = {
     enable = lib.mkEnableOption "Proton Pass user services";
+
+    package = lib.mkPackageOption inputs.self.packages.${system} "proton-pass-cli" {
+      pkgsText = "inputs.self.packages.${system}";
+    };
 
     sshAgentSocket = lib.mkOption {
       type = lib.types.str;
@@ -22,14 +26,14 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ protonPassCli ];
+    home.packages = [ cfg.package ];
     home.sessionVariables.SSH_AUTH_SOCK = cfg.sshAgentSocket;
 
     launchd.agents.proton-pass-ssh-agent = {
       enable = true;
       config = {
         ProgramArguments = [
-          "${protonPassCli}/bin/pass-cli"
+          "${cfg.package}/bin/pass-cli"
           "ssh-agent"
           "start"
           "--socket-path"
