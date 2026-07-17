@@ -46,7 +46,8 @@ pkgs.writeShellApplication {
 
   text = ''
     echo >&2 "Checking Mac App Store metadata..."
-
+  ''
+  + lib.optionalString (apps != { }) ''
     mas_search_paths=( ${searchPathArguments} )
 
     # Locate applications by bundle identifier instead of assuming their
