@@ -1,9 +1,11 @@
-{
+rec {
   description = "Jinhao nix-darwin system flake";
 
   nixConfig = {
     extra-substituters = [ "https://cache.numtide.com" ];
-    extra-trusted-public-keys = [ "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=" ];
+    extra-trusted-public-keys = [
+      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+    ];
   };
 
   inputs = {
@@ -112,6 +114,7 @@
             { config, ... }:
             {
               homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
+              nix.settings = nixConfig;
               nixpkgs.config = nixpkgsConfig;
             }
           )
