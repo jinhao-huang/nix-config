@@ -1,4 +1,5 @@
 {
+  darwinHost,
   pkgs,
   pkgs-unstable,
   self,
@@ -115,7 +116,7 @@
 
   nix.settings = {
     experimental-features = "nix-command flakes";
-    trusted-users = [ "jinhaohuang" ];
+    trusted-users = [ darwinHost.username ];
     extra-substituters = [ "https://cache.numtide.com" ];
     extra-trusted-public-keys = [
       "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
@@ -128,16 +129,16 @@
   # Set Git commit hash for darwin-version.
   system.configurationRevision = self.rev or self.dirtyRev or null;
 
-  system.primaryUser = "jinhaohuang";
+  system.primaryUser = darwinHost.username;
 
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog
   system.stateVersion = 6;
 
   # The platform the configuration will be used on.
-  nixpkgs.hostPlatform = "aarch64-darwin";
+  nixpkgs.hostPlatform = darwinHost.system;
 
-  users.users.jinhaohuang.home = "/Users/jinhaohuang";
+  users.users.${darwinHost.username}.home = darwinHost.homeDirectory;
 
   security.pam.services.sudo_local.touchIdAuth = true;
 
@@ -154,7 +155,7 @@
     enableRosetta = false;
 
     # User owning the Homebrew prefix
-    user = "jinhaohuang";
+    user = darwinHost.username;
 
     # Optional: Declarative tap management
     taps = {

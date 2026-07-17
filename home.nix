@@ -1,5 +1,6 @@
 {
   config,
+  darwinHost,
   pkgs,
   pkgs-unstable,
   ...
@@ -8,8 +9,8 @@
 {
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
-  home.username = "jinhaohuang";
-  home.homeDirectory = "/Users/jinhaohuang";
+  home.username = darwinHost.username;
+  home.homeDirectory = darwinHost.homeDirectory;
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage

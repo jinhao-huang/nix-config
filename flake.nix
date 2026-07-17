@@ -50,6 +50,11 @@
       ...
     }:
     let
+      darwinHost = {
+        system = "aarch64-darwin";
+        username = "jinhaohuang";
+        homeDirectory = "/Users/jinhaohuang";
+      };
       supportedSystems = [
         "aarch64-darwin"
         "x86_64-darwin"
@@ -75,13 +80,14 @@
       darwinConfigurations."mac" =
         let
           pkgs-unstable = import nixpkgs-unstable {
-            system = "aarch64-darwin";
+            system = darwinHost.system;
             config.allowUnfree = true;
           };
         in
         nix-darwin.lib.darwinSystem {
           specialArgs = {
             inherit self inputs pkgs-unstable;
+            inherit darwinHost;
           };
           modules = [
             (
@@ -96,9 +102,11 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.jinhaohuang = ./home.nix;
+              home-manager.users.${darwinHost.username} = ./home.nix;
 
-              home-manager.extraSpecialArgs = { inherit inputs pkgs-unstable; };
+              home-manager.extraSpecialArgs = {
+                inherit inputs pkgs-unstable darwinHost;
+              };
             }
           ];
         };
