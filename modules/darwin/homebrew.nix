@@ -8,10 +8,8 @@
 {
   imports = [
     ./mas-apps.nix
-    ../proton-pass
   ];
 
-  modules.proton-pass.enable = true;
   modules.mas-apps = {
     # The release-branch package is significantly slower for metadata queries
     # on the current macOS version, so use the current implementation.
@@ -78,6 +76,7 @@
     };
 
     casks = [
+      "proton-pass"
       "1password"
       "airbuddy"
       "app-cleaner"

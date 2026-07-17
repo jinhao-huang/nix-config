@@ -30,7 +30,7 @@
   imports = [
     ./modules/starship
     ./modules/git
-    ./modules/proton-pass/home-manager.nix
+    ./modules/proton-pass
     ./modules/ssh
     ./modules/go
     ./modules/claude-code
