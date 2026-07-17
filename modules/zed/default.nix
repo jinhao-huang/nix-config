@@ -14,7 +14,7 @@ in
     programs.zed-editor = {
       enable = true;
       package = null;
-      mutableUserSettings = true;
+      mutableUserSettings = false;
       mutableUserKeymaps = false;
 
       userSettings = {
