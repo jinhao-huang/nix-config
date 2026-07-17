@@ -40,7 +40,6 @@
     ./modules/zed
     ./modules/mise
     ./modules/tmux
-    ./modules/common
     ./modules/nix-development
   ];
 
@@ -57,8 +56,7 @@
   modules.tmux.enable = true;
   modules.nix-development.enable = true;
 
-  # Configuration repository path relative to home directory
-  modules.repoRelativePath = "nix-config";
+  modules.ai-agents.repoRelativePath = "nix-config";
 
   home.packages = with pkgs; [
     typst

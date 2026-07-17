@@ -5,7 +5,7 @@
 }:
 let
   cfg = config.modules.ai-agents;
-  aiAgentsDir = "${config.modules.repoPath}/modules/ai-agents";
+  aiAgentsDir = "${config.home.homeDirectory}/${cfg.repoRelativePath}/modules/ai-agents";
   mkAiAgentsSymlink =
     relativePath: config.lib.file.mkOutOfStoreSymlink "${aiAgentsDir}/${relativePath}";
 
@@ -17,6 +17,11 @@ in
 {
   options.modules.ai-agents = {
     enable = lib.mkEnableOption "AI agents configuration (guidance, skills, etc.)";
+
+    repoRelativePath = lib.mkOption {
+      type = lib.types.strMatching "[^/].*";
+      description = "Path to the configuration repository relative to the home directory.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
