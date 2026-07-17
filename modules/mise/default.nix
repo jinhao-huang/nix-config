@@ -10,12 +10,16 @@ in
 {
   options.modules.mise = {
     enable = lib.mkEnableOption "mise environment manager";
+
+    package = lib.mkPackageOption customPackages "mise" {
+      pkgsText = "customPackages";
+    };
   };
 
   config = lib.mkIf cfg.enable {
     programs.mise = {
       enable = true;
-      package = customPackages.mise;
+      package = cfg.package;
       enableBashIntegration = true;
       enableZshIntegration = true;
       globalConfig = {

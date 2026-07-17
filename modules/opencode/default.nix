@@ -78,12 +78,16 @@ in
 {
   options.modules.opencode = {
     enable = lib.mkEnableOption "opencode";
+
+    package = lib.mkPackageOption llmAgentPackages "opencode" {
+      pkgsText = "llmAgentPackages";
+    };
   };
 
   config = lib.mkIf cfg.enable {
     programs.opencode = {
       enable = true;
-      package = llmAgentPackages.opencode;
+      package = cfg.package;
     };
 
     xdg.configFile."opencode/tui.json".source = tuiConfigFile;
