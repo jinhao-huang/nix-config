@@ -73,6 +73,13 @@ let
   };
 
   configFileTpl = jsonFormat.generate "opencode-config.json.tpl" settings;
+  injectOpencodeConfig = import ./inject-config.nix { inherit pkgs; };
+  injectOpencodeConfigArguments = lib.escapeShellArgs [
+    "${protonPassCli}/bin/pass-cli"
+    "${configFileTpl}"
+    "${config.xdg.configHome}/opencode/opencode.json"
+    "${config.xdg.configHome}/opencode/config.json"
+  ];
   tuiConfigFile = jsonFormat.generate "opencode-tui.json" tuiSettings;
 in
 {
@@ -94,34 +101,8 @@ in
 
     home.activation.injectOpencodeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       if [ -z "$DRY_RUN_CMD" ]; then
-        PASS_CMD="${protonPassCli}/bin/pass-cli"
-        target="${config.xdg.configHome}/opencode/opencode.json"
-        legacy_target="${config.xdg.configHome}/opencode/config.json"
-        tpl="${configFileTpl}"
-
-        if "$PASS_CMD" test >/dev/null 2>&1; then
-          (
-            umask 077
-            tmp="$(${pkgs.coreutils}/bin/mktemp "$target.tmp.XXXXXX")"
-            trap '[ -z "$tmp" ] || ${pkgs.coreutils}/bin/rm -f "$tmp"' EXIT INT TERM
-
-            echo "Injecting Proton Pass secrets into opencode/opencode.json..."
-            if "$PASS_CMD" inject \
-              --in-file "$tpl" \
-              --out-file "$tmp" \
-              --force \
-              --file-mode 0400 \
-              && ${pkgs.jq}/bin/jq -e . "$tmp" >/dev/null \
-              && ! ${pkgs.gnugrep}/bin/grep -q '{{[[:space:]]*pass://' "$tmp"; then
-              ${pkgs.coreutils}/bin/mv -f "$tmp" "$target"
-              ${pkgs.coreutils}/bin/rm -f "$legacy_target"
-              tmp=""
-            else
-              echo "Warning: Proton Pass injection failed; preserving the existing OpenCode configuration." >&2
-            fi
-          )
-        else
-          echo "Warning: Proton Pass is not logged in; preserving the existing OpenCode configuration." >&2
+        if ! ${injectOpencodeConfig}/bin/opencode-config-inject ${injectOpencodeConfigArguments}; then
+          :
         fi
       fi
     '';
