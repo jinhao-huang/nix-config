@@ -30,6 +30,7 @@
   imports = [
     ./modules/starship
     ./modules/git
+    ./modules/proton-pass/home-manager.nix
     ./modules/ssh
     ./modules/go
     ./modules/claude-code
@@ -46,6 +47,7 @@
   ];
 
   modules.claude-code.enable = true;
+  modules.proton-pass.enable = true;
   modules.go.enable = true;
   modules.uv.enable = true;
   modules.gemini-cli.enable = true;

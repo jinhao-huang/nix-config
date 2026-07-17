@@ -8,10 +8,9 @@ let
   userName = "Jinhao Huang";
   userEmail = "me@jinhaohuang.com";
   gitSigningKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFgb0OhbTZQuqxdcczlzlsEbOGUszYHfo+qI/lbQEUqR";
-  protonPassSocket = "${config.home.homeDirectory}/.ssh/proton-pass-agent.sock";
 
   gitSshSign = pkgs.writeShellScript "git-ssh-sign" ''
-    export SSH_AUTH_SOCK=${lib.escapeShellArg protonPassSocket}
+    export SSH_AUTH_SOCK=${lib.escapeShellArg config.modules.proton-pass.sshAgentSocket}
     exec ${pkgs.openssh}/bin/ssh-keygen "$@"
   '';
 in

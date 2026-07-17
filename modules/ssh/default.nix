@@ -9,7 +9,7 @@
 let
   identities = import ./inventory.nix;
   protonPassCli = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.proton-pass-cli;
-  agentSocket = "${config.home.homeDirectory}/.ssh/proton-pass-agent.sock";
+  agentSocket = config.modules.proton-pass.sshAgentSocket;
   publicKeyDirectory = "${config.home.homeDirectory}/.ssh/proton-pass";
 
   syncCommands = lib.concatStringsSep "\n" (
