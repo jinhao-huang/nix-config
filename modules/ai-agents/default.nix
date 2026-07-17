@@ -3,9 +3,6 @@
   lib,
   ...
 }:
-
-with lib;
-
 let
   cfg = config.modules.ai-agents;
   aiAgentsDir = "${config.modules.repoPath}/modules/ai-agents";
@@ -19,10 +16,10 @@ let
 in
 {
   options.modules.ai-agents = {
-    enable = mkEnableOption "AI agents configuration (guidance, skills, etc.)";
+    enable = lib.mkEnableOption "AI agents configuration (guidance, skills, etc.)";
   };
 
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     # Claude Code
     home.file.".claude/CLAUDE.md".source = globalGuidelines;
 
