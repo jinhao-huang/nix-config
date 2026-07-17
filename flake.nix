@@ -62,27 +62,33 @@
         "x86_64-linux"
       ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-      pkgsFor =
-        system:
-        import nixpkgs {
+      nixpkgsConfig = {
+        allowUnfree = true;
+      };
+      mkPkgs =
+        source: system:
+        import source {
           inherit system;
-          config.allowUnfree = true;
+          config = nixpkgsConfig;
         };
     in
     {
-      packages = forAllSystems (system: {
-        mise = import ./packages/mise { pkgs = pkgsFor system; };
-        proton-pass-cli = import ./packages/proton-pass-cli { pkgs = pkgsFor system; };
-      });
+      packages = forAllSystems (
+        system:
+        let
+          pkgs = mkPkgs nixpkgs system;
+        in
+        {
+          mise = import ./packages/mise { inherit pkgs; };
+          proton-pass-cli = import ./packages/proton-pass-cli { inherit pkgs; };
+        }
+      );
 
       # Build darwin flake using:
       # $ darwin-rebuild build --flake .#mac
       darwinConfigurations."mac" =
         let
-          pkgs-unstable = import nixpkgs-unstable {
-            system = darwinHost.system;
-            config.allowUnfree = true;
-          };
+          pkgs-unstable = mkPkgs nixpkgs-unstable darwinHost.system;
         in
         nix-darwin.lib.darwinSystem {
           specialArgs = {
@@ -94,6 +100,7 @@
               { config, ... }:
               {
                 homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
+                nixpkgs.config = nixpkgsConfig;
               }
             )
             ./modules/darwin/default.nix
@@ -112,7 +119,7 @@
         };
 
       homeConfigurations."linux-deployment" = home-manager.lib.homeManagerConfiguration {
-        pkgs = import inputs.nixpkgs { system = "x86_64-linux"; }; # Use the linux nixpkgs
+        pkgs = mkPkgs nixpkgs "x86_64-linux";
 
         # Pass the new deployment.nix file to the modules
         modules = [ ./deployment.nix ];
