@@ -71,7 +71,7 @@
     enable = true;
     onActivation = {
       cleanup = "check";
-      upgrade = true;
+      upgrade = false;
       autoUpdate = false;
     };
 
