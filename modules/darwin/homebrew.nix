@@ -33,15 +33,15 @@
         bundleIdentifier = "com.immersivetranslate.Immersive-Translate";
       };
       "Keynote" = {
-        id = 409183694;
+        id = 361285480;
         bundleIdentifier = "com.apple.iWork.Keynote";
       };
       "Numbers" = {
-        id = 409203825;
+        id = 361304891;
         bundleIdentifier = "com.apple.iWork.Numbers";
       };
       "Pages" = {
-        id = 409201541;
+        id = 361309726;
         bundleIdentifier = "com.apple.iWork.Pages";
       };
       "PastePal" = {
