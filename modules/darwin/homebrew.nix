@@ -69,6 +69,7 @@
       cleanup = "check";
       upgrade = false;
       autoUpdate = false;
+      extraFlags = [ "--verbose" ];
     };
 
     casks = [
