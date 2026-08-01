@@ -95,6 +95,7 @@
       "proton-mail"
       "raycast"
       "rustdesk"
+      "surge"
       "tableplus"
       "tower"
       "typora"
