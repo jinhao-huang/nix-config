@@ -34,10 +34,36 @@
   security.pam.services.sudo_local.touchIdAuth = true;
 
   system.defaults = {
+    CustomUserPreferences = {
+      "com.apple.HIToolbox".AppleEnabledInputSources = [
+        {
+          InputSourceKind = "Keyboard Layout";
+          "KeyboardLayout ID" = 252;
+          "KeyboardLayout Name" = "ABC";
+        }
+        {
+          "Bundle ID" = "com.apple.inputmethod.SCIM";
+          "Input Mode" = "com.apple.inputmethod.SCIM.Shuangpin";
+          InputSourceKind = "Input Mode";
+        }
+        {
+          "Bundle ID" = "com.apple.inputmethod.SCIM";
+          InputSourceKind = "Keyboard Input Method";
+        }
+        {
+          "Bundle ID" = "com.apple.CharacterPaletteIM";
+          InputSourceKind = "Non Keyboard Input Method";
+        }
+      ];
+
+      "com.apple.inputmethod.CoreChineseEngineFramework".shuangpinLayout = 4;
+    };
+
     finder.AppleShowAllExtensions = true;
     finder.FXPreferredViewStyle = "clmv";
 
     trackpad.Clicking = true;
     trackpad.TrackpadRightClick = true;
+    trackpad.TrackpadThreeFingerDrag = true;
   };
 }
