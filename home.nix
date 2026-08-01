@@ -60,7 +60,6 @@
 
   home.packages = with pkgs; [
     typst
-    _1password-cli
   ];
 
   programs = {

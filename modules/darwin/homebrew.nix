@@ -16,10 +16,6 @@
     package = masPackage;
 
     apps = {
-      "1Password for Safari" = {
-        id = 1569813296;
-        bundleIdentifier = "com.1password.safari";
-      };
       "Amphetamine" = {
         id = 937984704;
         bundleIdentifier = "com.if.Amphetamine";
@@ -77,10 +73,7 @@
 
     casks = [
       "proton-pass"
-      "1password"
-      "airbuddy"
       "app-cleaner"
-      "betterdisplay"
       "cleanshot"
       "chatgpt"
       "codex-app"
@@ -100,7 +93,6 @@
       "tower"
       "typora"
       "visual-studio-code"
-      "warp"
       "zed"
       "zotero"
     ];
