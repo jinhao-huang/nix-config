@@ -36,5 +36,8 @@
   system.defaults = {
     finder.AppleShowAllExtensions = true;
     finder.FXPreferredViewStyle = "clmv";
+
+    trackpad.Clicking = true;
+    trackpad.TrackpadRightClick = true;
   };
 }
