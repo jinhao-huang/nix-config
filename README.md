@@ -9,21 +9,12 @@ sudo -H nix --extra-experimental-features "nix-command flakes" \
   switch --flake .#mac
 ```
 
-If resources required by the build are not directly reachable, use any HTTP
-proxy endpoint that is accessible from the new machine. Replace the example
-address with the proxy host and port, and run:
-
-```sh
-bootstrap_proxy_url="http://192.168.1.2:6152"
-sudo -H env \
-  http_proxy="$bootstrap_proxy_url" \
-  https_proxy="$bootstrap_proxy_url" \
-  HTTP_PROXY="$bootstrap_proxy_url" \
-  HTTPS_PROXY="$bootstrap_proxy_url" \
-  nix --extra-experimental-features "nix-command flakes" \
-  run nix-darwin/nix-darwin-26.05#darwin-rebuild -- \
-  switch --flake .#mac
-```
+If the full build requires transparent proxying, download the latest official
+Surge Mac release, place `Surge.app` at `/Applications/Surge.app`, open it, and
+enable Enhanced Mode before running the command above. Homebrew Bundle uses its
+adoption flow for an existing app declared as a cask, so the full activation
+registers the manually placed application as the managed `surge` cask instead
+of installing a conflicting second copy.
 
 The `-H` option gives the root process its own home directory and avoids Nix's
 warning that `/Users/jinhaohuang` is not owned by root. It does not change the
