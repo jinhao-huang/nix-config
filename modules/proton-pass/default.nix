@@ -40,7 +40,10 @@ in
           "Dev"
         ];
         RunAtLoad = true;
-        KeepAlive = true;
+        # Avoid retrying authentication-dependent startup during initial provisioning.
+        KeepAlive = {
+          Crashed = true;
+        };
         ProcessType = "Background";
         ThrottleInterval = 30;
       };
