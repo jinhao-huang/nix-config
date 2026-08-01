@@ -9,6 +9,22 @@ sudo -H nix --extra-experimental-features "nix-command flakes" \
   switch --flake .#mac
 ```
 
+If resources required by the build are not directly reachable, use any HTTP
+proxy endpoint that is accessible from the new machine. Replace the example
+address with the proxy host and port, and run:
+
+```sh
+bootstrap_proxy_url="http://192.168.1.2:6152"
+sudo -H env \
+  http_proxy="$bootstrap_proxy_url" \
+  https_proxy="$bootstrap_proxy_url" \
+  HTTP_PROXY="$bootstrap_proxy_url" \
+  HTTPS_PROXY="$bootstrap_proxy_url" \
+  nix --extra-experimental-features "nix-command flakes" \
+  run nix-darwin/nix-darwin-26.05#darwin-rebuild -- \
+  switch --flake .#mac
+```
+
 The `-H` option gives the root process its own home directory and avoids Nix's
 warning that `/Users/jinhaohuang` is not owned by root. It does not change the
 user targeted by the nix-darwin or Home Manager configuration.
