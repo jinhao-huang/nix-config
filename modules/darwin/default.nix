@@ -34,6 +34,8 @@
   security.pam.services.sudo_local.touchIdAuth = true;
 
   system.defaults = {
+    NSGlobalDomain.AppleInterfaceStyleSwitchesAutomatically = false;
+
     CustomUserPreferences = {
       "com.hezongyidev.Bob".AppleLanguages = [
         "zh-Hans-US"
