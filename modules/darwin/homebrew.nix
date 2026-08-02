@@ -77,7 +77,6 @@
       "app-cleaner"
       "cleanshot"
       "chatgpt"
-      "codex-app"
       "steipete/homebrew-tap/codexbar"
       "coteditor"
       "ghostty"
