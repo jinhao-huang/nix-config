@@ -40,10 +40,8 @@ in
           "Dev"
         ];
         RunAtLoad = true;
-        # Avoid retrying authentication-dependent startup during initial provisioning.
-        KeepAlive = {
-          Crashed = true;
-        };
+        # Authenticate before the first activation to avoid concurrent session initialization.
+        KeepAlive = true;
         ProcessType = "Background";
         ThrottleInterval = 30;
       };

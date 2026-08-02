@@ -1,7 +1,16 @@
 ## First-time setup
 
 On a new machine, `darwin-rebuild` is not available until nix-darwin has been
-activated for the first time. From the repository root, run:
+activated for the first time. Before the first activation, authenticate Proton
+Pass as the regular user so its launch agent does not race with interactive
+session initialization:
+
+```sh
+nix --extra-experimental-features "nix-command flakes" \
+  run .#proton-pass-cli -- login
+```
+
+Then run the initial activation from the repository root:
 
 ```sh
 sudo -H nix --extra-experimental-features "nix-command flakes" \
@@ -29,6 +38,31 @@ be built locally.
 
 Restart the terminal after the command completes so the updated environment is
 loaded.
+
+### Proton Pass session lifecycle
+
+If the configuration was activated before Proton Pass was authenticated, stop
+the already loaded SSH agent before logging in, then reactivate the
+configuration:
+
+```sh
+launchctl bootout "gui/$UID/org.nix-community.home.proton-pass-ssh-agent" 2>/dev/null || true
+pass-cli login
+sudo darwin-rebuild switch --flake .#mac
+```
+
+Authentication and launch-agent lifecycles are intentionally managed
+separately. Stop the agent before explicitly logging out so it cannot retain
+loaded SSH keys in memory:
+
+```sh
+launchctl bootout "gui/$UID/org.nix-community.home.proton-pass-ssh-agent" 2>/dev/null || true
+pass-cli logout
+```
+
+After logging in again, run `sudo darwin-rebuild switch --flake .#mac` to load
+the agent in the current user session. Future user sessions load it
+automatically.
 
 ## Subsequent rebuilds
 
