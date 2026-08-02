@@ -35,6 +35,12 @@
 
   system.defaults = {
     CustomUserPreferences = {
+      "com.hezongyidev.Bob".AppleLanguages = [
+        "zh-Hans-US"
+        "en"
+        "en-US"
+      ];
+
       "com.apple.HIToolbox".AppleEnabledInputSources = [
         {
           InputSourceKind = "Keyboard Layout";
