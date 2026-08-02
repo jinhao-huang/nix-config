@@ -1,8 +1,14 @@
+let
+  identities = {
+    personal.publicKey = ./public-keys/personal.pub;
+    cas.publicKey = ./public-keys/cas.pub;
+  };
+in
 {
   aliyun-ecs = {
-    reference = "pass://Dev/Aliyun-ECS/public_key";
+    identity = identities.personal;
 
-    hosts."Aliyun-ECS" = {
+    settings = {
       HostName = "aliyun.internal";
       User = "jinhaohuang";
       Port = 29360;
@@ -26,9 +32,9 @@
   };
 
   iscas-r750xa = {
-    reference = "pass://Dev/ISCAS-r750xa/public_key";
+    identity = identities.cas;
 
-    hosts."iscas-r750xa" = {
+    settings = {
       HostName = "iscas-r750xa.internal";
       User = "huangjh";
       Port = 22;
