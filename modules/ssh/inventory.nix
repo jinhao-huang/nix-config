@@ -24,4 +24,14 @@
       ];
     };
   };
+
+  iscas-r750xa = {
+    reference = "pass://Dev/ISCAS-r750xa/public_key";
+
+    hosts."iscas-r750xa" = {
+      HostName = "iscas-r750xa.internal";
+      User = "huangjh";
+      Port = 22;
+    };
+  };
 }
