@@ -31,6 +31,12 @@ rec {
     home-manager.url = "github:nix-community/home-manager/release-26.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Selectively backport the Pi module until it reaches a Home Manager release.
+    home-manager-unstable = {
+      url = "github:nix-community/home-manager/master";
+      flake = false;
+    };
+
     llm-agents.url = "github:numtide/llm-agents.nix";
 
     oh-my-tmux = {
@@ -50,6 +56,7 @@ rec {
       homebrew-cask,
       homebrew-steipete,
       home-manager,
+      home-manager-unstable,
       llm-agents,
       oh-my-tmux,
       ...
@@ -128,6 +135,7 @@ rec {
 
             home-manager.extraSpecialArgs = {
               inherit customPackages darwinHost llmAgentPackages;
+              homeManagerUnstable = home-manager-unstable;
               ohMyTmux = oh-my-tmux;
             };
           }

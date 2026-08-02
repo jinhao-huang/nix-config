@@ -36,6 +36,7 @@
     ./modules/gemini-cli
     ./modules/codex
     ./modules/opencode
+    ./modules/pi
     ./modules/ai-agents
     ./modules/zed
     ./modules/mise
@@ -50,6 +51,7 @@
   modules.gemini-cli.enable = true;
   modules.codex.enable = true;
   modules.opencode.enable = true;
+  modules.pi.enable = true;
   modules.ai-agents.enable = true;
   modules.zed.enable = true;
   modules.mise.enable = true;
