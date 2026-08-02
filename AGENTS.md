@@ -52,6 +52,12 @@ Use normal module options for values shared between modules. Reserve
 `specialArgs` and `extraSpecialArgs` for flake inputs, host inventory, or values
 needed during import resolution rather than general configuration plumbing.
 
+Before using `home.file`, `xdg.configFile`, or custom activation code, check
+whether Home Manager or nix-darwin provides a native module option for the
+software. Prefer native module options whenever they can express the desired
+configuration. Use raw generated files only when no suitable native option
+exists, and document why the exception is necessary.
+
 Prefer declarative Home Manager or nix-darwin options over activation scripts
 for files, symlinks, packages, and services. Use activation scripts only for
 runtime state validation, external secret synchronization, or migration that
