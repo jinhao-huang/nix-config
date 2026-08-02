@@ -41,6 +41,7 @@
     ./modules/zed
     ./modules/mise
     ./modules/tmux
+    ./modules/ghostty
     ./modules/nix-development
   ];
 
