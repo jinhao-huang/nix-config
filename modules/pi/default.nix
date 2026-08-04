@@ -30,6 +30,19 @@ in
       settings = {
         defaultProjectTrust = "ask";
         enableInstallTelemetry = false;
+
+        npmCommand = [
+          "${lib.getExe config.modules.mise.package}"
+          "exec"
+          "node@${config.modules.mise.nodeVersion}"
+          "--"
+          "npm"
+        ];
+
+        packages = [
+          # Web search, URL fetching, PDF extraction, and video analysis.
+          "npm:pi-web-access"
+        ];
       };
     };
   };

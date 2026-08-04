@@ -14,6 +14,12 @@ in
     package = lib.mkPackageOption customPackages "mise" {
       pkgsText = "customPackages";
     };
+
+    nodeVersion = lib.mkOption {
+      type = lib.types.str;
+      default = "24";
+      description = "Default Node.js major version managed by mise";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -31,7 +37,7 @@ in
           ];
         };
         tools = {
-          node = "24";
+          node = cfg.nodeVersion;
           pnpm = "11";
           rust = "stable";
         };
