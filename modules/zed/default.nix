@@ -16,6 +16,12 @@ in
       package = null;
       mutableUserSettings = false;
       mutableUserKeymaps = false;
+      extensions = [
+        "html"
+        "nix"
+        "toml"
+        "tombi"
+      ];
 
       userSettings = {
         agent_servers.opencode.type = "registry";
