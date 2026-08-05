@@ -43,6 +43,13 @@
         "en-US"
       ];
 
+      # Disable Spotlight's Cmd-Space (AppleSymbolicHotKeys 64) so Raycast can claim it.
+      "com.apple.symbolichotkeys" = {
+        AppleSymbolicHotKeys."64" = {
+          enabled = false;
+        };
+      };
+
       "com.apple.HIToolbox".AppleEnabledInputSources = [
         {
           InputSourceKind = "Keyboard Layout";
