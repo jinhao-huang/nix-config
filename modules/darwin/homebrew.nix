@@ -73,6 +73,7 @@
     };
 
     casks = [
+      "adobe-creative-cloud"
       "proton-pass"
       "app-cleaner"
       "cleanshot"
