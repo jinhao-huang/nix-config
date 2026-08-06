@@ -50,11 +50,14 @@ in
       };
     };
 
-    # pi-web-access search workflow. "auto-summary" returns a model-generated
-    # summary without the curator window or manual approval. Read-only store
-    # symlink: edit here and redeploy to change; use "none" for raw results.
+    # Read-only store symlink: edit here and redeploy to change.
     home.file.".pi/web-search.json".text = builtins.toJSON {
+      # "auto-summary" returns a model-generated summary without the curator
+      # window or manual approval; use "none" for raw results.
       workflow = "auto-summary";
+      # Exempt the Surge TUN/fake-IP range (RFC 2544 198.18.0.0/15) from the
+      # pi-web-access SSRF guard, otherwise every fetch/web_search is blocked.
+      ssrf.allowRanges = [ "198.18.0.0/15" ];
     };
   };
 }
