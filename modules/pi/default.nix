@@ -31,6 +31,10 @@ in
         defaultProjectTrust = "ask";
         enableInstallTelemetry = false;
 
+        defaultProvider = "zai-coding-cn";
+        defaultModel = "glm-5.2";
+        defaultThinkingLevel = "medium";
+
         npmCommand = [
           "${lib.getExe config.modules.mise.package}"
           "exec"
