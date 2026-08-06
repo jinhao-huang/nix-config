@@ -43,6 +43,7 @@
     ./modules/tmux
     ./modules/ghostty
     ./modules/nix-development
+    ./modules/zsh
   ];
 
   modules.claude-code.enable = true;
@@ -58,6 +59,7 @@
   modules.mise.enable = true;
   modules.tmux.enable = true;
   modules.nix-development.enable = true;
+  modules.zsh.enable = true;
 
   modules.ai-agents.repoRelativePath = "nix-config";
 
@@ -77,20 +79,6 @@
 
     gpg = {
       enable = true;
-    };
-
-    zsh = {
-      enable = true;
-
-      oh-my-zsh = {
-        enable = true;
-        plugins = [
-          "git"
-        ];
-      };
-
-      autosuggestion.enable = true; # Enable autosuggestions (gray inline completions)
-      syntaxHighlighting.enable = true; # Enable syntax highlighting
     };
 
     zoxide = {
