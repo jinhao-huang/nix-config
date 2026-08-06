@@ -45,5 +45,12 @@ in
         ];
       };
     };
+
+    # pi-web-access search workflow. "auto-summary" returns a model-generated
+    # summary without the curator window or manual approval. Read-only store
+    # symlink: edit here and redeploy to change; use "none" for raw results.
+    home.file.".pi/web-search.json".text = builtins.toJSON {
+      workflow = "auto-summary";
+    };
   };
 }
