@@ -85,7 +85,7 @@
       "microsoft-excel"
       "microsoft-powerpoint"
       "microsoft-word"
-      "onedrive"
+      "homebrew/cask/onedrive"
       "obsidian"
       "omnigraffle"
       "orbstack"
