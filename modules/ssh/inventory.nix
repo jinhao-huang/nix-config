@@ -31,6 +31,16 @@ in
     };
   };
 
+  mac-mini = {
+    identity = identities.personal;
+
+    settings = {
+      HostName = "mac-mini.internal";
+      User = "jinhaohuang";
+      Port = 22;
+    };
+  };
+
   iscas-r750xa = {
     identity = identities.cas;
 
