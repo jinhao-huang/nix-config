@@ -28,6 +28,10 @@ rec {
       url = "github:steipete/homebrew-tap";
       flake = false;
     };
+    homebrew-jinhao-huang = {
+      url = "github:jinhao-huang/homebrew-tap";
+      flake = false;
+    };
     home-manager.url = "github:nix-community/home-manager/release-26.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -55,6 +59,7 @@ rec {
       homebrew-core,
       homebrew-cask,
       homebrew-steipete,
+      homebrew-jinhao-huang,
       home-manager,
       home-manager-unstable,
       llm-agents,
@@ -89,6 +94,7 @@ rec {
         "homebrew/homebrew-core" = homebrew-core;
         "homebrew/homebrew-cask" = homebrew-cask;
         "steipete/homebrew-tap" = homebrew-steipete;
+        "jinhao-huang/homebrew-tap" = homebrew-jinhao-huang;
       };
       llmAgentPackages = llm-agents.packages.${darwinHost.system};
       masPackage = (mkPkgs nixpkgs-unstable darwinHost.system).mas;

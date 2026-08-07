@@ -166,6 +166,22 @@
         "type": "github"
       }
     },
+    "homebrew-jinhao-huang": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786079401,
+        "narHash": "sha256-1ansInaPSjZ1BoCYfhW1BShSsqHNauCpWhumtpTK28M=",
+        "owner": "jinhao-huang",
+        "repo": "homebrew-tap",
+        "rev": "086019846725af0d91373d7538f68ec2fef732d2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jinhao-huang",
+        "repo": "homebrew-tap",
+        "type": "github"
+      }
+    },
     "homebrew-steipete": {
       "flake": false,
       "locked": {
@@ -314,6 +330,7 @@
         "home-manager-unstable": "home-manager-unstable",
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
+        "homebrew-jinhao-huang": "homebrew-jinhao-huang",
         "homebrew-steipete": "homebrew-steipete",
         "llm-agents": "llm-agents",
         "nix-darwin": "nix-darwin",
