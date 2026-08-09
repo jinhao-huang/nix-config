@@ -2,20 +2,21 @@
 
 ## Language
 
-### Artifacts & Code (Strictly English)
+### Repository & Machine-Facing Artifacts (English)
 
-All persistent outputs, including:
+Use English for source code and artifacts intended to be kept as project inputs or records, including:
 
-- Source code & Naming conventions
-- Inline comments & Docstrings
-- Documentation files (README, etc.)
+- Source code and identifiers
+- Inline comments and docstrings
+- Tracked documentation, specifications, ADRs, and READMEs
+- Configuration and structured data consumed by tools or agents
 - Git commit messages
 
-MUST be written in **English**. Do not use Chinese in file contents unless the user strictly asks for a translation task.
+### Conversation & User-Facing Working Output (Chinese)
 
-## Interaction & Reasoning (Chinese)
+Use Chinese for conversation, reasoning, planning, bug analysis, and working artifacts meant for the user's immediate reading rather than as durable project inputs. This includes research findings, investigation and review reports, disposable notes, and preview HTML written to an OS temporary directory or another explicitly disposable location.
 
-Conversational responses, logic explanations, planning, and bug analysis MUST communicate with the user in **Chinese** for clarity.
+Choose the language by the artifact's audience and lifecycle, not by whether it happens to be written to a file. For mixed artifacts such as temporary HTML reports, keep markup, code identifiers, and code comments in English while rendering the user-visible prose in Chinese. If the same material is explicitly destined for tracked project documentation, use English.
 
 ## Engineering Principles
 
