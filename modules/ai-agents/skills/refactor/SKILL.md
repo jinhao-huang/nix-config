@@ -1,201 +1,56 @@
 ---
 name: refactor
-description: Guide systematic code and architecture refactoring with emphasis on maintainability, design patterns, and code quality. Use this skill when the user asks to refactor code, improve code structure, apply design patterns, eliminate code smells, modularize components, or enhance code maintainability. Triggers include requests like "refactor this module", "this code has code smells", "improve this class design", "split into independent modules", or "make this code more maintainable".
+description: Execute scoped, behavior-preserving code simplifications in an already-selected area. Use when the user asks to refactor, simplify, clean up, remove duplication or dead code, or reduce the maintenance cost of specific code. Use improve-codebase-architecture to discover codebase-wide opportunities, codebase-design to redesign an interface or seam, and a review workflow to assess a completed change.
 ---
 
-# Code Refactoring
+# Refactor
 
-Guide systematic refactoring of code and architecture while preserving behavior. Focus on improving maintainability, readability, and design quality.
+Make selected code easier to understand and change while preserving its exact observable behavior.
 
-## Workflow
+## 1. Establish ground truth
 
-Follow this incremental process for every refactoring task:
+- Read the repository instructions and inspect the target, its callers, neighboring conventions, tests, and relevant history.
+- Inspect the worktree before editing. Preserve unrelated user changes.
+- State the invariants: inputs, outputs, error modes, side effects, ordering, configuration, and public behavior that must remain unchanged.
+- Derive validation from the repository rather than assuming commands. Run the narrowest useful pre-change baseline when practical.
+- Record existing failures or coverage gaps before changing code.
 
-### 1. Analyze
+This step is complete when the scope, invariants, and verification path are explicit.
 
-Examine the code to identify:
-- **Code smells**: Patterns indicating deeper problems
-- **Structural issues**: Coupling, cohesion, responsibility violations
-- **Design opportunities**: Where patterns could improve structure
+## 2. Choose a simplification
 
-Present findings with specific evidence from the code.
+Prefer the smallest coherent change that removes concepts or moving parts:
 
-### 2. Plan
+- Delete dead code and pass-through indirection.
+- Flatten control flow when it reduces the reader's mental stack.
+- Consolidate duplicated policy where one implementation serves real callers.
+- Keep a helper when its name carries a useful concept.
+- Introduce an abstraction only when it hides complexity behind a smaller interface.
 
-Propose a refactoring plan with:
-- **Rationale**: Why each change improves the code
-- **Steps**: Ordered sequence of atomic refactoring operations
-- **Risks**: Potential issues and mitigation strategies
+Apply the deletion test to a proposed extraction: deleting a useful module should spread its hidden complexity back into callers. If deletion merely removes indirection, keep the code direct.
 
-Each step should be small enough to verify independently.
+Preserve the public interface unless the user explicitly selected an interface change. When the interface or seam is the real decision, use `codebase-design` before implementing. When the target itself is unknown, use `improve-codebase-architecture` instead.
 
-### 3. Confirm
+This step is complete when the proposed diff reduces complexity rather than relocating it.
 
-Present the plan to the user. Wait for approval before proceeding.
+## 3. Implement the selected change
 
-For significant refactors, offer alternatives:
-- Conservative approach (minimal changes)
-- Moderate approach (balanced risk/reward)
-- Aggressive approach (comprehensive restructure)
+- Apply one coherent simplification at a time.
+- Keep feature work and unrelated cleanup out of the diff.
+- Follow the repository's compatibility and deprecation policy; do not invent fallback paths.
+- Preserve behavioral tests. Update tests only when test structure is itself in scope or the user approved an interface change.
+- Remove imports, helpers, configuration, and comments made obsolete by the refactor.
+- Do not create commits unless the user asks.
 
-### 4. Implement
+Pause only when alternatives would materially change public behavior, ownership, or interface shape, or when the invariants cannot be established safely.
 
-Execute refactoring in small, verifiable steps:
-- Apply one refactoring technique at a time
-- Verify behavior preservation after each step
-- Provide before/after comparisons for clarity
+This step is complete when the selected simplification is applied with no unrelated changes.
 
-## Code Smell Detection
+## 4. Verify and report
 
-Identify these common code smells and their refactoring solutions:
+- Run the repository-required formatter, linter, evaluator, tests, and builds in proportion to the change.
+- Inspect the final diff for behavior drift, leftover dead code, accidental compatibility layers, and unrelated edits.
+- Compare the result against every stated invariant.
+- Report what complexity disappeared, the verification evidence, and any residual uncertainty.
 
-### Shotgun Surgery
-**Symptom**: A single change requires modifications across many classes/modules.
-**Cause**: Related behavior scattered across the codebase.
-**Solutions**:
-- Move Method/Field to consolidate related code
-- Extract Class to group related functionality
-- Apply Facade pattern to provide unified interface
-
-### Divergent Change
-**Symptom**: One class/module changes for multiple unrelated reasons.
-**Cause**: Violation of Single Responsibility Principle.
-**Solutions**:
-- Extract Class to separate concerns
-- Split module by responsibility
-- Apply Strategy pattern for varying behaviors
-
-### Duplicated Code
-**Symptom**: Same or similar code in multiple locations.
-**Cause**: Copy-paste programming, lack of abstraction.
-**Solutions**:
-- Extract Method for duplicated logic
-- Extract Superclass/Interface for shared behavior
-- Apply Template Method pattern for similar algorithms
-
-### Feature Envy
-**Symptom**: A method uses more features of another class than its own.
-**Cause**: Misplaced responsibility.
-**Solutions**:
-- Move Method to the class it envies
-- Extract and move the envious portion
-- Reconsider class boundaries
-
-## Refactoring Techniques
-
-Apply these atomic refactoring operations:
-
-### Extract Method
-When: Long method, duplicated code, comments explaining code blocks.
-```
-// Before: Long method with comment
-function process(data) {
-  // validate input
-  if (!data) throw new Error('...');
-  if (!data.id) throw new Error('...');
-  // ... more validation
-  
-  // transform data
-  // ... transformation logic
-}
-
-// After: Extracted methods
-function process(data) {
-  validateInput(data);
-  return transformData(data);
-}
-```
-
-### Extract Class
-When: Class has too many responsibilities, subset of fields/methods form a logical unit.
-
-### Move Method/Field
-When: Method/field is more related to another class, feature envy detected.
-
-### Replace Conditional with Polymorphism
-When: Same conditional structure repeats, type-based switching.
-```
-// Before: Type switching
-function getArea(shape) {
-  switch(shape.type) {
-    case 'circle': return Math.PI * shape.r ** 2;
-    case 'rectangle': return shape.w * shape.h;
-  }
-}
-
-// After: Polymorphism
-class Circle { getArea() { return Math.PI * this.r ** 2; } }
-class Rectangle { getArea() { return this.w * this.h; } }
-```
-
-### Introduce Parameter Object
-When: Multiple parameters always travel together.
-
-### Replace Magic Numbers/Strings with Constants
-When: Literal values with unclear meaning appear in code.
-
-## Architecture Refactoring
-
-For larger structural changes:
-
-### Modularization
-- Identify cohesive functionality groups
-- Define clear module boundaries and interfaces
-- Minimize inter-module dependencies
-- Consider dependency direction (depend on abstractions)
-
-### Layer Separation
-- Separate presentation, business logic, and data access
-- Enforce unidirectional dependencies between layers
-- Use dependency inversion for flexibility
-
-### Interface Extraction
-- Identify implicit contracts between components
-- Extract explicit interfaces for flexibility
-- Enable substitution and testing
-
-## Design Pattern Application
-
-Apply patterns when they solve specific problems:
-
-**Creational**: Factory (object creation complexity), Builder (complex construction), Singleton (global access point)
-
-**Structural**: Adapter (interface mismatch), Facade (complex subsystem), Decorator (dynamic behavior extension), Composite (tree structures)
-
-**Behavioral**: Strategy (algorithm variation), Observer (event notification), Command (action encapsulation), State (state-dependent behavior)
-
-**IMPORTANT**: Never apply patterns preemptively. Identify the problem first, then select the pattern that addresses it.
-
-## Output Format
-
-For each refactoring, provide:
-
-### Analysis
-```
-Code Smell: [Identified smell]
-Location: [File/class/method]
-Evidence: [Specific code patterns observed]
-Impact: [How this affects maintainability]
-```
-
-### Refactoring Plan
-```
-Goal: [What the refactoring achieves]
-Technique: [Primary refactoring method]
-Steps:
-1. [First atomic step]
-2. [Second atomic step]
-...
-Risks: [Potential issues]
-```
-
-### Before/After Comparison
-Show the transformed code with explanatory comments highlighting key changes.
-
-## Safety Guidelines
-
-- **Preserve behavior**: Refactoring must not change external behavior
-- **Small steps**: Each change should be independently verifiable
-- **Test coverage**: Recommend tests before refactoring when missing
-- **Rollback plan**: Ensure changes can be reverted if issues arise
-- **Document assumptions**: Note any assumptions about unchanged behavior
+Completion requires fresh evidence that the relevant behavior remains intact. If full verification is unavailable, state the exact gap instead of claiming completion.
