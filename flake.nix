@@ -98,6 +98,43 @@ rec {
       };
       llmAgentPackages = llm-agents.packages.${darwinHost.system};
       masPackage = (mkPkgs nixpkgs-unstable darwinHost.system).mas;
+      mkDarwinConfiguration =
+        extraModules:
+        nix-darwin.lib.darwinSystem {
+          specialArgs = {
+            inherit
+              configurationRevision
+              darwinHost
+              homebrewTaps
+              masPackage
+              ;
+          };
+          modules = [
+            (
+              { config, ... }:
+              {
+                homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
+                nix.settings = nixConfig;
+                nixpkgs.config = nixpkgsConfig;
+              }
+            )
+            ./modules/darwin/default.nix
+            nix-homebrew.darwinModules.nix-homebrew
+            home-manager.darwinModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.${darwinHost.username} = ./home.nix;
+
+              home-manager.extraSpecialArgs = {
+                inherit customPackages darwinHost llmAgentPackages;
+                homeManagerUnstable = home-manager-unstable;
+                ohMyTmux = oh-my-tmux;
+              };
+            }
+          ]
+          ++ extraModules;
+        };
     in
     {
       packages = forAllSystems (
@@ -111,41 +148,16 @@ rec {
         }
       );
 
-      # Build darwin flake using:
-      # $ darwin-rebuild build --flake .#mac
-      darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {
-        specialArgs = {
-          inherit
-            configurationRevision
-            darwinHost
-            homebrewTaps
-            masPackage
-            ;
-        };
-        modules = [
-          (
-            { config, ... }:
-            {
-              homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
-              nix.settings = nixConfig;
-              nixpkgs.config = nixpkgsConfig;
-            }
-          )
-          ./modules/darwin/default.nix
-          nix-homebrew.darwinModules.nix-homebrew
-          home-manager.darwinModules.home-manager
+      # Build Darwin profiles using:
+      # $ darwin-rebuild build --flake .#laptop
+      # $ darwin-rebuild build --flake .#desktop
+      darwinConfigurations = {
+        laptop = mkDarwinConfiguration [
           {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.${darwinHost.username} = ./home.nix;
-
-            home-manager.extraSpecialArgs = {
-              inherit customPackages darwinHost llmAgentPackages;
-              homeManagerUnstable = home-manager-unstable;
-              ohMyTmux = oh-my-tmux;
-            };
+            homebrew.casks = [ "wechat" ];
           }
         ];
+        desktop = mkDarwinConfiguration [ ];
       };
 
       homeConfigurations."linux-deployment" = home-manager.lib.homeManagerConfiguration {

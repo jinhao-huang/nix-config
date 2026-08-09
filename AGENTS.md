@@ -3,8 +3,9 @@
 ## Project Structure & Module Organization
 
 This repository is a Nix flake for personal macOS and Linux user environments.
-`flake.nix` defines the flake inputs, package outputs, the `mac` nix-darwin
-configuration, and the `linux-deployment` Home Manager configuration.
+`flake.nix` defines the flake inputs, package outputs, the `laptop` and `desktop`
+nix-darwin configurations, and the `linux-deployment` Home Manager
+configuration.
 Keep top-level files focused on composition: `home.nix` wires user-level Home
 Manager modules together, while `deployment.nix` defines the Linux deployment
 profile.
@@ -26,12 +27,15 @@ explicitly from the relevant profile.
 
 - `nix flake check --no-build`: evaluate standard flake outputs without building
   checks; use it as a fast structural check.
-- `nix build --no-link .#darwinConfigurations.mac.system`: build the complete
-  macOS system closure without creating a `result` symlink.
-- `darwin-rebuild build --flake .#mac`: build the macOS system configuration
-  without activating it; this is an equivalent host-oriented validation path.
-- `sudo darwin-rebuild switch --flake .#mac`: build and activate the macOS
-  configuration.
+- `nix build --no-link .#darwinConfigurations.laptop.system
+  .#darwinConfigurations.desktop.system`: build both complete macOS system
+  closures without creating a `result` symlink; use this for shared Darwin
+  changes.
+- `darwin-rebuild build --flake .#laptop` or `darwin-rebuild build --flake
+  .#desktop`: build one role without activating it; use the affected role for
+  role-specific changes.
+- `sudo darwin-rebuild switch --flake .#laptop` or `sudo darwin-rebuild switch
+  --flake .#desktop`: build and activate the explicitly selected role.
 - `nix build .#mise` or `nix build .#proton-pass-cli`: build an exported custom
   package.
 - `nix flake update`: update all locked inputs in `flake.lock`; use
@@ -71,11 +75,11 @@ respect `DRY_RUN_CMD` when they perform external side effects.
 There is no separate unit test suite. Run `nixfmt --check` on every touched Nix
 file and use `nix flake check --no-build` as baseline validation. Because
 `nix flake check` does not build the nix-darwin system closure, Darwin and
-integrated Home Manager changes must also pass
-`nix build --no-link .#darwinConfigurations.mac.system` or
-`darwin-rebuild build --flake .#mac` before switching. For package changes,
-build the affected package directly and verify hashes, supported platforms, and
-`meta.mainProgram` when applicable. Use
+integrated Home Manager changes must also pass the applicable complete-system
+build above before switching: build both roles for shared changes and the
+affected role for role-specific changes. For package changes, build the affected
+package directly and verify hashes, supported platforms, and `meta.mainProgram`
+when applicable. Use
 `nix flake check --all-systems --no-build` when changing cross-platform package
 outputs. Register new files with Git before running flake commands because Git
 flakes ignore untracked paths.

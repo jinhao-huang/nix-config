@@ -1,3 +1,15 @@
+## Choose a Darwin profile
+
+Set the profile for the current machine before running the commands below:
+
+```sh
+darwin_profile=laptop
+# Use `desktop` on the desktop Mac.
+```
+
+Set the variable again after opening a new shell. The profile names describe
+the machine's role and are independent of its hardware model or macOS hostname.
+
 ## First-time setup
 
 On a new machine, `darwin-rebuild` is not available until nix-darwin has been
@@ -15,7 +27,7 @@ Then run the initial activation from the repository root:
 ```sh
 sudo -H nix --extra-experimental-features "nix-command flakes" \
   run nix-darwin/nix-darwin-26.05#darwin-rebuild -- \
-  switch --flake .#mac
+  switch --flake ".#$darwin_profile"
 ```
 
 If the full build requires transparent proxying, download the latest official
@@ -48,7 +60,7 @@ configuration:
 ```sh
 launchctl bootout "gui/$UID/org.nix-community.home.proton-pass-ssh-agent" 2>/dev/null || true
 pass-cli login
-sudo darwin-rebuild switch --flake .#mac
+sudo darwin-rebuild switch --flake ".#$darwin_profile"
 ```
 
 Authentication and launch-agent lifecycles are intentionally managed
@@ -60,14 +72,15 @@ launchctl bootout "gui/$UID/org.nix-community.home.proton-pass-ssh-agent" 2>/dev
 pass-cli logout
 ```
 
-After logging in again, run `sudo darwin-rebuild switch --flake .#mac` to load
-the agent in the current user session. Future user sessions load it
-automatically.
+After logging in again, set `darwin_profile` again and run
+`sudo darwin-rebuild switch --flake ".#$darwin_profile"` to load the agent in
+the current user session. Future user sessions load it automatically.
 
 ## Subsequent rebuilds
 
 ```sh
-sudo darwin-rebuild switch --flake .#mac
+darwin_profile=laptop # Use `desktop` on the desktop Mac.
+sudo darwin-rebuild switch --flake ".#$darwin_profile"
 ```
 
 ## How to update
