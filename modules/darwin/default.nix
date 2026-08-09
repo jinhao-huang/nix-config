@@ -35,6 +35,10 @@
 
   system.defaults = {
     NSGlobalDomain.AppleInterfaceStyleSwitchesAutomatically = false;
+    NSGlobalDomain.AppleShowAllFiles = true;
+    NSGlobalDomain.NSDocumentSaveNewDocumentsToCloud = false;
+    # Spring loading: auto-open folders/stacks when hovering while dragging.
+    NSGlobalDomain."com.apple.springing.enabled" = true;
 
     CustomUserPreferences = {
       "com.hezongyidev.Bob".AppleLanguages = [
@@ -76,6 +80,12 @@
 
     finder.AppleShowAllExtensions = true;
     finder.FXPreferredViewStyle = "clmv";
+    finder.ShowPathbar = true;
+    # "SCcf" scopes searches to the current folder instead of "This Mac".
+    finder.FXDefaultSearchScope = "SCcf";
+    finder._FXSortFoldersFirst = true;
+    finder.FXRemoveOldTrashItems = true;
+    finder.NewWindowTarget = "Home";
 
     trackpad.Clicking = true;
     trackpad.TrackpadRightClick = true;
