@@ -36,7 +36,7 @@ explicitly from the relevant profile.
   role-specific changes.
 - `sudo darwin-rebuild switch --flake .#laptop` or `sudo darwin-rebuild switch
   --flake .#desktop`: build and activate the explicitly selected role.
-- `nix build .#mise` or `nix build .#proton-pass-cli`: build an exported custom
+- `nix build .#mise` or `nix build .#proton-pass-cli`: build an exported
   package.
 - `nix flake update`: update all locked inputs in `flake.lock`; use
   `nix flake update <input-name>` for targeted updates.

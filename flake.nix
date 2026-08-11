@@ -74,7 +74,6 @@ rec {
       };
       supportedSystems = [
         "aarch64-darwin"
-        "x86_64-darwin"
         "aarch64-linux"
         "x86_64-linux"
       ];
@@ -141,9 +140,10 @@ rec {
         system:
         let
           pkgs = mkPkgs nixpkgs system;
+          unstablePkgs = mkPkgs nixpkgs-unstable system;
         in
         {
-          mise = import ./packages/mise { inherit pkgs; };
+          mise = unstablePkgs.mise;
           proton-pass-cli = import ./packages/proton-pass-cli { inherit pkgs; };
         }
       );

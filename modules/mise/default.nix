@@ -30,11 +30,12 @@ in
       enableZshIntegration = true;
       globalConfig = {
         settings = {
-          npm.package_manager = "pnpm";
           idiomatic_version_file_enable_tools = [
             "node"
             "rust"
           ];
+          not_found_auto_install = false;
+          system_deps = "warn";
         };
         tools = {
           node = cfg.nodeVersion;
