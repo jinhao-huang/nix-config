@@ -32,7 +32,6 @@ in
         settings = {
           idiomatic_version_file_enable_tools = [
             "node"
-            "rust"
           ];
           not_found_auto_install = false;
           system_deps = "warn";
@@ -40,7 +39,6 @@ in
         tools = {
           node = cfg.nodeVersion;
           pnpm = "11";
-          rust = "stable";
         };
       };
     };
