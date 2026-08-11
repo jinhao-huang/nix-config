@@ -51,6 +51,24 @@ be built locally.
 Restart the terminal after the command completes so the updated environment is
 loaded.
 
+### GitHub CLI authentication
+
+Home Manager installs GitHub CLI and configures it to use SSH for Git
+operations. Authentication remains machine-local runtime state so credentials
+never enter the repository or the Nix store. After the first activation, sign
+in as the regular user:
+
+```sh
+gh auth login --web --git-protocol ssh --skip-ssh-key
+gh auth status
+```
+
+The `--skip-ssh-key` option keeps SSH key management with the Proton Pass agent.
+The interactive login stores the OAuth token in the system credential store
+when available. Do not add tokens to `programs.gh`, `home.sessionVariables`, or
+other Nix values. For headless automation, inject `GH_TOKEN` from the runtime
+secret store instead of persisting it in this configuration.
+
 ### Proton Pass session lifecycle
 
 If the configuration was activated before Proton Pass was authenticated, stop

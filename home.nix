@@ -28,6 +28,7 @@
   imports = [
     ./modules/starship
     ./modules/git
+    ./modules/gh
     ./modules/proton-pass
     ./modules/ssh
     ./modules/go
