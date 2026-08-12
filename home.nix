@@ -42,6 +42,7 @@
     ./modules/ai-agents
     ./modules/zed
     ./modules/mise
+    ./modules/direnv
     ./modules/tmux
     ./modules/ghostty
     ./modules/nix-development
@@ -60,6 +61,7 @@
   modules.ai-agents.enable = true;
   modules.zed.enable = true;
   modules.mise.enable = true;
+  modules.direnv.enable = true;
   modules.tmux.enable = true;
   modules.nix-development.enable = true;
   modules.zsh.enable = true;
