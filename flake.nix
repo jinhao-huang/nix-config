@@ -154,7 +154,10 @@ rec {
       darwinConfigurations = {
         laptop = mkDarwinConfiguration [
           {
-            homebrew.casks = [ "wechat" ];
+            homebrew.casks = [
+              "telegram"
+              "wechat"
+            ];
           }
         ];
         desktop = mkDarwinConfiguration [ ];
