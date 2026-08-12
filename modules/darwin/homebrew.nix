@@ -81,6 +81,7 @@
       "steipete/homebrew-tap/codexbar"
       "coteditor"
       "ghostty"
+      "google-chrome"
       "keka"
       "jinhao-huang/homebrew-tap/microsoft-office-slim"
       "obsidian"
