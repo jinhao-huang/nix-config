@@ -156,6 +156,7 @@ rec {
           {
             homebrew.casks = [
               "telegram"
+              "tencent-meeting"
               "wechat"
             ];
           }
