@@ -9,6 +9,7 @@
     # See README.md for more details
     settings = (builtins.fromTOML (builtins.readFile ./plain-text-symbols.toml)) // {
       add_newline = false;
+      command_timeout = 1000;
     };
   };
 }
