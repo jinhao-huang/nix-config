@@ -66,6 +66,15 @@
   homebrew = {
     enable = true;
     onActivation = {
+      # "check" runs a pre-flight `brew bundle cleanup` with the PREVIOUSLY
+      # activated brew, before nix-homebrew swaps in the newly pinned one. If a
+      # past activation left a tap snapshot on disk that the old brew cannot
+      # parse (e.g. `command_wrapper` needs brew >= 6.0.13), every rebuild
+      # deadlocks: the cask DSL error is misreported as "found Homebrew
+      # packages not listed in the Brewfile". Unlock by running the current
+      # profile's setup script, then rebuild:
+      #   sudo "$(grep -o '/nix/store/[a-z0-9]*-setup-homebrew' "$(readlink -f /nix/var/nix/profiles/system)/activate" | head -1)"
+      #   sudo darwin-rebuild switch --flake .#laptop
       cleanup = "check";
       upgrade = false;
       autoUpdate = false;
@@ -106,6 +115,9 @@
     enableRosetta = false;
     user = darwinHost.username;
 
+    # Update this input (which re-pins `brew-src`) in the same change as any
+    # homebrew-* tap update: newer tap snapshots may use cask DSL that an
+    # older pinned brew cannot parse, aborting activation.
     taps = homebrewTaps;
 
     # With mutable taps disabled, taps can no longer be added imperatively.

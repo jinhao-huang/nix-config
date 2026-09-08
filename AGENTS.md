@@ -40,6 +40,12 @@ explicitly from the relevant profile.
   package.
 - `nix flake update`: update all locked inputs in `flake.lock`; use
   `nix flake update <input-name>` for targeted updates.
+- Homebrew tap inputs (`homebrew-cask`, `homebrew-core`, `homebrew-steipete`,
+  `homebrew-jinhao-huang`) must always be updated together with
+  `nix-homebrew` in the same change, because its `brew-src` input pins the
+  Homebrew version. Updating taps alone can land cask DSL that the pinned
+  brew cannot parse and abort activation; see the unlock runbook in
+  `modules/darwin/homebrew.nix`.
 
 ## Coding Style & Naming Conventions
 
