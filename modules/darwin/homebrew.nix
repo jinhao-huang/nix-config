@@ -95,6 +95,7 @@
       "tower"
       "typora"
       "visual-studio-code"
+      "zcode"
       "zed"
       "zotero"
     ];
