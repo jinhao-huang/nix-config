@@ -89,6 +89,7 @@
       "chatgpt"
       "steipete/homebrew-tap/codexbar"
       "coteditor"
+      "drawio"
       "ghostty"
       "google-chrome"
       "keka"
