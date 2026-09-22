@@ -45,13 +45,13 @@ in
 
         packages = [
           # Web search, URL fetching, PDF extraction, and video analysis.
-          "npm:pi-web-access@0.20.0"
+          "npm:pi-web-access@0.30.0"
         ];
       };
     };
 
     # Read-only store symlink: edit here and redeploy to change.
-    home.file.".pi/web-search.json".text = builtins.toJSON {
+    home.file.".pi/agent/web-search.json".text = builtins.toJSON {
       # "auto-summary" returns a model-generated summary without the curator
       # window or manual approval; use "none" for raw results.
       workflow = "auto-summary";

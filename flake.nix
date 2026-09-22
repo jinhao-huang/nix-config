@@ -139,12 +139,11 @@ rec {
       packages = forAllSystems (
         system:
         let
-          pkgs = mkPkgs nixpkgs system;
           unstablePkgs = mkPkgs nixpkgs-unstable system;
         in
         {
           mise = unstablePkgs.mise;
-          proton-pass-cli = import ./packages/proton-pass-cli { inherit pkgs; };
+          proton-pass-cli = unstablePkgs.proton-pass-cli;
         }
       );
 
