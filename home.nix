@@ -69,6 +69,7 @@
   modules.ai-agents.repoRelativePath = "nix-config";
 
   home.packages = with pkgs; [
+    lima
     typst
   ];
 
