@@ -1,0 +1,100 @@
+{
+  "repository": "https://github.com/mattpocock/skills",
+  "revision": "d81f3a183412e71a5b1e84ca21bc1a35eea03a60",
+  "reviewed_on": "2026-10-02",
+  "license": "skills/MATT-POCOCK-LICENSE",
+  "skills": {
+    "code-review": {
+      "upstream_path": "skills/engineering/code-review",
+      "local_path": "skills/code-review",
+      "adaptations": [
+        "Cover scoped working-tree, staged, unstaged, untracked, and committed changes with an explicit baseline.",
+        "Use conversation requirements without requiring tracker setup; verify findings and report by severity with axis attribution.",
+        "Support independent sequential review when delegation is unavailable."
+      ]
+    },
+    "codebase-design": {
+      "upstream_path": "skills/engineering/codebase-design",
+      "local_path": "skills/codebase-design",
+      "adaptations": []
+    },
+    "diagnosing-bugs": {
+      "upstream_path": "skills/engineering/diagnosing-bugs",
+      "local_path": "skills/diagnosing-bugs",
+      "adaptations": [
+        "Use repository-appropriate feedback, including configuration evaluation and builds; scale diagnosis to existing evidence.",
+        "Allow safe investigation when reproduction is unavailable; use a human-accessible interaction channel.",
+        "Report the cause without requiring a commit or pull request."
+      ]
+    },
+    "domain-modeling": {
+      "upstream_path": "skills/engineering/domain-modeling",
+      "local_path": "skills/domain-modeling",
+      "adaptations": []
+    },
+    "grill-me": {
+      "upstream_path": "skills/productivity/grill-me",
+      "local_path": "skills/grill-me",
+      "adaptations": [
+        "Read the installed dependency through a relative link instead of assuming a particular Skill tool."
+      ]
+    },
+    "grill-with-docs": {
+      "upstream_path": "skills/engineering/grill-with-docs",
+      "local_path": "skills/grill-with-docs",
+      "adaptations": [
+        "Read both installed dependencies explicitly through relative links."
+      ]
+    },
+    "grilling": {
+      "upstream_path": "skills/productivity/grilling",
+      "local_path": "skills/grilling",
+      "adaptations": [
+        "Reuse settled decisions and authorization; use the client question interface when available."
+      ]
+    },
+    "handoff": {
+      "upstream_path": "skills/productivity/handoff",
+      "local_path": "skills/handoff",
+      "adaptations": [
+        "Preserve upstream URL metadata and temporary output; identify dependency paths and invocation boundaries."
+      ]
+    },
+    "improve-codebase-architecture": {
+      "upstream_path": "skills/engineering/improve-codebase-architecture",
+      "local_path": "skills/improve-codebase-architecture",
+      "adaptations": [
+        "Preserve temporary reports and language policy; use offline HTML and embedded diagrams with preview verification.",
+        "Load dependencies explicitly and reuse an existing candidate choice."
+      ]
+    },
+    "research": {
+      "upstream_path": "skills/engineering/research",
+      "local_path": "skills/research",
+      "adaptations": [
+        "Deliver a temporary, cited HTML report with offline content, reader-oriented structure, and preview verification.",
+        "Preserve language and repository-persistence policy; retain extra notes only for handoff or maintenance."
+      ]
+    },
+    "retro": {
+      "upstream_path": "skills/engineering/retro",
+      "local_path": "skills/retro",
+      "adaptations": [
+        "Use session evidence to propose proportionate improvements and implement only within the requested scope.",
+        "Keep automatic discovery with a narrow retrospective trigger; honor repository standards during implementation and review."
+      ]
+    },
+    "setup-matt-pocock-skills": {
+      "upstream_path": "skills/engineering/setup-matt-pocock-skills",
+      "local_path": "skills/setup-matt-pocock-skills",
+      "adaptations": []
+    },
+    "writing-for-agents": {
+      "upstream_path": "skills/productivity/writing-for-agents",
+      "local_path": "skills/writing-for-agents",
+      "adaptations": [
+        "Document cross-client dependency loading and invocation policies; preserve existing policies and default new skills to automatic discovery."
+      ]
+    }
+  }
+}

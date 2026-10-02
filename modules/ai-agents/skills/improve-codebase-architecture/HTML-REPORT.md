@@ -1,6 +1,6 @@
 # HTML Report Format
 
-The architectural review is rendered as a single self-contained HTML file in the OS temp directory. Tailwind and Mermaid both come from CDNs. Mermaid handles graph-shaped diagrams reliably; hand-built divs and inline SVG handle the more editorial visuals (mass diagrams, cross-sections). Mix the two — don't lean on Mermaid for everything, it'll start to look generic.
+Render the architectural review as one HTML file in the OS temporary directory. Use inline CSS and SVG so the content and diagrams work offline. Mermaid is an authoring option when a renderer is available; embed its SVG output rather than loading a browser runtime from a CDN.
 
 ## Scaffold
 
@@ -9,108 +9,61 @@ The architectural review is rendered as a single self-contained HTML file in the
 <html lang="{{report language code}}">
   <head>
     <meta charset="utf-8" />
-    <title>{{localized architecture review title}} — {{repo name}}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script type="module">
-      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-      mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{localized architecture review title}} · {{repo name}}</title>
     <style>
-      /* small custom layer for things Tailwind doesn't cover cleanly:
-         dashed seam lines, hand-drawn-feeling arrow heads, etc. */
-      .seam { stroke-dasharray: 4 4; }
-      .leak { stroke: #dc2626; }
-      .deep { background: linear-gradient(135deg, #0f172a, #1e293b); }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #fafaf9; color: #0f172a; font: 1rem/1.6 system-ui, sans-serif; }
+      main { max-width: 72rem; margin: auto; padding: clamp(1rem, 4vw, 3rem); }
+      article { margin-block: 2rem; padding: 1.5rem; border: 1px solid #cbd5e1; background: white; }
+      .comparison { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1.5rem; }
+      figure { margin: 0; min-width: 0; }
+      svg { display: block; width: 100%; height: auto; }
+      a { color: #4338ca; text-underline-offset: .2em; }
+      :focus-visible { outline: 3px solid #4338ca; outline-offset: 3px; }
+      code { overflow-wrap: anywhere; }
+      @media print { body { background: white; } article { break-inside: avoid; } }
     </style>
   </head>
-  <body class="bg-stone-50 text-slate-900 font-sans">
-    <main class="max-w-5xl mx-auto px-6 py-12 space-y-12">
+  <body>
+    <main>
       <header>...</header>
-      <section id="candidates" class="space-y-10">...</section>
       <section id="top-recommendation">...</section>
+      <section id="candidates">...</section>
     </main>
   </body>
 </html>
 ```
 
-## Header
+## Reading order
 
-Repo name, date, and a compact localized legend: solid box = module, dashed line = seam, red arrow = leakage, thick dark box = deep module. No introduction paragraph — straight into the candidates. Use the global language policy for every user-visible string in the report.
+Show the repo, date, scope, and top recommendation first. Explain which candidate to tackle and why, with an anchor to its evidence. Add a short diagram legend where needed: solid box = module, dashed line = seam, red arrow = leakage, thick box = deep module.
 
-## Candidate card
+Each candidate is an `<article>` containing:
 
-The diagrams carry the weight. Prose is sparse, plain, and uses the glossary terms (from the `/codebase-design` skill) without ceremony.
+- A title naming the deepening and a localized recommendation strength: `Strong`, `Worth exploring`, or `Speculative`.
+- Files involved, with useful links where the preview environment supports them.
+- Before and after diagrams placed side by side on wide screens and stacked on narrow ones.
+- The problem, proposed change, and expected benefits, each tied to observed code.
+- An ADR conflict callout only when the evidence justifies revisiting that decision.
 
-Each candidate is one `<article>`:
-
-- **Title** — short and names the deepening.
-- **Badge row** — localized recommendation strength (`Strong` = emerald, `Worth exploring` = amber, `Speculative` = slate), plus a localized tag for the dependency category (`in-process`, `local-substitutable`, `ports & adapters`, `mock`).
-- **Files** — monospaced list, `font-mono text-sm`.
-- **Before / After diagram** — the centrepiece. Two columns, side by side. See patterns below.
-- **Problem** — one sentence. What hurts.
-- **Solution** — one sentence. What changes.
-- **Wins** — short localized bullets, each pairing a glossary term with concrete evidence.
-- **ADR callout** (if applicable) — one line in an amber-tinted box.
-
-No paragraphs of explanation. If the diagram needs a paragraph to be understood, redraw the diagram.
+Keep the main explanation concise. Use `<details>` for supporting evidence when it would interrupt the comparison; keep the recommendation and its material limitations visible.
 
 ## Diagram patterns
 
-Pick the pattern that fits the candidate. Mix them. Don't make every diagram look the same — variety is part of the point.
+Choose the representation that explains the candidate:
 
-### Mermaid graph (the workhorse for dependencies / call flow)
+- **Dependency or call graph:** boxes and arrows; emphasize the paths and leaked responsibilities that change. A rendered Mermaid flowchart or sequence diagram can work well here.
+- **Cross-section:** horizontal bands showing each module a call passes through, then the consolidated responsibility.
+- **Mass diagram:** rectangles for interface and implementation size, illustrating shallow versus deep. Label schematic proportions as illustrative when they are not measured.
+- **Call-graph collapse:** nested calls before, one public interface with faded internals after.
 
-Use a Mermaid `flowchart` or `graph` when the point is "X calls Y calls Z, and look at the mess." Wrap it in a Tailwind-styled card so it doesn't feel parachuted in. Style with classDef to colour leakage edges red and the deep module dark. Sequence diagrams work well for "before: 6 round-trips; after: 1."
+Use SVG `viewBox`, readable labels, and accessible titles or figure captions. Pair color with labels or line styles. Diagrams should remain legible at the size the report displays them.
 
-```html
-<div class="rounded-lg border border-slate-200 bg-white p-4">
-  <pre class="mermaid">
-    flowchart LR
-      A[OrderHandler] --> B[OrderValidator]
-      B --> C[OrderRepo]
-      C -.leak.-> D[PricingClient]
-      classDef leak stroke:#dc2626,stroke-width:2px;
-      class C,D leak
-  </pre>
-</div>
-```
+## Style and language
 
-### Hand-built boxes-and-arrows (when Mermaid's layout fights you)
+Use readable typography, generous spacing, and a restrained accent color. Spend visual complexity on the architecture comparison. Add custom interaction only when it materially helps inspect a candidate; static HTML and native disclosure elements are usually enough.
 
-Modules as `<div>`s with borders and labels. Arrows as inline SVG `<line>` or `<path>` elements positioned absolutely over a relative container. Reach for this when you want the "after" diagram to feel like one thick-bordered deep module with greyed-out internals — Mermaid won't render that with the right weight.
+Follow the global language policy for all user-visible prose, labels, and diagrams. Keep markup, identifiers, and code comments in English. Use the project's `GLOSSARY.md` for domain terms and the [codebase-design vocabulary](../codebase-design/SKILL.md) for architecture. In a non-English report, retain canonical architecture terms inline or explain each once.
 
-### Cross-section (good for layered shallowness)
-
-Stack horizontal bands (`h-12 border-l-4`) to show layers a call passes through. Before: 6 thin layers each doing nothing. After: 1 thick band labelled with the consolidated responsibility.
-
-### Mass diagram (good for "interface as wide as implementation")
-
-Two rectangles per module — one for interface surface area, one for implementation. Before: interface rectangle is nearly as tall as the implementation rectangle (shallow). After: interface rectangle is short, implementation rectangle is tall (deep).
-
-### Call-graph collapse
-
-Before: a tree of function calls rendered as nested boxes. After: the same tree collapsed into one box, with the now-internal calls shown faded inside it.
-
-## Style guidance
-
-- Lean editorial, not corporate-dashboard. Generous whitespace. Serif optional for headings (`font-serif` works well with stone/slate).
-- Colour sparingly: one accent (emerald or indigo) plus red for leakage and amber for warnings.
-- Keep diagrams ~320px tall so before/after sits comfortably side by side without scrolling.
-- Use `text-xs uppercase tracking-wider` for module labels inside diagrams — they should read as schematic, not as UI.
-- The only scripts are the Tailwind CDN and the Mermaid ESM import. The report is otherwise static — no app code, no interactivity beyond Mermaid's own rendering.
-
-## Top recommendation section
-
-One larger card. Candidate name, one sentence on why, anchor link to its card. That's it.
-
-## Tone
-
-Use concise prose in the language selected by the global policy, but keep the architectural nouns and verbs from the `/codebase-design` skill. When the report language is not English, retain the canonical terms in English inline or pair each with a localized explanation once. Concision is not an excuse to drift.
-
-**Use exactly:** module, interface, implementation, depth, deep, shallow, seam, adapter, leverage, locality.
-
-**Never substitute:** component, service, unit (for module) · API, signature (for interface) · boundary (for seam) · layer, wrapper (for module, when you mean module).
-
-**Wins bullets** name the gain with a glossary term and concrete evidence: quantify affected call sites, tests, leaked responsibilities, or deleted shallow modules. Generic claims about cleanliness or maintainability do not earn their place.
-
-No hedging, no throat-clearing, no "it's worth noting that…". If a sentence could be a bullet, make it a bullet. If a bullet could be cut, cut it. If a term isn't in the `/codebase-design` glossary, reach for one that is before inventing a new one.
+Name concrete gains in locality, leverage, or depth. Quantify affected call sites, tests, leaked responsibilities, or deleted shallow modules when the evidence supports it. Distinguish expected benefits from measured results.
