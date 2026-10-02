@@ -2,38 +2,11 @@
 
 Render the architectural review as one HTML file in the OS temporary directory. Use inline CSS and SVG so the content and diagrams work offline. Mermaid is an authoring option when a renderer is available; embed its SVG output rather than loading a browser runtime from a CDN.
 
-## Scaffold
+## Template
 
-```html
-<!doctype html>
-<html lang="{{report language code}}">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{localized architecture review title}} · {{repo name}}</title>
-    <style>
-      * { box-sizing: border-box; }
-      body { margin: 0; background: #fafaf9; color: #0f172a; font: 1rem/1.6 system-ui, sans-serif; }
-      main { max-width: 72rem; margin: auto; padding: clamp(1rem, 4vw, 3rem); }
-      article { margin-block: 2rem; padding: 1.5rem; border: 1px solid #cbd5e1; background: white; }
-      .comparison { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1.5rem; }
-      figure { margin: 0; min-width: 0; }
-      svg { display: block; width: 100%; height: auto; }
-      a { color: #4338ca; text-underline-offset: .2em; }
-      :focus-visible { outline: 3px solid #4338ca; outline-offset: 3px; }
-      code { overflow-wrap: anywhere; }
-      @media print { body { background: white; } article { break-inside: avoid; } }
-    </style>
-  </head>
-  <body>
-    <main>
-      <header>...</header>
-      <section id="top-recommendation">...</section>
-      <section id="candidates">...</section>
-    </main>
-  </body>
-</html>
-```
+Copy [the shared HTML asset](../research/assets/report.html); this is the single source of report styles. Replace `{{REPORT_LANG}}` with the language code, `{{REPORT_TITLE}}` with an HTML-escaped title, and `<!-- REPORT_CONTENT -->` with semantic HTML containing the report header, top recommendation, and candidate articles.
+
+Keep the template's typography and layout. Place before/after figures in `.comparison`, wide tables in `.table-wrap`, and secondary evidence in native `<details>`. Add only the SVG or small style adjustment needed to explain the architecture; a new visual identity and custom controls are not part of routine report generation.
 
 ## Reading order
 

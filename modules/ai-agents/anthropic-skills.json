@@ -1,0 +1,17 @@
+{
+  "repository": "https://github.com/anthropics/skills",
+  "revision": "8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4",
+  "reviewed_on": "2026-10-02",
+  "license": "skills/frontend-design/LICENSE.txt",
+  "skills": {
+    "frontend-design": {
+      "upstream_path": "skills/frontend-design",
+      "local_path": "skills/frontend-design",
+      "adaptations": [
+        "Narrow automatic discovery to visual interface design; route routine reports to established templates.",
+        "Use the actual brief, settled preferences, and existing design systems instead of assuming a new visual identity or requiring repeated confirmation.",
+        "Scale planning and verification to the requested change, compare alternatives only when useful, and stop after the brief and quality criteria are satisfied."
+      ]
+    }
+  }
+}

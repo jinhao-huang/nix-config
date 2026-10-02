@@ -64,7 +64,7 @@
       "upstream_path": "skills/engineering/improve-codebase-architecture",
       "local_path": "skills/improve-codebase-architecture",
       "adaptations": [
-        "Preserve temporary reports and language policy; use offline HTML and embedded diagrams with preview verification.",
+        "Preserve temporary reports and language policy; reuse the shared offline HTML template with embedded diagrams and proportionate preview verification.",
         "Load dependencies explicitly and reuse an existing candidate choice."
       ]
     },
@@ -72,8 +72,9 @@
       "upstream_path": "skills/engineering/research",
       "local_path": "skills/research",
       "adaptations": [
-        "Deliver a temporary, cited HTML report with offline content, reader-oriented structure, and preview verification.",
-        "Preserve language and repository-persistence policy; retain extra notes only for handoff or maintenance."
+        "Deliver temporary, cited HTML using a reusable offline template; reserve the workflow for substantive research and scale delegation to useful parallel work.",
+        "Preserve language and repository-persistence policy; link full source material by default and retain extra notes only for handoff or maintenance.",
+        "Separate routine reports from frontend design, add interaction only for a concrete reader need, and validate the changed content or behavior."
       ]
     },
     "retro": {

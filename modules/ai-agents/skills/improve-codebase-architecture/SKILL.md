@@ -36,7 +36,7 @@ Apply the **deletion test** to anything you suspect is shallow: would deleting i
 
 ### 2. Present candidates as an HTML report
 
-Write a self-contained HTML file to the OS temp directory with a fresh, descriptive filename. Open it using the available file-preview or browser tool, or the OS file opener, and give the user a clickable absolute path.
+Copy the shared [report template](../research/assets/report.html) into a self-contained HTML file in the OS temp directory with a fresh, descriptive filename. Fill it as described in [HTML-REPORT.md](HTML-REPORT.md), preserving its styles unless the diagrams need a layout adjustment. Routine architecture reports use this template without loading `frontend-design`. Open the report using the available file-preview or browser tool, or the OS file opener, and give the user a clickable absolute path.
 
 The report is user-facing working output: follow the global language policy for all rendered prose, including labels and diagram text. Keep HTML, CSS, JavaScript, identifiers, and code comments in English.
 
@@ -57,9 +57,9 @@ Lead the report with a localized **Top recommendation** section: which candidate
 
 **ADR conflicts**: if a candidate contradicts an existing ADR, only surface it when the friction is real enough to warrant revisiting the ADR. Mark the ADR identifier and reason clearly in a localized warning callout. Don't list every theoretical refactor an ADR forbids.
 
-See [HTML-REPORT.md](HTML-REPORT.md) for the full HTML scaffold, diagram patterns, and styling guidance.
+See [HTML-REPORT.md](HTML-REPORT.md) for report structure and diagram patterns. Link to code and diffs; embed complete source only when needed for the decision or a requested offline archive.
 
-Inspect the rendered report when browser tools are available, checking diagram labels and narrow layouts. State if visual verification was unavailable. Then ask which candidate the user wants to explore, unless they have already selected one. Interface design follows that choice.
+Inspect the rendered report when browser tools are available, checking the new content, diagram labels, and narrow layouts. Recheck template behavior when the layout or controls change; stop when the content is readable and the affected behavior works. State if visual verification was unavailable. Then ask which candidate the user wants to explore, unless they have already selected one. Interface design follows that choice.
 
 ### 3. Grilling loop
 
