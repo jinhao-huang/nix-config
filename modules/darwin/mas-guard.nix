@@ -35,7 +35,7 @@ let
         && ! printf '%s\n' "$mas_list" \
           | ${lib.escapeShellArg grepBin} -Eq '^[[:space:]]*${toString app.id}[[:space:]]'; then
         printf >&2 '%s\n' ${lib.escapeShellArg "error: ${name} has an App Store receipt, but mas cannot detect it."}
-        echo >&2 "Spotlight indexing may be unhealthy. Reboot or repair Spotlight before retrying."
+        echo >&2 "Check Spotlight indexing and verify that the configured App Store ID matches the installed application."
         mas_guard_failed=1
       fi
     '') apps
@@ -105,9 +105,16 @@ pkgs.writeShellApplication {
           ${lib.escapeShellArg timeoutBin} \
           --signal=TERM \
           ${toString listTimeoutSeconds}s \
-          ${lib.escapeShellArg masBin} list 2>/dev/null
+          ${lib.escapeShellArg masBin} list
       )"; then
         echo >&2 "error: mas list failed or timed out while installed App Store receipts exist."
+        echo >&2 "Aborting activation before Homebrew can make installation decisions."
+        exit 1
+      fi
+
+      if [[ -z "$mas_list" ]]; then
+        echo >&2 "error: mas list returned no applications while installed App Store receipts exist."
+        echo >&2 "Repair Spotlight search before retrying; readable metadata alone does not prove that applications are searchable."
         echo >&2 "Aborting activation before Homebrew can make installation decisions."
         exit 1
       fi

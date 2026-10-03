@@ -34,15 +34,15 @@
       };
       "Keynote" = {
         id = 361285480;
-        bundleIdentifier = "com.apple.iWork.Keynote";
+        bundleIdentifier = "com.apple.Keynote";
       };
       "Numbers" = {
         id = 361304891;
-        bundleIdentifier = "com.apple.iWork.Numbers";
+        bundleIdentifier = "com.apple.Numbers";
       };
       "Pages" = {
         id = 361309726;
-        bundleIdentifier = "com.apple.iWork.Pages";
+        bundleIdentifier = "com.apple.Pages";
       };
       "PastePal" = {
         id = 1503446680;
