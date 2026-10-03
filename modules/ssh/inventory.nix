@@ -41,7 +41,17 @@ in
     identity = identities.personal;
 
     settings = {
-      HostName = "mac-mini.internal";
+      HostName = "mac-mini.bison-agama.ts.net";
+      User = "jinhaohuang";
+      Port = 22;
+    };
+  };
+
+  macbook-air = {
+    identity = identities.personal;
+
+    settings = {
+      HostName = "macbook-air.bison-agama.ts.net";
       User = "jinhaohuang";
       Port = 22;
     };
