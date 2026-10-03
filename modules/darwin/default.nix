@@ -10,6 +10,8 @@
     ./tailscale-ingress
   ];
 
+  modules.tailscale-ingress.enable = true;
+
   nix.settings = {
     experimental-features = [
       "nix-command"
