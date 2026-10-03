@@ -6,12 +6,10 @@ let
 in
 {
   aliyun-ecs = {
-    identity = identities.personal;
-
     settings = {
-      HostName = "aliyun.internal";
+      HostName = "aliyun-ecs.bison-agama.ts.net";
       User = "jinhaohuang";
-      Port = 29360;
+      Port = 22;
       RemoteForward = [
         {
           bind.port = 6152;
@@ -28,6 +26,14 @@ in
           };
         }
       ];
+    };
+  };
+
+  fn-evo2 = {
+    settings = {
+      HostName = "fn-evo2.bison-agama.ts.net";
+      User = "jinhaohuang";
+      Port = 22;
     };
   };
 

@@ -12,6 +12,8 @@ let
     host.settings
     // {
       ForwardAgent = false;
+    }
+    // lib.optionalAttrs (host ? identity) {
       IdentityAgent = agentSocket;
       IdentityFile = "${host.identity.publicKey}";
       IdentitiesOnly = true;
