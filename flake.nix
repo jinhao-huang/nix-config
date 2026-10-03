@@ -161,7 +161,14 @@ rec {
             ];
           }
         ];
-        desktop = mkDarwinConfiguration [ ];
+        desktop = mkDarwinConfiguration [
+          {
+            homebrew.casks = [
+              "airbuddy"
+              "betterdisplay"
+            ];
+          }
+        ];
       };
 
       homeConfigurations."linux-deployment" = home-manager.lib.homeManagerConfiguration {
