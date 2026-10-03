@@ -4,7 +4,10 @@
   ...
 }:
 {
-  imports = [ ./homebrew.nix ];
+  imports = [
+    ./homebrew.nix
+    ./tailscale-ingress
+  ];
 
   nix.settings = {
     experimental-features = [

@@ -153,6 +153,8 @@ rec {
       darwinConfigurations = {
         laptop = mkDarwinConfiguration [
           {
+            modules.tailscale-ingress.enable = true;
+
             homebrew.casks = [
               "telegram"
               "tencent-meeting"
