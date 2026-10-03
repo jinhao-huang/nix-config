@@ -6,6 +6,7 @@
 {
   imports = [
     ./homebrew.nix
+    ./remote-login
     ./tailscale-ingress
   ];
 
