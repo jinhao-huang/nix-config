@@ -156,6 +156,7 @@ rec {
             modules.tailscale-ingress.enable = true;
 
             homebrew.casks = [
+              "pixcake"
               "telegram"
               "tencent-meeting"
               "wechat"
