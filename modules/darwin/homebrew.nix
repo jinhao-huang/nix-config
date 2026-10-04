@@ -93,6 +93,7 @@
       "ghostty"
       "google-chrome"
       "keka"
+      "kid3"
       "jinhao-huang/homebrew-tap/microsoft-office-slim"
       "obsidian"
       "omnigraffle"
