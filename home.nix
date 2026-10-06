@@ -26,6 +26,7 @@
 
   # Let Home Manager install and manage itself.
   imports = [
+    ./modules/fonts
     ./modules/starship
     ./modules/git
     ./modules/gh
