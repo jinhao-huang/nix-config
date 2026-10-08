@@ -38,8 +38,6 @@ in
   };
 
   mac-mini = {
-    identity = identities.personal;
-
     settings = {
       HostName = "mac-mini.bison-agama.ts.net";
       User = "jinhaohuang";
@@ -48,8 +46,6 @@ in
   };
 
   macbook-air = {
-    identity = identities.personal;
-
     settings = {
       HostName = "macbook-air.bison-agama.ts.net";
       User = "jinhaohuang";
@@ -64,6 +60,26 @@ in
       HostName = "iscas-r750xa.internal";
       User = "huangjh";
       Port = 22;
+    };
+  };
+
+  zouter-hk = {
+    identity = identities.personal;
+
+    settings = {
+      HostName = "zouter-hk.internal";
+      User = "jinhaohuang";
+      Port = 63872;
+    };
+  };
+
+  zouter-slc = {
+    identity = identities.personal;
+
+    settings = {
+      HostName = "zouter-slc.internal";
+      User = "jinhaohuang";
+      Port = 61120;
     };
   };
 }
