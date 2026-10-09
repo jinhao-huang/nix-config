@@ -6,6 +6,18 @@
 }:
 let
   cfg = config.modules.mise;
+  miseCfg = config.programs.mise;
+  command =
+    tools: executable:
+    [
+      (lib.getExe miseCfg.package)
+      "exec"
+    ]
+    ++ map (tool: "${tool}@${miseCfg.globalConfig.tools.${tool}}") tools
+    ++ [
+      "--"
+      executable
+    ];
 in
 {
   options.modules.mise = {
@@ -15,14 +27,27 @@ in
       pkgsText = "customPackages";
     };
 
-    nodeVersion = lib.mkOption {
-      type = lib.types.str;
-      default = "24";
-      description = "Default Node.js major version managed by mise";
+    commands = {
+      npm = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        readOnly = true;
+        description = "npm command using the declared Mise package and global Node.js version.";
+      };
+
+      pnpm = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        readOnly = true;
+        description = "pnpm command using the declared Mise package and global Node.js and pnpm versions.";
+      };
     };
   };
 
   config = lib.mkIf cfg.enable {
+    modules.mise.commands = {
+      npm = command [ "node" ] "npm";
+      pnpm = command [ "node" "pnpm" ] "pnpm";
+    };
+
     programs.mise = {
       enable = true;
       package = cfg.package;
@@ -37,8 +62,8 @@ in
           system_deps = "warn";
         };
         tools = {
-          node = cfg.nodeVersion;
-          pnpm = "11";
+          node = lib.mkDefault "24";
+          pnpm = lib.mkDefault "11";
         };
       };
     };

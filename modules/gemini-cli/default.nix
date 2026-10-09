@@ -4,22 +4,13 @@
   llmAgentPackages,
   ...
 }:
-let
-  cfg = config.modules.gemini-cli;
-in
 {
-  options.modules.gemini-cli = {
-    enable = lib.mkEnableOption "gemini-cli";
+  options.modules.gemini-cli.enable = lib.mkEnableOption "Gemini CLI with repository defaults";
 
-    package = lib.mkPackageOption llmAgentPackages "gemini-cli" {
-      pkgsText = "llmAgentPackages";
-    };
-  };
-
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.modules.gemini-cli.enable {
     programs.antigravity-cli = {
       enable = true;
-      package = cfg.package;
+      package = lib.mkDefault llmAgentPackages.gemini-cli;
     };
   };
 }

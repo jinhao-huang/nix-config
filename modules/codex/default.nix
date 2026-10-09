@@ -4,22 +4,13 @@
   llmAgentPackages,
   ...
 }:
-let
-  cfg = config.modules.codex;
-in
 {
-  options.modules.codex = {
-    enable = lib.mkEnableOption "Codex";
+  options.modules.codex.enable = lib.mkEnableOption "Codex with repository defaults";
 
-    package = lib.mkPackageOption llmAgentPackages "codex" {
-      pkgsText = "llmAgentPackages";
-    };
-  };
-
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.modules.codex.enable {
     programs.codex = {
       enable = true;
-      package = cfg.package;
+      package = lib.mkDefault llmAgentPackages.codex;
     };
   };
 }

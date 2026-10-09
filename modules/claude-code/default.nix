@@ -4,22 +4,13 @@
   llmAgentPackages,
   ...
 }:
-let
-  cfg = config.modules.claude-code;
-in
 {
-  options.modules.claude-code = {
-    enable = lib.mkEnableOption "Claude Code";
+  options.modules.claude-code.enable = lib.mkEnableOption "Claude Code with repository defaults";
 
-    package = lib.mkPackageOption llmAgentPackages "claude-code" {
-      pkgsText = "llmAgentPackages";
-    };
-  };
-
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.modules.claude-code.enable {
     programs.claude-code = {
       enable = true;
-      package = cfg.package;
+      package = lib.mkDefault llmAgentPackages.claude-code;
     };
   };
 }

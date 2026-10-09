@@ -25,7 +25,6 @@ in
     programs.pi-coding-agent = {
       enable = true;
       package = cfg.package;
-      context = ../ai-agents/global-guidelines.md;
 
       settings = {
         defaultProjectTrust = "ask";
@@ -35,13 +34,7 @@ in
         defaultModel = "glm-5.2";
         defaultThinkingLevel = "medium";
 
-        npmCommand = [
-          "${lib.getExe config.modules.mise.package}"
-          "exec"
-          "node@${config.modules.mise.nodeVersion}"
-          "--"
-          "npm"
-        ];
+        npmCommand = config.modules.mise.commands.npm;
 
         packages = [
           # Web search, URL fetching, PDF extraction, and video analysis.

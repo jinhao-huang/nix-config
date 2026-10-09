@@ -17,13 +17,7 @@ let
     mcp = {
       context7 = {
         type = "local";
-        command = [
-          "mise"
-          "exec"
-          "node@24"
-          "pnpm@11"
-          "--"
-          "pnpm"
+        command = config.modules.mise.commands.pnpm ++ [
           "dlx"
           "@upstash/context7-mcp@3.2.3"
           "--api-key"
