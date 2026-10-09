@@ -21,6 +21,7 @@ in
         "nix"
         "toml"
         "tombi"
+        "typst"
       ];
 
       userSettings = {
