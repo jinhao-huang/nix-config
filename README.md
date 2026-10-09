@@ -101,6 +101,36 @@ darwin_profile=laptop # Use `desktop` on the desktop Mac.
 sudo darwin-rebuild switch --flake ".#$darwin_profile"
 ```
 
+## Linux development servers
+
+`hosts/linux.nix` declares each server's architecture, username, and home path.
+On `iscas-r750xa`, run these commands as `huangjh` from the repository root,
+using the existing Lix installation (no sudo):
+
+```sh
+nix store ping
+nix build --no-link .#homeConfigurations.iscas-r750xa.activationPackage
+hm_cli=$(nix build --no-link --print-out-paths \
+  .#homeConfigurations.iscas-r750xa.config.programs.home-manager.package)
+"$hm_cli/bin/home-manager" -n -b before-hm switch --flake .#iscas-r750xa
+"$hm_cli/bin/home-manager" -b before-hm switch --flake .#iscas-r750xa
+```
+
+Before switching, review existing shell startup files and preserve any required
+lab initialization in the shell modules. The backup suffix preserves files,
+but does not keep their startup behavior. Later updates use:
+
+```sh
+home-manager switch --flake .#iscas-r750xa
+```
+
+Git uses the same SSH signing key on both platforms. For a forwarded agent,
+connect with `ssh -A iscas-r750xa`; the agent must contain the signing key.
+Linux keeps the incoming `SSH_AUTH_SOCK`. SSH host inventory is controlled by
+`modules.ssh.includeHosts`; local overrides go in `~/.ssh/config.local`.
+The login shell stays Bash; run `zsh` explicitly or use tmux. Language toolchains
+and CUDA dependencies belong in project environments.
+
 ## How to update
 
 ### Update all input

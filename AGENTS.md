@@ -4,11 +4,11 @@
 
 This repository is a Nix flake for personal macOS and Linux user environments.
 `flake.nix` defines the flake inputs, package outputs, the `laptop` and `desktop`
-nix-darwin configurations, and the `linux-deployment` Home Manager
-configuration.
+nix-darwin configurations, and standalone Linux Home Manager configurations
+from `hosts/linux.nix`.
 Keep top-level files focused on composition: `home.nix` wires user-level Home
-Manager modules together, while `deployment.nix` defines the Linux deployment
-profile.
+Manager modules together, while `linux.nix` composes the Linux development
+profile. Keep Linux account paths and architectures in `hosts/linux.nix`.
 
 Group cohesive features under `modules/<name>`. When a directory is imported as
 a module, expose `default.nix` as its public entry point. Split larger
@@ -38,6 +38,10 @@ explicitly from the relevant profile.
   --flake .#desktop`: build and activate the explicitly selected role.
 - `nix build .#mise` or `nix build .#proton-pass-cli`: build an exported
   package.
+- `nix build --no-link .#homeConfigurations.iscas-r750xa.activationPackage`:
+  build the Linux user environment on an x86_64 Linux builder without activation.
+- `home-manager switch --flake .#iscas-r750xa`: activate the Linux profile as
+  its declared user, without sudo. See the README for first-time setup.
 - `nix flake update`: update all locked inputs in `flake.lock`; use
   `nix flake update <input-name>` for targeted updates.
 - Homebrew tap inputs (`homebrew-cask`, `homebrew-core`, `homebrew-steipete`,
@@ -89,6 +93,9 @@ when applicable. Use
 `nix flake check --all-systems --no-build` when changing cross-platform package
 outputs. Register new files with Git before running flake commands because Git
 flakes ignore untracked paths.
+For standalone Linux changes, explicitly evaluate and build the affected
+`homeConfigurations.<name>.activationPackage`; the standard flake check does
+not validate this custom output. Use a Linux builder for the complete closure.
 
 ## Commit & Pull Request Guidelines
 

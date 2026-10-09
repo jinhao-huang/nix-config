@@ -1,5 +1,5 @@
 rec {
-  description = "Jinhao nix-darwin system flake";
+  description = "Jinhao macOS and Linux environments";
 
   nixConfig = {
     extra-substituters = [ "https://cache.numtide.com?priority=50" ];
@@ -172,11 +172,19 @@ rec {
         ];
       };
 
-      homeConfigurations."linux-deployment" = home-manager.lib.homeManagerConfiguration {
-        pkgs = mkPkgs nixpkgs "x86_64-linux";
-
-        # Pass the new deployment.nix file to the modules
-        modules = [ ./deployment.nix ];
-      };
+      homeConfigurations = nixpkgs.lib.mapAttrs (
+        _: host:
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = mkPkgs nixpkgs host.system;
+          extraSpecialArgs.ohMyTmux = oh-my-tmux;
+          modules = [
+            ./linux.nix
+            {
+              home.username = host.username;
+              home.homeDirectory = host.homeDirectory;
+            }
+          ];
+        }
+      ) (import ./hosts/linux.nix);
     };
 }

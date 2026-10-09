@@ -2,11 +2,16 @@
   config,
   customPackages,
   lib,
+  pkgs,
   ...
 }:
 
 let
   cfg = config.modules.proton-pass;
+  gitSshSign = pkgs.writeShellScript "git-ssh-sign" ''
+    export SSH_AUTH_SOCK=${lib.escapeShellArg cfg.sshAgentSocket}
+    exec ${pkgs.openssh}/bin/ssh-keygen "$@"
+  '';
 in
 {
   options.modules.proton-pass = {
@@ -26,6 +31,7 @@ in
   config = lib.mkIf cfg.enable {
     home.packages = [ cfg.package ];
     home.sessionVariables.SSH_AUTH_SOCK = cfg.sshAgentSocket;
+    programs.git.signing.signer = "${gitSshSign}";
 
     launchd.agents.proton-pass-ssh-agent = {
       enable = true;

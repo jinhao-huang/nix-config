@@ -1,4 +1,5 @@
 {
+  config,
   darwinHost,
   pkgs,
   ...
@@ -27,6 +28,9 @@
   # Let Home Manager install and manage itself.
   imports = [
     ./modules/fonts
+    ./modules/bash
+    ./modules/cli-tools
+    ./modules/vim
     ./modules/starship
     ./modules/git
     ./modules/gh
@@ -53,6 +57,10 @@
 
   modules.claude-code.enable = true;
   modules.proton-pass.enable = true;
+  modules.ssh.includeHosts = true;
+  modules.ssh.agentSocket = config.modules.proton-pass.sshAgentSocket;
+  modules.cli-tools.enable = true;
+  modules.vim.enable = true;
   modules.go.enable = true;
   modules.rust.enable = true;
   modules.uv.enable = true;
@@ -78,21 +86,10 @@
   programs = {
     home-manager.enable = true;
 
-    ripgrep.enable = true;
-
-    vim = {
-      enable = true;
-      defaultEditor = true;
-    };
-
     gpg = {
       enable = true;
     };
 
-    zoxide = {
-      enable = true;
-      enableZshIntegration = true; # Automatically configure Zsh hooks
-    };
   };
 
 }
