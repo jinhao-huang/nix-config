@@ -2,7 +2,6 @@
   config,
   homeManagerUnstable,
   lib,
-  llmAgentPackages,
   ...
 }:
 let
@@ -13,10 +12,6 @@ in
 
   options.modules.pi = {
     enable = lib.mkEnableOption "Pi coding agent";
-
-    package = lib.mkPackageOption llmAgentPackages "pi" {
-      pkgsText = "llmAgentPackages";
-    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -24,7 +19,8 @@ in
 
     programs.pi-coding-agent = {
       enable = true;
-      package = cfg.package;
+      # Pi owns its deployment snapshot; other agents use live repository links.
+      context = ../ai-agents/global-guidelines.md;
 
       settings = {
         defaultProjectTrust = "ask";

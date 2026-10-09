@@ -88,14 +88,13 @@ rec {
           config = nixpkgsConfig;
         };
       configurationRevision = self.rev or self.dirtyRev or null;
-      customPackages = self.packages.${darwinHost.system};
+      linuxHosts = import ./hosts/linux.nix;
       homebrewTaps = {
         "homebrew/homebrew-core" = homebrew-core;
         "homebrew/homebrew-cask" = homebrew-cask;
         "steipete/homebrew-tap" = homebrew-steipete;
         "jinhao-huang/homebrew-tap" = homebrew-jinhao-huang;
       };
-      llmAgentPackages = llm-agents.packages.${darwinHost.system};
       masPackage = (mkPkgs nixpkgs-unstable darwinHost.system).mas;
       mkDarwinConfiguration =
         extraModules:
@@ -123,10 +122,29 @@ rec {
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.${darwinHost.username} = ./home.nix;
+              home-manager.users.${darwinHost.username} =
+                { pkgs, ... }:
+                let
+                  system = pkgs.stdenv.hostPlatform.system;
+                  selectedPackages = self.packages.${system};
+                  agentPackages = llm-agents.packages.${system};
+                in
+                {
+                  imports = [ ./profiles/home/darwin.nix ];
+
+                  modules.proton-pass.package = selectedPackages.proton-pass-cli;
+                  modules.typst.package = selectedPackages.typst;
+                  programs = {
+                    mise.package = selectedPackages.mise;
+                    claude-code.package = agentPackages.claude-code;
+                    codex.package = agentPackages.codex;
+                    antigravity-cli.package = agentPackages.gemini-cli;
+                    opencode.package = agentPackages.opencode;
+                    pi-coding-agent.package = agentPackages.pi;
+                  };
+                };
 
               home-manager.extraSpecialArgs = {
-                inherit customPackages darwinHost llmAgentPackages;
                 homeManagerUnstable = home-manager-unstable;
                 ohMyTmux = oh-my-tmux;
               };
@@ -178,13 +196,20 @@ rec {
           pkgs = mkPkgs nixpkgs host.system;
           extraSpecialArgs.ohMyTmux = oh-my-tmux;
           modules = [
-            ./linux.nix
+            ./profiles/home/linux.nix
             {
               home.username = host.username;
               home.homeDirectory = host.homeDirectory;
             }
           ];
         }
-      ) (import ./hosts/linux.nix);
+      ) linuxHosts;
+
+      checks = forAllSystems (
+        system:
+        nixpkgs.lib.mapAttrs' (
+          name: _: nixpkgs.lib.nameValuePair "${name}-home" self.homeConfigurations.${name}.activationPackage
+        ) (nixpkgs.lib.filterAttrs (_: host: host.system == system) linuxHosts)
+      );
     };
 }

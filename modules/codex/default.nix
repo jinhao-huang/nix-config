@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  llmAgentPackages,
   ...
 }:
 {
@@ -10,7 +9,6 @@
   config = lib.mkIf config.modules.codex.enable {
     programs.codex = {
       enable = true;
-      package = lib.mkDefault llmAgentPackages.codex;
     };
   };
 }

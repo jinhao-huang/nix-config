@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  llmAgentPackages,
   ...
 }:
 {
@@ -10,7 +9,6 @@
   config = lib.mkIf config.modules.claude-code.enable {
     programs.claude-code = {
       enable = true;
-      package = lib.mkDefault llmAgentPackages.claude-code;
     };
   };
 }

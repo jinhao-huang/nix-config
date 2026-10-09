@@ -1,6 +1,5 @@
 {
   config,
-  customPackages,
   lib,
   pkgs,
   ...
@@ -17,9 +16,7 @@ in
   options.modules.proton-pass = {
     enable = lib.mkEnableOption "Proton Pass user services";
 
-    package = lib.mkPackageOption customPackages "proton-pass-cli" {
-      pkgsText = "customPackages";
-    };
+    package = lib.mkPackageOption pkgs "proton-pass-cli" { };
 
     sshAgentSocket = lib.mkOption {
       type = lib.types.str;

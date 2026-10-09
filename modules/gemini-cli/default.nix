@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  llmAgentPackages,
   ...
 }:
 {
@@ -10,7 +9,6 @@
   config = lib.mkIf config.modules.gemini-cli.enable {
     programs.antigravity-cli = {
       enable = true;
-      package = lib.mkDefault llmAgentPackages.gemini-cli;
     };
   };
 }

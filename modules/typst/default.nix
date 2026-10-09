@@ -1,6 +1,6 @@
 {
   config,
-  customPackages,
+  pkgs,
   lib,
   ...
 }:
@@ -11,9 +11,7 @@ in
   options.modules.typst = {
     enable = lib.mkEnableOption "Typst typesetting system";
 
-    package = lib.mkPackageOption customPackages "typst" {
-      pkgsText = "customPackages";
-    };
+    package = lib.mkPackageOption pkgs "typst" { };
   };
 
   config = lib.mkIf cfg.enable {

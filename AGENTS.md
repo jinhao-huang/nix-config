@@ -6,9 +6,13 @@ This repository is a Nix flake for personal macOS and Linux user environments.
 `flake.nix` defines the flake inputs, package outputs, the `laptop` and `desktop`
 nix-darwin configurations, and standalone Linux Home Manager configurations
 from `hosts/linux.nix`.
-Keep top-level files focused on composition: `home.nix` wires user-level Home
-Manager modules together, while `linux.nix` composes the Linux development
-profile. Keep Linux account paths and architectures in `hosts/linux.nix`.
+Keep `flake.nix` focused on composition and package-source selection. User-level
+Home Manager profiles live in `profiles/home`: `common.nix` owns shared CLI
+policy, while `darwin.nix` and `linux.nix` own their platform-specific policy.
+Keep Linux account paths and architectures in `hosts/linux.nix`.
+
+Keep README focused on user-facing setup, daily use, and troubleshooting.
+Document architecture and contributor validation in agent or developer guidance.
 
 Group cohesive features under `modules/<name>`. When a directory is imported as
 a module, expose `default.nix` as its public entry point. Split larger
@@ -23,10 +27,17 @@ Home Manager modules. Use `home-manager.sharedModules` only for policy that must
 apply to every configured Home Manager user; otherwise import the user module
 explicitly from the relevant profile.
 
+Use native `programs.*.package` options when available. Keep package-source
+selection in flake composition rather than passing package sets through
+`extraSpecialArgs`. Darwin owns the system Lix installation; standalone Linux
+Home Manager selects activation and shell tools without managing the host daemon.
+
 ## Build, Test, and Development Commands
 
 - `nix flake check --no-build`: evaluate standard flake outputs without building
   checks; use it as a fast structural check.
+- `nix flake check --all-systems --no-build`: also evaluate Linux Home Manager
+  activation packages registered as checks from the host inventory.
 - `nix build --no-link .#darwinConfigurations.laptop.system
   .#darwinConfigurations.desktop.system`: build both complete macOS system
   closures without creating a `result` symlink; use this for shared Darwin
@@ -93,9 +104,11 @@ when applicable. Use
 `nix flake check --all-systems --no-build` when changing cross-platform package
 outputs. Register new files with Git before running flake commands because Git
 flakes ignore untracked paths.
-For standalone Linux changes, explicitly evaluate and build the affected
-`homeConfigurations.<name>.activationPackage`; the standard flake check does
-not validate this custom output. Use a Linux builder for the complete closure.
+Standalone Linux activation packages are registered under
+`checks.<system>.<name>-home`; use `nix flake check --all-systems --no-build` to
+evaluate them from a different platform. For Linux changes, also explicitly
+evaluate and build the affected `homeConfigurations.<name>.activationPackage`.
+Use a Linux builder for the complete closure.
 
 ## Commit & Pull Request Guidelines
 

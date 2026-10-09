@@ -24,22 +24,15 @@ in
     };
   };
 
-  config = lib.mkMerge [
-    (lib.mkIf cfg.enable {
-      # Native context options do not accept live-link derivations as file sources.
-      home.file.".claude/CLAUDE.md".source = globalGuidelines;
-      home.file.".codex/AGENTS.md".source = globalGuidelines;
-      home.file.".agents/skills".source = skills;
+  config = lib.mkIf cfg.enable {
+    # Native context options do not accept live-link derivations as file sources.
+    home.file.".claude/CLAUDE.md".source = globalGuidelines;
+    home.file.".codex/AGENTS.md".source = globalGuidelines;
+    home.file.".agents/skills".source = skills;
 
-      xdg.configFile."opencode/AGENTS.md".source = globalGuidelines;
-      xdg.configFile."opencode/agents".source = agents;
-      xdg.configFile."opencode/commands".source = commands;
-      xdg.configFile."opencode/skills".source = skills;
-    })
-
-    # Pi keeps a deployment snapshot independently of the live-link switch.
-    (lib.mkIf config.modules.pi.enable {
-      programs.pi-coding-agent.context = ./global-guidelines.md;
-    })
-  ];
+    xdg.configFile."opencode/AGENTS.md".source = globalGuidelines;
+    xdg.configFile."opencode/agents".source = agents;
+    xdg.configFile."opencode/commands".source = commands;
+    xdg.configFile."opencode/skills".source = skills;
+  };
 }

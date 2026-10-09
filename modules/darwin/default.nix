@@ -1,6 +1,7 @@
 {
   configurationRevision,
   darwinHost,
+  pkgs,
   ...
 }:
 {
@@ -12,6 +13,7 @@
 
   modules.tailscale-ingress.enable = true;
 
+  nix.package = pkgs.lixPackageSets.stable.lix;
   nix.settings = {
     experimental-features = [
       "nix-command"

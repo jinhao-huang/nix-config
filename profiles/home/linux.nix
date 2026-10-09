@@ -1,20 +1,21 @@
 { config, pkgs, ... }:
 {
-  xdg.enable = true;
+  imports = [ ./common.nix ];
 
+  home.stateVersion = "26.05";
+  modules.bash.enable = true;
+
+  xdg.enable = true;
   targets.genericLinux = {
     enable = true;
     # GPU integration requires host setup; keep the CLI profile unprivileged.
     gpu.enable = false;
   };
 
-  # Use Lix for activation and shell integration without installing a new client
-  # or replacing the existing system daemon and its configuration.
-  nix.package = pkgs.lix;
+  # Select activation and shell integration tools; the host owns the daemon.
+  nix.package = pkgs.lixPackageSets.stable.lix;
 
-  programs.zsh.dotDir = "${config.xdg.configHome}/zsh";
   home.packages = [ pkgs.ncurses ];
-
   home.sessionSearchVariables.TERMINFO_DIRS = [
     "${config.home.profileDirectory}/share/terminfo"
     "/etc/terminfo"

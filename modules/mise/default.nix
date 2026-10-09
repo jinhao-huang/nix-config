@@ -1,6 +1,5 @@
 {
   config,
-  customPackages,
   lib,
   ...
 }:
@@ -22,10 +21,6 @@ in
 {
   options.modules.mise = {
     enable = lib.mkEnableOption "mise environment manager";
-
-    package = lib.mkPackageOption customPackages "mise" {
-      pkgsText = "customPackages";
-    };
 
     commands = {
       npm = lib.mkOption {
@@ -50,7 +45,6 @@ in
 
     programs.mise = {
       enable = true;
-      package = cfg.package;
       enableBashIntegration = true;
       enableZshIntegration = true;
       globalConfig = {
