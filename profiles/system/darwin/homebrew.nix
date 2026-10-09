@@ -1,4 +1,5 @@
 {
+  config,
   darwinHost,
   homebrewTaps,
   masPackage,
@@ -7,7 +8,7 @@
 
 {
   imports = [
-    ./mas-apps.nix
+    ../../../modules/darwin/mas-apps.nix
   ];
 
   modules.mas-apps = {
@@ -65,6 +66,7 @@
 
   homebrew = {
     enable = true;
+    taps = builtins.attrNames config.nix-homebrew.taps;
     onActivation = {
       # "check" runs a pre-flight `brew bundle cleanup` with the PREVIOUSLY
       # activated brew, before nix-homebrew swaps in the newly pinned one. If a

@@ -1,0 +1,7 @@
+{ ... }:
+{
+  homebrew.casks = [
+    "airbuddy"
+    "betterdisplay"
+  ];
+}

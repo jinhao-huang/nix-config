@@ -9,21 +9,25 @@ from `hosts/linux.nix`.
 Keep `flake.nix` focused on composition and package-source selection. User-level
 Home Manager profiles live in `profiles/home`: `common.nix` owns shared CLI
 policy, while `darwin.nix` and `linux.nix` own their platform-specific policy.
-Keep Linux account paths and architectures in `hosts/linux.nix`.
+Darwin system policy lives in `profiles/system/darwin`: `default.nix` composes
+shared settings, preferences, Homebrew application choices, and Remote Login;
+`laptop.nix` and `desktop.nix` own role-specific application choices.
+Keep Linux account paths and architectures in `hosts/linux.nix`; this repository
+manages Linux user environments rather than the host operating system.
 
 Keep README focused on user-facing setup, daily use, and troubleshooting.
 Document architecture and contributor validation in agent or developer guidance.
 
 Group cohesive features under `modules/<name>`. When a directory is imported as
-a module, expose `default.nix` as its public entry point. Split larger
-implementations into focused sibling modules and compose them with `imports`, as
-done by `modules/darwin/default.nix`, `homebrew.nix`, and `mas-apps.nix`. Keep
+a module, expose `default.nix` as its public entry point. Compose configuration
+choices in profiles and keep feature implementations in modules. Keep
 related data beside its owning module, such as `modules/ssh/inventory.nix` and
 `modules/starship/plain-text-symbols.toml`. Custom package derivations live in
 `packages/<name>/default.nix`.
 
-Keep nix-darwin-only settings in `modules/darwin` and user-level settings in
-Home Manager modules. Use `home-manager.sharedModules` only for policy that must
+Keep reusable nix-darwin feature implementations in `modules/darwin` and select
+their behavior from the system profiles. Keep user-level settings in Home Manager
+profiles and modules. Use `home-manager.sharedModules` only for policy that must
 apply to every configured Home Manager user; otherwise import the user module
 explicitly from the relevant profile.
 
@@ -60,7 +64,7 @@ Home Manager selects activation and shell tools without managing the host daemon
   `nix-homebrew` in the same change, because its `brew-src` input pins the
   Homebrew version. Updating taps alone can land cask DSL that the pinned
   brew cannot parse and abort activation; see the unlock runbook in
-  `modules/darwin/homebrew.nix`.
+  `profiles/system/darwin/homebrew.nix`.
 
 ## Coding Style & Naming Conventions
 

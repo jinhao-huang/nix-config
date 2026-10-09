@@ -97,7 +97,7 @@ rec {
       };
       masPackage = (mkPkgs nixpkgs-unstable darwinHost.system).mas;
       mkDarwinConfiguration =
-        extraModules:
+        roleProfile:
         nix-darwin.lib.darwinSystem {
           specialArgs = {
             inherit
@@ -108,15 +108,11 @@ rec {
               ;
           };
           modules = [
-            (
-              { config, ... }:
-              {
-                homebrew.taps = builtins.attrNames config.nix-homebrew.taps;
-                nix.settings = nixConfig;
-                nixpkgs.config = nixpkgsConfig;
-              }
-            )
-            ./modules/darwin/default.nix
+            {
+              nix.settings = nixConfig;
+              nixpkgs.config = nixpkgsConfig;
+            }
+            ./profiles/system/darwin
             nix-homebrew.darwinModules.nix-homebrew
             home-manager.darwinModules.home-manager
             {
@@ -149,8 +145,8 @@ rec {
                 ohMyTmux = oh-my-tmux;
               };
             }
-          ]
-          ++ extraModules;
+            roleProfile
+          ];
         };
     in
     {
@@ -170,24 +166,8 @@ rec {
       # $ darwin-rebuild build --flake .#laptop
       # $ darwin-rebuild build --flake .#desktop
       darwinConfigurations = {
-        laptop = mkDarwinConfiguration [
-          {
-            homebrew.casks = [
-              "pixcake"
-              "telegram"
-              "tencent-meeting"
-              "wechat"
-            ];
-          }
-        ];
-        desktop = mkDarwinConfiguration [
-          {
-            homebrew.casks = [
-              "airbuddy"
-              "betterdisplay"
-            ];
-          }
-        ];
+        laptop = mkDarwinConfiguration ./profiles/system/darwin/laptop.nix;
+        desktop = mkDarwinConfiguration ./profiles/system/darwin/desktop.nix;
       };
 
       homeConfigurations = nixpkgs.lib.mapAttrs (

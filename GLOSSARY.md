@@ -17,6 +17,10 @@ tools, and personal SSH agent integration.
 A macOS workstation category, currently laptop or desktop, that determines
 machine-specific application choices.
 
+**Darwin system profile**:
+The personal macOS system environment, including workstation preferences,
+system services, and application installation policy.
+
 **Linux home profile**:
 The lab user's command-line environment on a development server whose system
 installation and daemon remain administrator-owned.

@@ -15,6 +15,6 @@
   };
 
   users.users.${darwinHost.username}.openssh.authorizedKeys.keyFiles = [
-    ../../ssh/public-keys/personal.pub
+    ../../../../modules/ssh/public-keys/personal.pub
   ];
 }
