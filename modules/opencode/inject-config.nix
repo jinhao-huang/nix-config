@@ -20,8 +20,8 @@ pkgs.writeShellApplication {
     target="$3"
     legacy_target="$4"
 
-    if ! "$pass_cli" test >/dev/null 2>&1; then
-      echo "Warning: Proton Pass is not logged in; preserving the existing OpenCode configuration." >&2
+    if ! "$pass_cli" info >/dev/null 2>&1; then
+      echo "Warning: Unable to verify the Proton Pass CLI session; preserving the existing OpenCode configuration. Run 'pass-cli info' as your normal user to diagnose." >&2
       exit 1
     fi
 
