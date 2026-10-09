@@ -43,6 +43,7 @@
     ./modules/ai-agents
     ./modules/zed
     ./modules/mise
+    ./modules/typst
     ./modules/direnv
     ./modules/tmux
     ./modules/ghostty
@@ -62,6 +63,7 @@
   modules.ai-agents.enable = true;
   modules.zed.enable = true;
   modules.mise.enable = true;
+  modules.typst.enable = true;
   modules.direnv.enable = true;
   modules.tmux.enable = true;
   modules.nix-development.enable = true;
@@ -69,9 +71,8 @@
 
   modules.ai-agents.repoRelativePath = "nix-config";
 
-  home.packages = with pkgs; [
-    lima
-    typst
+  home.packages = [
+    pkgs.lima
   ];
 
   programs = {

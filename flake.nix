@@ -144,6 +144,7 @@ rec {
         {
           mise = unstablePkgs.mise;
           proton-pass-cli = unstablePkgs.proton-pass-cli;
+          typst = unstablePkgs.typst;
         }
       );
 
