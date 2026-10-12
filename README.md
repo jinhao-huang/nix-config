@@ -104,25 +104,56 @@ sudo darwin-rebuild switch --flake ".#$darwin_profile"
 ## Linux development servers
 
 `hosts/linux.nix` declares each server's architecture, username, and home path.
-On `iscas-r750xa`, run these commands as `huangjh` from the repository root,
-using the existing Lix installation (no sudo):
+On `iscas-r750xa`, run the commands below as `huangjh` from the repository root,
+using the existing Lix installation (no sudo).
+
+### First-time setup
+
+Before switching, review existing shell startup files and preserve any required
+lab initialization in the shell modules. Obtain the Home Manager CLI selected
+by this configuration, then build and activate the user environment:
 
 ```sh
-nix store ping
-nix build --no-link .#homeConfigurations.iscas-r750xa.activationPackage
 hm_cli=$(nix build --no-link --print-out-paths \
   .#homeConfigurations.iscas-r750xa.config.programs.home-manager.package)
-"$hm_cli/bin/home-manager" -n -b before-hm switch --flake .#iscas-r750xa
 "$hm_cli/bin/home-manager" -b before-hm switch --flake .#iscas-r750xa
 ```
 
-Before switching, review existing shell startup files and preserve any required
-lab initialization in the shell modules. The backup suffix preserves files,
-but does not keep their startup behavior. Later updates use:
+The `-b before-hm` option moves conflicting existing files to paths with the
+`.before-hm` suffix. It preserves the files, but does not keep their startup
+behavior.
+
+### Subsequent updates
 
 ```sh
 home-manager switch --flake .#iscas-r750xa
 ```
+
+### Optional validation and troubleshooting
+
+To preview activation, run this after setting `hm_cli` above and before the
+actual switch. The `-n` option skips activation changes, but may still build
+or download packages:
+
+```sh
+"$hm_cli/bin/home-manager" -n -b before-hm switch --flake .#iscas-r750xa
+```
+
+To check that the user environment builds without activating it:
+
+```sh
+nix build --no-link .#homeConfigurations.iscas-r750xa.activationPackage
+```
+
+A separate build is optional because `home-manager switch` also builds the
+environment. If Nix reports store or daemon connection errors, check store
+access with:
+
+```sh
+nix store ping
+```
+
+### Shell and SSH usage
 
 Git uses the same SSH signing key on both platforms. For a forwarded agent,
 connect with `ssh -A iscas-r750xa`; the agent must contain the signing key.
