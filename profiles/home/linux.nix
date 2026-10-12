@@ -14,6 +14,10 @@
 
   # Select activation and shell integration tools; the host owns the daemon.
   nix.package = pkgs.lixPackageSets.stable.lix;
+  nix.settings.extra-experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   home.packages = [ pkgs.ncurses ];
   home.sessionSearchVariables.TERMINFO_DIRS = [
