@@ -29,7 +29,7 @@
   modules.rust.enable = true;
   modules.gemini-cli.enable = true;
   modules.codex.enable = true;
-  modules.opencode.enable = true;
+  modules.opencode.enable = false;
   modules.pi.enable = true;
   modules.ai-agents.enable = true;
   modules.zed.enable = true;

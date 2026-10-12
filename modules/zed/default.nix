@@ -25,7 +25,6 @@ in
       ];
 
       userSettings = {
-        agent_servers.opencode.type = "registry";
         cli_default_open_behavior = "new_window";
 
         project_panel.dock = "left";

@@ -30,9 +30,11 @@ in
     home.file.".codex/AGENTS.md".source = globalGuidelines;
     home.file.".agents/skills".source = skills;
 
-    xdg.configFile."opencode/AGENTS.md".source = globalGuidelines;
-    xdg.configFile."opencode/agents".source = agents;
-    xdg.configFile."opencode/commands".source = commands;
-    xdg.configFile."opencode/skills".source = skills;
+    xdg.configFile = lib.mkIf config.programs.opencode.enable {
+      "opencode/AGENTS.md".source = globalGuidelines;
+      "opencode/agents".source = agents;
+      "opencode/commands".source = commands;
+      "opencode/skills".source = skills;
+    };
   };
 }
