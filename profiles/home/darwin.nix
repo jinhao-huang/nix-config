@@ -8,7 +8,6 @@
     ../../modules/rust
     ../../modules/claude-code
     ../../modules/gemini-cli
-    ../../modules/codex
     ../../modules/opencode
     ../../modules/pi
     ../../modules/ai-agents
@@ -20,6 +19,7 @@
 
   home.stateVersion = "25.05";
   home.packages = [ pkgs.lima ];
+  home.sessionPath = [ "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin" ];
 
   modules.claude-code.enable = true;
   modules.proton-pass.enable = true;
@@ -28,7 +28,6 @@
   modules.go.enable = true;
   modules.rust.enable = true;
   modules.gemini-cli.enable = true;
-  modules.codex.enable = true;
   modules.opencode.enable = false;
   modules.pi.enable = true;
   modules.ai-agents.enable = true;

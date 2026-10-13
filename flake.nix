@@ -133,7 +133,6 @@ rec {
                   programs = {
                     mise.package = selectedPackages.mise;
                     claude-code.package = agentPackages.claude-code;
-                    codex.package = agentPackages.codex;
                     antigravity-cli.package = agentPackages.gemini-cli;
                     opencode.package = agentPackages.opencode;
                     pi-coding-agent.package = agentPackages.pi;
