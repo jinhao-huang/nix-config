@@ -21,18 +21,22 @@ essential commands and critical caveats; point to configuration instead of
 listing its options. Put detailed rationale and analysis in task reports.
 Document architecture and contributor validation in agent or developer guidance.
 
-Group cohesive features under `modules/<name>`. When a directory is imported as
-a module, expose `default.nix` as its public entry point. Compose configuration
-choices in profiles and keep feature implementations in modules. Keep
-related data beside its owning module, such as `modules/ssh/inventory.nix` and
-`modules/starship/plain-text-symbols.toml`. Custom package derivations live in
-`packages/<name>/default.nix`.
+Group cohesive features under `modules/<name>`. Single-entry features expose
+`default.nix` when imported as a directory. Features targeting multiple module
+evaluators expose explicit `home-manager.nix` and `nix-darwin.nix` entry points;
+profiles import the matching file. Declare their `_class` as `homeManager` or
+`darwin` and express platform restrictions with assertions. Keep shared options
+and private implementations within the feature directory.
 
-Keep reusable nix-darwin feature implementations in `modules/darwin` and select
-their behavior from the system profiles. Keep user-level settings in Home Manager
-profiles and modules. Use `home-manager.sharedModules` only for policy that must
-apply to every configured Home Manager user; otherwise import the user module
-explicitly from the relevant profile.
+Compose configuration choices in profiles. Keep independently reusable feature
+implementations in modules and profile-specific helpers beside their owning
+profile. Select system features from system profiles and user-level features
+from Home Manager profiles. Keep related data beside its owning module, such as
+`modules/ssh/inventory.nix` and `modules/starship/plain-text-symbols.toml`.
+Custom package derivations live in `packages/<name>/default.nix`.
+Use `home-manager.sharedModules` only for policy that must apply to every
+configured Home Manager user; otherwise import the user module explicitly from
+the relevant profile.
 
 Use native `programs.*.package` options when available. Keep package-source
 selection in flake composition rather than passing package sets through

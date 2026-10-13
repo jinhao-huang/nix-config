@@ -2,7 +2,7 @@
 {
   imports = [
     ./common.nix
-    ../../modules/tailscale
+    ../../modules/tailscale/home-manager.nix
   ];
 
   home.stateVersion = "26.05";

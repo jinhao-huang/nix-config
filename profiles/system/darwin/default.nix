@@ -9,10 +9,14 @@
     ./homebrew.nix
     ./preferences.nix
     ./remote-login
-    ../../../modules/darwin/tailscale-ingress
+    ../../../modules/tailscale/nix-darwin.nix
   ];
 
-  modules.tailscale-ingress.enable = true;
+  modules.tailscale = {
+    enable = true;
+    incoming.enable = true;
+    ssh.enable = true;
+  };
 
   nix.package = pkgs.lixPackageSets.stable.lix;
   nix.settings = {

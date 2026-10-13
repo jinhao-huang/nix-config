@@ -32,11 +32,12 @@ macOS Remote Login and `authorized_keys`.
 
 ## Maintain
 
-Edit preferences in [default.nix](default.nix). Nix generates a locked native
-configuration, so CLI preference changes and `up`/`login` are not the enrollment
-workflow. Activating a configuration change reloads the daemon and can interrupt
-connections. Explicitly set `false` or an empty list to clear a preference;
-omitting a field can preserve its previous value.
+Configure ingress and SSH in the
+[Darwin profile](../../profiles/system/darwin/default.nix).
+Nix generates a locked native configuration, so CLI preference changes and
+`up`/`login` are not the enrollment workflow. Activating a configuration change
+reloads the daemon and can interrupt connections. Explicitly set `false` or an
+empty list to clear a preference; omitting a field can preserve its previous value.
 
 The [native configuration schema](https://tailscale.com/docs/reference/tailscaled/tailscaled-config-file)
 is still alpha, and `debug localapi` is not a stable CLI interface; check both

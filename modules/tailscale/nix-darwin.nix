@@ -5,33 +5,25 @@
   ...
 }:
 let
-  cfg = config.modules.tailscale-ingress;
-  # The pinned nix-darwin service has no native preference options.
-  tailscaleConfig = (pkgs.formats.json { }).generate "tailscale-ingress.json" {
-    version = "alpha0";
-    locked = true;
-    enabled = true;
-    acceptDNS = false;
-    acceptRoutes = false;
-    runSSHServer = true;
-    runWebClient = false;
-    shieldsUp = false;
-    exitNode = "";
-    advertiseRoutes = [ ];
-    autoUpdate = {
-      check = false;
-      apply = false;
-    };
+  cfg = config.modules.tailscale;
+  settings = import ./settings.nix {
+    incomingEnabled = cfg.incoming.enable;
+    sshEnabled = cfg.ssh.enable;
   };
+
+  # The pinned nix-darwin service has no native preference options.
+  tailscaleConfig = (pkgs.formats.json { }).generate "tailscale-ingress.json" settings;
 in
 {
-  options.modules.tailscale-ingress.enable = lib.mkEnableOption "a userspace Tailscale ingress daemon";
+  _class = "darwin";
+
+  imports = [ ./options.nix ];
 
   config = lib.mkIf cfg.enable {
     assertions = [
       {
         assertion = !config.services.tailscale.enable;
-        message = "Use modules.tailscale-ingress or services.tailscale, not both.";
+        message = "Use modules.tailscale or services.tailscale, not both.";
       }
     ];
 

@@ -7,25 +7,15 @@
 let
   cfg = config.modules.tailscale;
   proxyAddress = "127.0.0.1:1055";
+  settings = import ./settings.nix {
+    incomingEnabled = cfg.incoming.enable;
+    sshEnabled = cfg.ssh.enable;
+  };
 
   # Home Manager has tray clients but no native tailscaled service module.
-  tailscaleConfig = (pkgs.formats.json { }).generate "tailscale-user.json" {
-    version = "alpha0";
-    locked = true;
-    enabled = true;
-    acceptDNS = false;
-    acceptRoutes = false;
-    runSSHServer = cfg.ssh.enable;
-    runWebClient = false;
-    shieldsUp = !cfg.incoming.enable;
-    exitNode = "";
-    advertiseRoutes = [ ];
-    netfilterMode = "off";
-    autoUpdate = {
-      check = false;
-      apply = false;
-    };
-  };
+  tailscaleConfig = (pkgs.formats.json { }).generate "tailscale-user.json" (
+    settings // { netfilterMode = "off"; }
+  );
 
   userClient = pkgs.writeShellApplication {
     name = "tailscale-user";
@@ -36,23 +26,16 @@ let
   };
 in
 {
-  options.modules.tailscale = {
-    enable = lib.mkEnableOption "an unprivileged userspace Tailscale daemon";
+  _class = "homeManager";
 
-    incoming.enable = lib.mkEnableOption "incoming tailnet connections to local services";
+  imports = [ ./options.nix ];
 
-    outboundProxy.enable = lib.mkEnableOption "a local SOCKS5 and HTTP proxy for outgoing tailnet connections";
-
-    ssh.enable = lib.mkEnableOption "Tailscale SSH for the daemon's own Unix user";
-  };
+  options.modules.tailscale.outboundProxy.enable =
+    lib.mkEnableOption "a local SOCKS5 and HTTP proxy for outgoing tailnet connections";
 
   config = lib.mkIf cfg.enable {
     assertions = [
       (lib.hm.assertions.assertPlatform "modules.tailscale" pkgs lib.platforms.linux)
-      {
-        assertion = cfg.ssh.enable -> cfg.incoming.enable;
-        message = "modules.tailscale.ssh.enable requires modules.tailscale.incoming.enable.";
-      }
     ];
 
     home.packages = [

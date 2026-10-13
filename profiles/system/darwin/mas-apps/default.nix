@@ -11,7 +11,7 @@ let
 
   appIds = map (app: app.id) (lib.attrValues cfg.apps);
   bundleIdentifiers = map (app: app.bundleIdentifier) (lib.attrValues cfg.apps);
-  masGuard = import ./mas-guard.nix {
+  masGuard = import ./guard.nix {
     inherit lib pkgs;
     apps = cfg.apps;
     listTimeoutSeconds = cfg.listTimeoutSeconds;
@@ -21,6 +21,8 @@ let
   };
 in
 {
+  _class = "darwin";
+
   options.modules.mas-apps = {
     package = lib.mkOption {
       type = lib.types.package;

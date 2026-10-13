@@ -10,7 +10,7 @@ User-managed `~/.ssh/authorized_keys` is ignored.
   is a separate permission.
 - launchd owns TCP 22; `Port` and `ListenAddress` in `sshd_config` do not change
   the listener. This profile does not restrict access to the tailnet.
-- The laptop's [Tailscale SSH](../../../../modules/darwin/tailscale-ingress/README.md)
+- Both profiles' [Tailscale SSH](../../../../modules/tailscale/README.md)
   uses independent authorization; this profile's login policy does not apply to it.
 - On macOS 26+, [FileVault SSH unlock](https://github.com/apple-oss-distributions/OpenSSH/blob/main/apple_ssh_and_filevault.7)
   uses password authentication before the normal SSH configuration is available.

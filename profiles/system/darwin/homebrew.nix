@@ -8,7 +8,7 @@
 
 {
   imports = [
-    ../../../modules/darwin/mas-apps.nix
+    ./mas-apps
   ];
 
   modules.mas-apps = {
