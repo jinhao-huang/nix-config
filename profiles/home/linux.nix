@@ -1,9 +1,18 @@
 { config, pkgs, ... }:
 {
-  imports = [ ./common.nix ];
+  imports = [
+    ./common.nix
+    ../../modules/tailscale
+  ];
 
   home.stateVersion = "26.05";
   modules.bash.enable = true;
+  modules.tailscale = {
+    enable = true;
+    incoming.enable = true;
+    outboundProxy.enable = false;
+    ssh.enable = true;
+  };
 
   xdg.enable = true;
   targets.genericLinux = {

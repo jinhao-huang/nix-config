@@ -16,6 +16,9 @@ Keep Linux account paths and architectures in `hosts/linux.nix`; this repository
 manages Linux user environments rather than the host operating system.
 
 Keep README focused on user-facing setup, daily use, and troubleshooting.
+Keep additions very short and match the brevity of nearby sections. Include only
+essential commands and critical caveats; point to configuration instead of
+listing its options. Put detailed rationale and analysis in task reports.
 Document architecture and contributor validation in agent or developer guidance.
 
 Group cohesive features under `modules/<name>`. When a directory is imported as

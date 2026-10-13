@@ -162,6 +162,27 @@ Linux keeps the incoming `SSH_AUTH_SOCK`. SSH host inventory is controlled by
 The login shell stays Bash; run `zsh` explicitly or use tmux. Language toolchains
 and CUDA dependencies belong in project environments.
 
+### Tailscale without sudo
+
+Linux uses a systemd user service with incoming access and Tailscale SSH enabled;
+the outbound proxy is disabled. Configure these in `profiles/home/linux.nix`.
+
+After activation, enroll once using the user daemon's CLI:
+
+```sh
+tailscale-user debug localapi POST login-interactive
+tailscale-user status --json
+```
+
+Open `AuthURL` to approve the device; use `tailscale-user ip -4` for its address.
+For shared servers, assign a dedicated tag in Tailscale Console, allow your
+account to reach TCP 22, and add an SSH rule for `huangjh`. Remove rules granting
+the server access to other devices; disabling the proxy alone does not enforce
+this restriction. See [grants](https://tailscale.com/docs/reference/syntax/grants).
+
+Run `loginctl enable-linger` to stay online after logout and reboot; ask the
+administrator if host policy denies it. Logs: `journalctl --user -u tailscaled`.
+
 ## How to update
 
 ### Update all input
