@@ -2,11 +2,15 @@
 {
   imports = [
     ./common.nix
+    ../../modules/mise
+    ../../modules/pi
     ../../modules/tailscale/home-manager.nix
   ];
 
   home.stateVersion = "26.05";
   modules.bash.enable = true;
+  modules.mise.enable = true;
+  modules.pi.enable = true;
   modules.tailscale = {
     enable = true;
     incoming.enable = true;

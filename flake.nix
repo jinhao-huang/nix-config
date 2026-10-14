@@ -173,12 +173,17 @@ rec {
         _: host:
         home-manager.lib.homeManagerConfiguration {
           pkgs = mkPkgs nixpkgs host.system;
-          extraSpecialArgs.ohMyTmux = oh-my-tmux;
+          extraSpecialArgs = {
+            homeManagerUnstable = home-manager-unstable;
+            ohMyTmux = oh-my-tmux;
+          };
           modules = [
             ./profiles/home/linux.nix
             {
               home.username = host.username;
               home.homeDirectory = host.homeDirectory;
+              programs.mise.package = self.packages.${host.system}.mise;
+              programs.pi-coding-agent.package = llm-agents.packages.${host.system}.pi;
             }
           ];
         }
