@@ -23,6 +23,7 @@ Choose the language by the artifact's audience and lifecycle, not by whether it 
 ## Finished Prose
 
 - Write documents, coursework, reports, and other prose deliverables directly in the author's voice for their intended reader. Match the requested genre, template, and language.
+- When writing or reviewing README files and developer documentation in any repository, load and follow `~/.agents/skills/technical-writing/SKILL.md`.
 - Keep coordination with the requester in chat: prompt interpretation, drafting and revision commentary, work notes, and unsolicited AI-authorship statements. The deliverable contains the requested subject matter. Preserve required methodology, provenance, disclosures, citations, and meaningful limitations.
 - Use concrete subjects, direct verbs, and concise, connected paragraphs. Cut empty background, repeated conclusions, and ornamental emphasis. Use headings, lists, tables, and identifiers only when they help the reader or the requested format requires them.
 - Before delivering newly written or substantially revised prose, perform a final editorial review. For Chinese prose, read and follow `~/.agents/skills/humanizer-zh/SKILL.md` automatically as part of authoring; apply it to the prose within DOCX, Typst, LaTeX, Markdown, and other formats. A review-only request remains read-only.

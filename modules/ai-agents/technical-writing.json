@@ -1,0 +1,19 @@
+{
+  "repository": "https://github.com/backnotprop/pstack",
+  "revision": "6f131f137de64fdaf928278c0fd9ecec520ccbee",
+  "reviewed_on": "2026-10-17",
+  "license": "skills/technical-writing/LICENSE",
+  "skills": {
+    "technical-writing": {
+      "upstream_path": "skills/technical-writing",
+      "local_path": "skills/technical-writing",
+      "adaptations": [
+        "Enable automatic invocation across repositories for README files and developer documentation; keep agent instructions, research reports, and format-only conversion with their existing workflows.",
+        "Retain task-first document types, concrete naming, and plain prose while allowing README navigation, complete references, and context-sensitive structure.",
+        "Follow the target project's language, conventions, and requested edit scope instead of upstream repository-specific formatting, fixed sentence lengths, and punctuation bans.",
+        "Remove the unslop dependency and maintenance proposals; reuse humanizer-zh for Chinese final editing without repeating an unchanged text's completed pass.",
+        "Preserve source meaning, uncertainty, protected syntax, and artifact-specific authoring and verification requirements."
+      ]
+    }
+  }
+}
