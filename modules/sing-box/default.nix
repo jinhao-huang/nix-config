@@ -1,0 +1,230 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
+  cfg = config.modules.sing-box;
+  stateDirectory = "${config.xdg.stateHome}/sing-box";
+  localDomains = lib.unique ([ "localhost" ] ++ cfg.routing.directDomains);
+  noProxy = lib.unique (
+    [
+      "127.0.0.1"
+      "::1"
+    ]
+    ++ localDomains
+    ++ cfg.routing.directDomainSuffixes
+  );
+  cnDomains = pkgs.fetchurl {
+    url = "https://raw.githubusercontent.com/SagerNet/sing-geosite/ea962e34bf255b69f3a66690e4a53900d48b48ea/geosite-cn.srs";
+    hash = "sha256-fnqVvxbGvMfAJbhteJsuG5wU84zjN3fliEFmFcui5A8=";
+  };
+  directRule =
+    fields:
+    fields
+    // {
+      action = "route";
+      outbound = "direct";
+    };
+  baseConfig = {
+    log.level = "warn";
+    inbounds = [
+      {
+        type = "mixed";
+        tag = "local";
+        listen = "127.0.0.1";
+        listen_port = cfg.listenPort;
+        set_system_proxy = false;
+      }
+    ];
+    dns = {
+      servers = [
+        {
+          type = "local";
+          tag = "local-dns";
+        }
+      ];
+      final = "local-dns";
+    };
+    outbounds = [
+      {
+        type = "direct";
+        tag = "direct";
+        domain_resolver = "local-dns";
+      }
+    ];
+    route = {
+      default_domain_resolver = "local-dns";
+      rule_set = [
+        {
+          type = "local";
+          tag = "cn-domains";
+          format = "binary";
+          path = toString cnDomains;
+        }
+      ];
+      rules = [
+        (directRule { ip_is_private = true; })
+      ]
+      ++ [ (directRule { domain = localDomains; }) ]
+      ++ lib.optional (cfg.routing.directDomainSuffixes != [ ]) (directRule {
+        domain_suffix = cfg.routing.directDomainSuffixes;
+      })
+      ++ lib.optional (cfg.routing.directIpCidrs != [ ]) (directRule {
+        ip_cidr = cfg.routing.directIpCidrs;
+      })
+      ++ lib.optional (cfg.routing.proxyDomainSuffixes != [ ]) {
+        domain_suffix = cfg.routing.proxyDomainSuffixes;
+        action = "route";
+        outbound = "proxy";
+      }
+      ++ [ (directRule { rule_set = "cn-domains"; }) ];
+      final = "proxy";
+    };
+  };
+  policy = pkgs.writeText "sing-box-policy.json" (
+    builtins.toJSON {
+      inherit stateDirectory baseConfig;
+      inherit (cfg) listenPort;
+      requestFile = cfg.subscription.requestFile;
+      credentialsFile = cfg.proxyCredentialsFile;
+      username = config.home.username;
+      singBox = lib.getExe cfg.package;
+      packageId = builtins.hashString "sha256" (lib.getExe cfg.package);
+      curl = lib.getExe pkgs.curl;
+      systemctl = lib.getExe' pkgs.systemd "systemctl";
+      inherit noProxy;
+    }
+  );
+  runtime = "${lib.getExe pkgs.python3} ${./runtime.py} ${policy}";
+  withProxy = pkgs.writeShellApplication {
+    name = "with-proxy";
+    text = ''
+      exec ${runtime} with-proxy "$@"
+    '';
+  };
+  privatePath = path: lib.hasPrefix "/" path && !(lib.hasPrefix "${builtins.storeDir}/" path);
+in
+{
+  _class = "homeManager";
+
+  options.modules.sing-box = {
+    enable = lib.mkEnableOption "an authenticated local HTTP/SOCKS proxy with subscription nodes";
+    package = lib.mkPackageOption pkgs "sing-box" { };
+    listenPort = lib.mkOption {
+      type = lib.types.port;
+      description = "Fixed, unprivileged loopback HTTP/SOCKS port; conflicts abort activation.";
+    };
+    subscription.requestFile = lib.mkOption {
+      type = lib.types.str;
+      default = "${config.xdg.configHome}/sing-box/subscription.curl";
+      description = "Private runtime curl configuration containing the HTTPS subscription URL and headers.";
+    };
+    proxyCredentialsFile = lib.mkOption {
+      type = lib.types.str;
+      default = "${stateDirectory}/auth.json";
+      description = "Private username/password JSON; generated once if absent, outside the Nix store.";
+    };
+    routing = {
+      directDomains = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Additional exact local hostnames; localhost is always resolved locally and routed directly.";
+      };
+      directDomainSuffixes = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Local domain suffixes, without a leading dot; also included in no_proxy.";
+      };
+      directIpCidrs = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Additional directly reachable campus or LAN networks.";
+      };
+      proxyDomainSuffixes = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = "Proxy exceptions evaluated after local destinations and before the China domain set.";
+      };
+    };
+  };
+
+  config = lib.mkIf cfg.enable {
+    assertions = [
+      (lib.hm.assertions.assertPlatform "modules.sing-box" pkgs lib.platforms.linux)
+      {
+        assertion = cfg.listenPort >= 1024;
+        message = "modules.sing-box.listenPort must be an unprivileged port (1024–65535).";
+      }
+      {
+        assertion = privatePath cfg.subscription.requestFile && privatePath cfg.proxyCredentialsFile;
+        message = "sing-box secret paths must be absolute runtime paths outside the Nix store.";
+      }
+      {
+        assertion = lib.all (
+          suffix: suffix != "" && !(lib.hasPrefix "." suffix)
+        ) cfg.routing.directDomainSuffixes;
+        message = "sing-box direct domain suffixes must be nonempty and have no leading dot.";
+      }
+    ];
+
+    home.packages = [
+      cfg.package
+      withProxy
+    ];
+    home.sessionVariables = {
+      no_proxy = lib.concatStringsSep "," noProxy;
+      NO_PROXY = lib.concatStringsSep "," noProxy;
+    };
+
+    # No native Home Manager sing-box module exists. Secrets are assembled only at activation.
+    home.activation.checkSingBoxInputs = lib.hm.dag.entryBefore [ "writeBoundary" ] ''
+      run ${runtime} check_inputs
+    '';
+    home.activation.prepareSingBox =
+      lib.hm.dag.entryBetween [ "linkGeneration" "installPackages" ] [ "writeBoundary" ]
+        ''
+          run ${runtime} initialize
+          if [[ ! -v DRY_RUN ]]; then
+            exec {singBoxLockFd}>${lib.escapeShellArg "${stateDirectory}/activation.lock"}
+            if ! ${lib.getExe' pkgs.util-linux "flock"} --timeout 90 "$singBoxLockFd"; then
+              echo "Timed out waiting for another sing-box activation." >&2
+              exit 1
+            fi
+            singBoxCandidate="$(run ${runtime} prepare)"
+          else
+            run ${runtime} prepare
+          fi
+        '';
+    home.activation.applySingBox =
+      lib.hm.dag.entryAfter [ "reloadSystemd" "installPackages" "onFilesChange" ]
+        ''
+          run ${runtime} apply "''${singBoxCandidate:-<prepared-snapshot>}"
+          if [[ ! -v DRY_RUN ]]; then
+            exec {singBoxLockFd}>&-
+          fi
+        '';
+
+    systemd.user.services.sing-box = {
+      Unit = {
+        Description = "Authenticated sing-box development proxy";
+        # Activation validates and commits snapshots; sd-switch must not restart early.
+        X-SwitchMethod = "keep-old";
+        ConditionPathExists = "${stateDirectory}/current/config.json";
+        StartLimitIntervalSec = 30;
+        StartLimitBurst = 3;
+      };
+      Service = {
+        ExecStart = "${lib.getExe cfg.package} run -c ${lib.escapeShellArg "${stateDirectory}/current/config.json"} -D ${lib.escapeShellArg stateDirectory}";
+        UMask = "0077";
+        NoNewPrivileges = true;
+        Restart = "on-failure";
+        RestartSec = 3;
+        TimeoutStartSec = 15;
+        TimeoutStopSec = 15;
+      };
+      Install.WantedBy = [ "default.target" ];
+    };
+  };
+}

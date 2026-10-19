@@ -1,9 +1,25 @@
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
+  ensureLinger = pkgs.writeShellApplication {
+    name = "ensure-user-linger";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.systemd
+    ];
+    text = builtins.readFile ./ensure-linger.sh;
+  };
+in
 {
   imports = [
     ./common.nix
     ../../modules/mise
     ../../modules/pi
+    ../../modules/sing-box
     ../../modules/tailscale/home-manager.nix
   ];
 
@@ -11,12 +27,23 @@
   modules.bash.enable = true;
   modules.mise.enable = true;
   modules.pi.enable = true;
+  modules.sing-box = {
+    enable = true;
+    listenPort = 21009;
+    routing.directDomainSuffixes = [ "internal" ];
+  };
   modules.tailscale = {
     enable = true;
     incoming.enable = true;
     outboundProxy.enable = false;
     ssh.enable = true;
   };
+
+  home.activation.ensureUserLinger =
+    lib.hm.dag.entryBetween [ "prepareSingBox" "linkGeneration" "installPackages" ] [ "writeBoundary" ]
+      ''
+        run ${lib.getExe ensureLinger}
+      '';
 
   xdg.enable = true;
   targets.genericLinux = {

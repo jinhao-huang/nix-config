@@ -180,8 +180,46 @@ account to reach TCP 22, and add an SSH rule for `huangjh`. Remove rules grantin
 the server access to other devices; disabling the proxy alone does not enforce
 this restriction. See [grants](https://tailscale.com/docs/reference/syntax/grants).
 
-Run `loginctl enable-linger` to stay online after logout and reboot; ask the
-administrator if host policy denies it. Logs: `journalctl --user -u tailscaled`.
+The Linux profile requires linger during activation and attempts to enable it;
+activation fails if host policy denies it. Logs: `journalctl --user -u tailscaled`.
+
+### sing-box without sudo
+
+Create `~/.config/sing-box/subscription.curl` outside Git with directory mode
+`0700` and file mode `0600`. Use native sing-box JSON over HTTPS:
+
+```text
+url = "https://subscription.example/private-token?format=json"
+```
+
+Each switch downloads nodes, validates a private configuration, and restarts only
+when needed. Download or validation failure preserves the running proxy. Startup
+failure aborts the switch and attempts to restore the previous configuration
+using the current sing-box package. If recovery fails, restore the previous Home
+Manager generation and its saved private configuration; binaries are not rolled
+back automatically. Proxy credentials are
+generated once in `~/.local/state/sing-box/auth.json` (mode `0600`). Neither secret
+is read by Nix evaluation or stored in the Nix store.
+
+Configure the port and local routing in [the Linux profile](profiles/home/linux.nix).
+The authenticated mixed listener uses `127.0.0.1:21009`; an occupied port aborts
+activation. Local destinations and pinned China domains go direct; other requests
+use subscription nodes. Add laboratory domains and directly reachable campus
+networks before use. Tailnet-only targets need a separate userspace Tailscale exit.
+
+For one command, or a temporary proxy-enabled shell:
+
+```sh
+with-proxy git fetch
+with-proxy bash
+```
+
+Login sessions receive a small `no_proxy`/`NO_PROXY` list. The wrapper reads
+credentials into the child environment and uses the active proxy's bypass list.
+It refuses to run commands when the managed proxy is unavailable.
+Start a new proxy-enabled shell after changing the port or credentials.
+Logs: `journalctl --user -u sing-box`; private download/check diagnostics remain
+under `~/.local/state/sing-box/snapshots/`.
 
 ## How to update
 
