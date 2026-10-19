@@ -34,7 +34,7 @@ in
 
         packages = [
           # Web search, URL fetching, PDF extraction, and video analysis.
-          "npm:pi-web-access@0.30.0"
+          "npm:pi-web-access@0.42.0"
         ];
       };
     };
