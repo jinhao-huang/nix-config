@@ -34,28 +34,43 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      description = "DeepSeek Harness CLI package selected by the flake for the Linux service.";
+      example = lib.literalExpression "llm-agents.packages.\${host.system}.dsh";
+      description = ''
+        DeepSeek Harness CLI package, required when the Linux Web service is
+        enabled and selected by the flake. macOS uses the official desktop app.
+      '';
     };
 
     service = {
       enable = lib.mkEnableOption "the persistent Linux DeepSeek Harness Web service";
       publicHost = lib.mkOption {
         type = lib.types.strMatching "[a-zA-Z0-9][a-zA-Z0-9.-]*";
-        description = "Tailnet HTTPS hostname advertised by the Web service.";
+        example = "server.example.ts.net";
+        description = ''
+          Tailnet HTTPS hostname, without a scheme or port, required when the Web
+          service is enabled. The Linux inventory supplies tailscaleHostname.
+        '';
       };
       publicPort = lib.mkOption {
         type = lib.types.ints.between 1 65535;
         default = 443;
-        description = "Public HTTPS port advertised by the Web service.";
+        example = 8443;
+        description = ''
+          Public HTTPS port advertised by the Web service. The Linux profile
+          derives it from modules.tailscale.serve.httpsPort. Port 443 is omitted
+          from the launch URL; other ports enter both the URL and trusted host.
+        '';
       };
       port = lib.mkOption {
         type = lib.types.ints.between 1 65535;
         default = 3080;
-        description = "Loopback port for the Harness backend.";
+        example = 13080;
+        description = "Loopback port for the Harness backend; it must differ from the proxy port.";
       };
       proxyPort = lib.mkOption {
         type = lib.types.ints.between 1 65535;
         default = 3081;
+        example = 13081;
         description = "Loopback port for the cookie-rewriting proxy used by Tailscale Serve.";
       };
     };

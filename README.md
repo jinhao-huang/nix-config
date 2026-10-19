@@ -1,3 +1,9 @@
+## Configuration reference
+
+See the [configuration reference](docs/configuration.md) for Linux host fields
+and all sing-box, DeepSeek Harness, and Tailscale options, including defaults,
+examples, and constraints.
+
 ## Choose a Darwin profile
 
 Set the profile for the current machine before running the commands below:
@@ -103,7 +109,7 @@ sudo darwin-rebuild switch --flake ".#$darwin_profile"
 
 ## Linux development servers
 
-`hosts/linux.nix` declares each server's architecture, username, and home path.
+`hosts/linux.nix` declares each server's account, architecture, ports, and routing.
 On `iscas-r750xa`, run the commands below as `huangjh` from the repository root,
 using the existing Lix installation (no sudo).
 
@@ -201,9 +207,10 @@ back automatically. Proxy credentials are
 generated once in `~/.local/state/sing-box/auth.json` (mode `0600`). Neither secret
 is read by Nix evaluation or stored in the Nix store.
 
-Configure the port and local routing in [the Linux profile](profiles/home/linux.nix).
-The authenticated mixed listener uses `127.0.0.1:21009`; an occupied port aborts
-activation. Local destinations and pinned China domains go direct; other requests
+Configure the port and local routing in the host's `singBox` entry in
+[the Linux inventory](hosts/linux.nix). The authenticated mixed listener binds
+loopback; an occupied port aborts activation. Local destinations and pinned China
+domains go direct; other requests
 use subscription nodes. Add laboratory domains and directly reachable campus
 networks before use. Tailnet-only targets need a separate userspace Tailscale exit.
 

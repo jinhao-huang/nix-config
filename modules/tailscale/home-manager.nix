@@ -36,19 +36,32 @@ in
 
   imports = [ ./options.nix ];
 
-  options.modules.tailscale.outboundProxy.enable =
-    lib.mkEnableOption "a local SOCKS5 and HTTP proxy for outgoing tailnet connections";
+  options.modules.tailscale.outboundProxy.enable = lib.mkEnableOption ''
+    a local SOCKS5 and HTTP proxy for outgoing tailnet connections on
+    127.0.0.1:1055. Available on Linux; this does not select an exit node
+  '';
 
   options.modules.tailscale.serve = {
-    enable = lib.mkEnableOption "a tailnet-only HTTPS reverse proxy";
+    enable = lib.mkEnableOption ''
+      a tailnet-only HTTPS reverse proxy on Linux. Requires incoming.enable,
+      MagicDNS, tailnet HTTPS certificates, and access to the selected HTTPS
+      port. Enabling Serve unlocks native daemon preferences so the foreground
+      CLI can manage its mapping; Nix reapplies preferences on daemon startup
+    '';
     httpsPort = lib.mkOption {
       type = lib.types.ints.between 1 65535;
       default = 443;
+      example = 8443;
       description = "Tailnet HTTPS port for Tailscale Serve.";
     };
     target = lib.mkOption {
       type = lib.types.strMatching "http://127[.]0[.]0[.]1:[0-9]+";
-      description = "Loopback HTTP backend for Tailscale Serve.";
+      example = "http://127.0.0.1:3081";
+      description = ''
+        Loopback HTTP backend, required when Serve is enabled. The Linux profile
+        derives this URL from the Harness proxy port. The mapping exists for
+        the systemd service lifetime; Funnel is not enabled.
+      '';
     };
   };
 

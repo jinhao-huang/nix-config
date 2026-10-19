@@ -13,6 +13,15 @@ let
     ];
     text = builtins.readFile ./ensure-linger.sh;
   };
+  loopbackPorts =
+    lib.optional config.modules.sing-box.enable config.modules.sing-box.listenPort
+    ++
+      lib.optionals
+        (config.modules.deepseek-harness.enable && config.modules.deepseek-harness.service.enable)
+        [
+          config.modules.deepseek-harness.service.port
+          config.modules.deepseek-harness.service.proxyPort
+        ];
 in
 {
   imports = [
@@ -40,11 +49,7 @@ in
     enable = true;
     repoRelativePath = "nix-config";
   };
-  modules.sing-box = {
-    enable = true;
-    listenPort = 21009;
-    routing.directDomainSuffixes = [ "internal" ];
-  };
+  modules.sing-box.enable = lib.mkDefault true;
   modules.tailscale = {
     enable = true;
     incoming.enable = true;
@@ -62,6 +67,13 @@ in
     PartOf = [ "deepseek-harness-proxy.service" ];
   };
   systemd.user.services.tailscale-serve.Install.WantedBy = [ "deepseek-harness-proxy.service" ];
+
+  assertions = [
+    {
+      assertion = lib.length (lib.unique loopbackPorts) == lib.length loopbackPorts;
+      message = "sing-box, DeepSeek Harness, and its proxy must use distinct loopback ports.";
+    }
+  ];
 
   home.activation.ensureUserLinger =
     lib.hm.dag.entryBetween [ "prepareSingBox" "linkGeneration" "installPackages" ] [ "writeBoundary" ]

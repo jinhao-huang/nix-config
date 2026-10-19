@@ -9,5 +9,9 @@
       proxyPort = 3081;
       httpsPort = 443;
     };
+    singBox = {
+      listenPort = 21009;
+      routing.directDomainSuffixes = [ "internal" ];
+    };
   };
 }

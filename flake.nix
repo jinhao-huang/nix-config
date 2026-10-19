@@ -152,12 +152,18 @@ rec {
       packages = forAllSystems (
         system:
         let
+          pkgs = mkPkgs nixpkgs system;
           unstablePkgs = mkPkgs nixpkgs-unstable system;
+          configurationReference = pkgs.callPackage ./packages/configuration-reference {
+            inherit home-manager;
+          };
         in
         {
           mise = unstablePkgs.mise;
           proton-pass-cli = unstablePkgs.proton-pass-cli;
           typst = unstablePkgs.typst;
+          configuration-reference = configurationReference;
+          update-configuration-reference = configurationReference.update;
         }
       );
 
@@ -192,6 +198,7 @@ rec {
                 };
               };
               modules.tailscale.serve.httpsPort = host.deepseekHarness.httpsPort;
+              modules.sing-box = host.singBox;
             }
           ];
         }
@@ -199,7 +206,10 @@ rec {
 
       checks = forAllSystems (
         system:
-        nixpkgs.lib.mapAttrs' (
+        {
+          configuration-reference = self.packages.${system}.configuration-reference.tests.up-to-date;
+        }
+        // nixpkgs.lib.mapAttrs' (
           name: _: nixpkgs.lib.nameValuePair "${name}-home" self.homeConfigurations.${name}.activationPackage
         ) (nixpkgs.lib.filterAttrs (_: host: host.system == system) linuxHosts)
       );

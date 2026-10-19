@@ -111,41 +111,74 @@ in
 
   options.modules.sing-box = {
     enable = lib.mkEnableOption "an authenticated local HTTP/SOCKS proxy with subscription nodes";
-    package = lib.mkPackageOption pkgs "sing-box" { };
+    package = lib.mkPackageOption pkgs "sing-box" { example = "pkgs.sing-box"; };
     listenPort = lib.mkOption {
       type = lib.types.port;
-      description = "Fixed, unprivileged loopback HTTP/SOCKS port; conflicts abort activation.";
+      example = 21009;
+      description = ''
+        Fixed loopback HTTP/SOCKS port, required when enabled. The port must be
+        between 1024 and 65535; conflicts abort activation. The Linux profile
+        also checks for conflicts with the Harness backend and proxy.
+      '';
     };
     subscription.requestFile = lib.mkOption {
       type = lib.types.str;
       default = "${config.xdg.configHome}/sing-box/subscription.curl";
-      description = "Private runtime curl configuration containing the HTTPS subscription URL and headers.";
+      defaultText = lib.literalExpression ''"''${config.xdg.configHome}/sing-box/subscription.curl"'';
+      example = "/home/alice/.config/sing-box/lab.curl";
+      description = ''
+        Private runtime curl configuration containing the HTTPS subscription URL
+        and headers. Use an absolute path outside the Nix store. The directory
+        must have mode 0700 and the file mode 0600; Nix never reads its contents.
+      '';
     };
     proxyCredentialsFile = lib.mkOption {
       type = lib.types.str;
       default = "${stateDirectory}/auth.json";
-      description = "Private username/password JSON; generated once if absent, outside the Nix store.";
+      defaultText = lib.literalExpression ''"''${config.xdg.stateHome}/sing-box/auth.json"'';
+      example = "/home/alice/.local/state/sing-box/lab-auth.json";
+      description = ''
+        Private username/password JSON, generated once if absent. Use an
+        absolute path outside the Nix store. The file has mode 0600 and remains
+        runtime state; Nix never reads its contents.
+      '';
     };
     routing = {
       directDomains = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
-        description = "Additional exact local hostnames; localhost is always resolved locally and routed directly.";
+        example = [ "git.lab.example" ];
+        description = ''
+          Additional exact hostnames resolved locally and routed directly.
+          localhost is always included. These names also enter no_proxy and
+          NO_PROXY for login shells and with-proxy commands.
+        '';
       };
       directDomainSuffixes = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
+        example = [ "internal" ];
         description = "Local domain suffixes, without a leading dot; also included in no_proxy.";
       };
       directIpCidrs = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
-        description = "Additional directly reachable campus or LAN networks.";
+        example = [ "203.0.113.0/24" ];
+        description = ''
+          Additional directly reachable campus or LAN networks in CIDR notation.
+          Private IP destinations already go direct. These rules apply inside
+          sing-box and are not added to no_proxy.
+        '';
       };
       proxyDomainSuffixes = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
-        description = "Proxy exceptions evaluated after local destinations and before the China domain set.";
+        example = [ "proxy.example" ];
+        description = ''
+          Domain suffixes routed through subscription nodes before the China
+          domain set is checked. Private destinations and explicit direct
+          domain, suffix, and CIDR rules take precedence.
+        '';
       };
     };
   };
