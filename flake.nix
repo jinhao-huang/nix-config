@@ -184,6 +184,14 @@ rec {
               home.homeDirectory = host.homeDirectory;
               programs.mise.package = self.packages.${host.system}.mise;
               programs.pi-coding-agent.package = llm-agents.packages.${host.system}.pi;
+              modules.deepseek-harness = {
+                package = llm-agents.packages.${host.system}.dsh;
+                service = {
+                  publicHost = host.tailscaleHostname;
+                  inherit (host.deepseekHarness) port proxyPort;
+                };
+              };
+              modules.tailscale.serve.httpsPort = host.deepseekHarness.httpsPort;
             }
           ];
         }

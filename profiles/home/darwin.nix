@@ -10,6 +10,7 @@
     ../../modules/gemini-cli
     ../../modules/opencode
     ../../modules/pi
+    ../../modules/deepseek-harness
     ../../modules/ai-agents
     ../../modules/zed
     ../../modules/mise
@@ -30,6 +31,7 @@
   modules.gemini-cli.enable = true;
   modules.opencode.enable = false;
   modules.pi.enable = true;
+  modules.deepseek-harness.enable = true;
   modules.ai-agents.enable = true;
   modules.zed.enable = true;
   modules.mise.enable = true;

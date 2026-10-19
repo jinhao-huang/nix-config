@@ -221,6 +221,32 @@ Start a new proxy-enabled shell after changing the port or credentials.
 Logs: `journalctl --user -u sing-box`; private download/check diagnostics remain
 under `~/.local/state/sing-box/snapshots/`.
 
+## DeepSeek Harness
+
+On macOS, open **DeepSeek Harness** after activation; Homebrew installs the
+official desktop application. Configure an API key in **Settings → Models**.
+Credentials and sessions stay under `~/.dsh`, outside Nix.
+[Harness policy](modules/deepseek-harness/default.nix) disables telemetry,
+additional session-log uploads, and Desktop product analytics; model requests
+still send task context.
+
+Linux runs the Web backend and Tailscale Serve as systemd user services. Connect
+to Tailscale, then use the HTTPS launch URL printed in the backend journal:
+
+```sh
+journalctl --user -u deepseek-harness -b --no-pager
+```
+
+Set each host's three ports in the [Linux inventory](hosts/linux.nix); proxy
+targets and the launch URL follow automatically.
+
+The URL includes a private launch token; do not share the journal. HTTPS requires
+MagicDNS, tailnet HTTPS certificates, and an access rule allowing intended peers
+to the configured HTTPS port (443 by default). A loopback proxy adds secure
+cookies; no Funnel is enabled.
+Check ingress with `tailscale-user serve status` and
+`systemctl --user status deepseek-harness deepseek-harness-proxy tailscale-serve`.
+
 ## How to update
 
 ### Update all input

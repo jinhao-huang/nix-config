@@ -28,6 +28,7 @@ in
     # Native context options do not accept live-link derivations as file sources.
     home.file.".claude/CLAUDE.md".source = globalGuidelines;
     home.file.".codex/AGENTS.md".source = globalGuidelines;
+    home.file.".dsh/AGENTS.md".source = globalGuidelines;
     home.file.".agents/skills".source = skills;
 
     xdg.configFile = lib.mkIf config.programs.opencode.enable {

@@ -90,6 +90,7 @@
       "chatgpt"
       "steipete/homebrew-tap/codexbar"
       "coteditor"
+      "deepseek-harness"
       "drawio"
       "ghostty"
       "google-chrome"
