@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, ... }:
 {
   imports = [
     ./common.nix
@@ -12,6 +12,7 @@
     ../../modules/pi
     ../../modules/deepseek-harness
     ../../modules/ai-agents
+    ../../modules/lima
     ../../modules/zed
     ../../modules/mise
     ../../modules/typst
@@ -19,7 +20,6 @@
   ];
 
   home.stateVersion = "25.05";
-  home.packages = [ pkgs.lima ];
   home.sessionPath = [ "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin" ];
 
   modules.claude-code.enable = false;
@@ -28,6 +28,7 @@
   modules.ssh.agentSocket = config.modules.proton-pass.sshAgentSocket;
   modules.go.enable = true;
   modules.rust.enable = true;
+  modules.lima.enable = true;
   modules.gemini-cli.enable = false;
   modules.opencode.enable = false;
   modules.pi = {
