@@ -269,11 +269,15 @@ additional session-log uploads, and Desktop product analytics; model requests
 still send task context.
 
 Linux runs the Web backend and Tailscale Serve as systemd user services. Connect
-to Tailscale, then use the HTTPS launch URL printed in the backend journal:
+to Tailscale, then open the latest complete HTTPS launch URL, including
+`?token=...`, from the backend journal:
 
 ```sh
 journalctl --user -u deepseek-harness -b --no-pager
 ```
+
+Bookmark the clean URL after authentication; its cookie lasts 30 days by default.
+For `dsh web authentication required`, reopen the latest complete launch URL.
 
 Set each host's three ports in the [Linux inventory](hosts/linux.nix); proxy
 targets and the launch URL follow automatically.
