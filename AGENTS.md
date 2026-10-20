@@ -4,16 +4,18 @@
 
 This repository is a Nix flake for personal macOS and Linux user environments.
 `flake.nix` defines the flake inputs, package outputs, the `laptop` and `desktop`
-nix-darwin configurations, and standalone Linux Home Manager configurations
-from `hosts/linux.nix`.
+nix-darwin configurations, and standalone Linux Home Manager configurations.
 Keep `flake.nix` focused on composition and package-source selection. User-level
 Home Manager profiles live in `profiles/home`: `common.nix` owns shared CLI
 policy, while `darwin.nix` and `linux.nix` own their platform-specific policy.
 Darwin system policy lives in `profiles/system/darwin`: `default.nix` composes
 shared settings, preferences, Homebrew application choices, and Remote Login;
 `laptop.nix` and `desktop.nix` own role-specific application choices.
-Keep Linux account paths and architectures in `hosts/linux.nix`; this repository
-manages Linux user environments rather than the host operating system.
+Keep host data in `hosts/darwin.nix` and `hosts/linux.nix`; `hosts/default.nix`
+composes them and validates the optional `host-local` input. Local overrides
+may only change Pi startup defaults. Keep their schema and settings generation
+in `modules/pi`. This repository manages Linux user environments rather than
+the host operating system.
 
 Keep README focused on user-facing setup, daily use, and troubleshooting.
 Keep additions very short and match the brevity of nearby sections. Include only

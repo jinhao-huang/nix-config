@@ -3,6 +3,7 @@
     system = "x86_64-linux";
     username = "huangjh";
     homeDirectory = "/home/huangjh";
+    pi = { };
     tailscaleHostname = "iscas-r750xa.bison-agama.ts.net";
     deepseekHarness = {
       port = 3080;

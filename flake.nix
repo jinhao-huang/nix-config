@@ -41,6 +41,11 @@ rec {
       flake = false;
     };
 
+    host-local = {
+      url = "path:./hosts/empty-local.nix";
+      flake = false;
+    };
+
     llm-agents.url = "github:numtide/llm-agents.nix";
 
     oh-my-tmux = {
@@ -62,15 +67,15 @@ rec {
       homebrew-jinhao-huang,
       home-manager,
       home-manager-unstable,
+      host-local,
       llm-agents,
       oh-my-tmux,
       ...
     }:
     let
-      darwinHost = {
-        system = "aarch64-darwin";
-        username = "jinhaohuang";
-        homeDirectory = "/Users/jinhaohuang";
+      hosts = import ./hosts {
+        lib = nixpkgs.lib;
+        local = import host-local;
       };
       supportedSystems = [
         "aarch64-darwin"
@@ -88,24 +93,22 @@ rec {
           config = nixpkgsConfig;
         };
       configurationRevision = self.rev or self.dirtyRev or null;
-      linuxHosts = import ./hosts/linux.nix;
       homebrewTaps = {
         "homebrew/homebrew-core" = homebrew-core;
         "homebrew/homebrew-cask" = homebrew-cask;
         "steipete/homebrew-tap" = homebrew-steipete;
         "jinhao-huang/homebrew-tap" = homebrew-jinhao-huang;
       };
-      masPackage = (mkPkgs nixpkgs-unstable darwinHost.system).mas;
       mkDarwinConfiguration =
-        roleProfile:
+        darwinHost: roleProfile:
         nix-darwin.lib.darwinSystem {
           specialArgs = {
             inherit
               configurationRevision
               darwinHost
               homebrewTaps
-              masPackage
               ;
+            masPackage = (mkPkgs nixpkgs-unstable darwinHost.system).mas;
           };
           modules = [
             {
@@ -130,6 +133,7 @@ rec {
 
                   modules.proton-pass.package = selectedPackages.proton-pass-cli;
                   modules.typst.package = selectedPackages.typst;
+                  modules.pi.defaults = darwinHost.pi;
                   programs = {
                     mise.package = selectedPackages.mise;
                     claude-code.package = agentPackages.claude-code;
@@ -171,8 +175,8 @@ rec {
       # $ darwin-rebuild build --flake .#laptop
       # $ darwin-rebuild build --flake .#desktop
       darwinConfigurations = {
-        laptop = mkDarwinConfiguration ./profiles/system/darwin/laptop.nix;
-        desktop = mkDarwinConfiguration ./profiles/system/darwin/desktop.nix;
+        laptop = mkDarwinConfiguration hosts.darwin.laptop ./profiles/system/darwin/laptop.nix;
+        desktop = mkDarwinConfiguration hosts.darwin.desktop ./profiles/system/darwin/desktop.nix;
       };
 
       homeConfigurations = nixpkgs.lib.mapAttrs (
@@ -188,6 +192,7 @@ rec {
             {
               home.username = host.username;
               home.homeDirectory = host.homeDirectory;
+              modules.pi.defaults = host.pi;
               programs.mise.package = self.packages.${host.system}.mise;
               programs.pi-coding-agent.package = llm-agents.packages.${host.system}.pi;
               modules.deepseek-harness = {
@@ -202,7 +207,7 @@ rec {
             }
           ];
         }
-      ) linuxHosts;
+      ) hosts.linux;
 
       checks = forAllSystems (
         system:
@@ -211,7 +216,7 @@ rec {
         }
         // nixpkgs.lib.mapAttrs' (
           name: _: nixpkgs.lib.nameValuePair "${name}-home" self.homeConfigurations.${name}.activationPackage
-        ) (nixpkgs.lib.filterAttrs (_: host: host.system == system) linuxHosts)
+        ) (nixpkgs.lib.filterAttrs (_: host: host.system == system) hosts.linux)
       );
     };
 }

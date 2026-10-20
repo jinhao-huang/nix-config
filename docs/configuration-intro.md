@@ -17,6 +17,7 @@ Edit [hosts/linux.nix](../hosts/linux.nix). Each top-level attribute names a
 | `system` | Package architecture, such as `x86_64-linux` or `aarch64-linux`. |
 | `username` | `home.username`. |
 | `homeDirectory` | Absolute `home.homeDirectory`. |
+| `pi` | Optional Pi startup defaults passed to `modules.pi.defaults`; see [the schema](../modules/pi/startup-defaults-type.nix). |
 | `tailscaleHostname` | `modules.deepseek-harness.service.publicHost`, using the node's actual MagicDNS hostname. |
 | `deepseekHarness.port` | `modules.deepseek-harness.service.port`. |
 | `deepseekHarness.proxyPort` | `modules.deepseek-harness.service.proxyPort`. |

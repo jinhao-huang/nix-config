@@ -107,6 +107,27 @@ darwin_profile=laptop # Use `desktop` on the desktop Mac.
 sudo darwin-rebuild switch --flake ".#$darwin_profile"
 ```
 
+## Pi startup defaults
+
+Set `pi.model = { provider = "provider-id"; id = "model-id"; };` and
+`pi.thinkingLevel` in [the Darwin inventory](hosts/darwin.nix) or
+[the Linux inventory](hosts/linux.nix). Omitted values use Pi defaults.
+
+For local overrides, create the Git-ignored `hosts/inventory.local.nix`, for
+example `{ laptop.pi.thinkingLevel = "high"; }`, then build from the repository
+root:
+
+```sh
+nix build --no-link ".#darwinConfigurations.$darwin_profile.system" \
+  --override-input host-local "path:$PWD/hosts/inventory.local.nix"
+```
+
+Pass the same override when switching; without it, only tracked defaults apply.
+Omitted fields inherit; `null` clears a default, and `model` replaces the provider
+and ID together. Changes require rebuilding and switching; Pi's global settings
+remain read-only. Keep credentials out of both inventories: ignored overrides
+also enter the Nix store.
+
 ## Linux development servers
 
 `hosts/linux.nix` declares each server's account, architecture, ports, and routing.

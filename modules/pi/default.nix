@@ -8,10 +8,17 @@ let
   cfg = config.modules.pi;
 in
 {
+  _class = "homeManager";
+
   imports = [ "${homeManagerUnstable}/modules/programs/pi-coding-agent.nix" ];
 
   options.modules.pi = {
     enable = lib.mkEnableOption "Pi coding agent";
+    defaults = lib.mkOption {
+      type = import ./startup-defaults-type.nix { inherit lib; };
+      default = { };
+      description = "Host-specific Pi startup defaults.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -26,16 +33,19 @@ in
         defaultProjectTrust = "ask";
         enableInstallTelemetry = false;
 
-        defaultProvider = "zai-coding-cn";
-        defaultModel = "glm-5.2";
-        defaultThinkingLevel = "medium";
-
         npmCommand = config.modules.mise.commands.npm;
 
         packages = [
           # Web search, URL fetching, PDF extraction, and video analysis.
           "npm:pi-web-access@0.42.0"
         ];
+      }
+      // lib.optionalAttrs (cfg.defaults.model != null) {
+        defaultProvider = cfg.defaults.model.provider;
+        defaultModel = cfg.defaults.model.id;
+      }
+      // lib.optionalAttrs (cfg.defaults.thinkingLevel != null) {
+        defaultThinkingLevel = cfg.defaults.thinkingLevel;
       };
     };
 
