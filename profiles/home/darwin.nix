@@ -22,13 +22,13 @@
   home.packages = [ pkgs.lima ];
   home.sessionPath = [ "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin" ];
 
-  modules.claude-code.enable = true;
+  modules.claude-code.enable = false;
   modules.proton-pass.enable = true;
   modules.ssh.includeHosts = true;
   modules.ssh.agentSocket = config.modules.proton-pass.sshAgentSocket;
   modules.go.enable = true;
   modules.rust.enable = true;
-  modules.gemini-cli.enable = true;
+  modules.gemini-cli.enable = false;
   modules.opencode.enable = false;
   modules.pi = {
     enable = true;
