@@ -86,7 +86,7 @@ let
   policy = pkgs.writeText "sing-box-policy.json" (
     builtins.toJSON {
       inherit stateDirectory baseConfig;
-      inherit (cfg) listenPort;
+      inherit (cfg) listenPort nodesFile;
       requestFile = cfg.subscription.requestFile;
       credentialsFile = cfg.proxyCredentialsFile;
       username = config.home.username;
@@ -110,7 +110,7 @@ in
   _class = "homeManager";
 
   options.modules.sing-box = {
-    enable = lib.mkEnableOption "an authenticated local HTTP/SOCKS proxy with subscription nodes";
+    enable = lib.mkEnableOption "an authenticated local HTTP/SOCKS proxy with private proxy nodes";
     package = lib.mkPackageOption pkgs "sing-box" { example = "pkgs.sing-box"; };
     listenPort = lib.mkOption {
       type = lib.types.port;
@@ -122,14 +122,31 @@ in
       '';
     };
     subscription.requestFile = lib.mkOption {
-      type = lib.types.str;
-      default = "${config.xdg.configHome}/sing-box/subscription.curl";
-      defaultText = lib.literalExpression ''"''${config.xdg.configHome}/sing-box/subscription.curl"'';
+      type = lib.types.nullOr lib.types.str;
+      default = null;
       example = "/home/alice/.config/sing-box/lab.curl";
       description = ''
         Private runtime curl configuration containing the HTTPS subscription URL
-        and headers. Use an absolute path outside the Nix store. The directory
-        must have mode 0700 and the file mode 0600; Nix never reads its contents.
+        and headers. The response must be native sing-box JSON with an outbounds
+        array, at most 8 MiB. Null disables subscription downloads. Configure
+        this option, nodesFile, or both; both sources join the same URLTest group.
+        Use an absolute path outside Git and the Nix store. The directory must
+        have mode 0700 and the file mode 0600; Nix never reads its contents.
+      '';
+    };
+    nodesFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "/home/alice/.config/sing-box/nodes.json";
+      description = ''
+        Private runtime native sing-box JSON with an outbounds array, at most
+        8 MiB. Only independent proxy nodes are imported; listeners, routing,
+        DNS, and proxy groups remain module-managed. Node tags must be unique
+        within each source; local and subscription tags are namespaced separately.
+        Changes take effect on the next switch. Null disables local node input.
+        Configure this option, subscription.requestFile, or both. Use an absolute
+        path outside Git and the Nix store. The directory must have mode 0700 and
+        the file mode 0600; Nix never reads its contents. Share links are not supported.
       '';
     };
     proxyCredentialsFile = lib.mkOption {
@@ -175,7 +192,7 @@ in
         default = [ ];
         example = [ "proxy.example" ];
         description = ''
-          Domain suffixes routed through subscription nodes before the China
+          Domain suffixes routed through proxy nodes before the China
           domain set is checked. Private destinations and explicit direct
           domain, suffix, and CIDR rules take precedence.
         '';
@@ -191,7 +208,17 @@ in
         message = "modules.sing-box.listenPort must be an unprivileged port (1024–65535).";
       }
       {
-        assertion = privatePath cfg.subscription.requestFile && privatePath cfg.proxyCredentialsFile;
+        assertion = cfg.subscription.requestFile != null || cfg.nodesFile != null;
+        message = "sing-box requires subscription.requestFile, nodesFile, or both.";
+      }
+      {
+        assertion = lib.all privatePath (
+          [ cfg.proxyCredentialsFile ]
+          ++ lib.filter (path: path != null) [
+            cfg.subscription.requestFile
+            cfg.nodesFile
+          ]
+        );
         message = "sing-box secret paths must be absolute runtime paths outside the Nix store.";
       }
       {

@@ -32,6 +32,7 @@ class RuntimeTests(unittest.TestCase):
         self.policy = {
             "stateDirectory": str(self.root / "state"),
             "requestFile": str(request),
+            "nodesFile": None,
             "credentialsFile": str(self.root / "state/auth.json"),
             "username": "tester",
             "curl": "curl",
@@ -80,6 +81,16 @@ class RuntimeTests(unittest.TestCase):
         self.runtime.publish("current", candidate)
         return candidate
 
+    def configure_local_nodes(self, document, *, subscription=False):
+        path = self.root / "nodes.json"
+        path.write_text(json.dumps(document))
+        path.chmod(0o600)
+        self.policy["nodesFile"] = str(path)
+        if not subscription:
+            self.policy["requestFile"] = None
+        self.runtime = module.Runtime(self.policy)
+        return path
+
     def test_only_independent_nodes_are_imported(self):
         self.document.update(
             {"inbounds": [{"type": "tun"}], "dns": {"unknown-new-field": True}}
@@ -93,7 +104,7 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(
             [o["type"] for o in config["outbounds"]], ["direct", "urltest", "vless"]
         )
-        self.assertEqual(config["outbounds"][-1]["tag"], "node/node-a")
+        self.assertEqual(config["outbounds"][-1]["tag"], "node/subscription/node-a")
         self.assertEqual(config["outbounds"][-1]["domain_resolver"], "local-dns")
         self.assertEqual(config["inbounds"][0]["type"], "mixed")
 
@@ -106,9 +117,133 @@ class RuntimeTests(unittest.TestCase):
             [{"type": "vless", "tag": "x"}, {"type": "vless", "tag": "x"}],
             [{"type": "selector", "tag": "proxy"}],
         ]
-        for outbounds in invalid:
-            with self.subTest(outbounds=outbounds), self.assertRaises(module.Failure):
-                module.import_nodes({"outbounds": outbounds})
+        for source in ("subscription", "local"):
+            for outbounds in invalid:
+                with (
+                    self.subTest(source=source, outbounds=outbounds),
+                    self.assertRaises(module.Failure),
+                ):
+                    module.import_nodes({"outbounds": outbounds}, source)
+
+    def test_local_nodes_need_no_subscription_and_keep_module_policy(self):
+        self.runtime.request.unlink()
+        self.document.update(
+            {"inbounds": [{"type": "tun"}], "route": {"final": "foreign"}}
+        )
+        self.document["outbounds"] += [{"type": "selector", "tag": "foreign"}]
+        self.document["outbounds"][0]["domain_resolver"] = "provider-only-dns"
+        path = self.configure_local_nodes(self.document)
+        original = path.read_bytes()
+        snapshot = self.runtime.prepare()
+        config = module.read_json(snapshot / "config.json")
+        self.assertEqual(self.downloads, 0)
+        self.assertFalse((snapshot / "download.log").exists())
+        self.assertEqual(path.read_bytes(), original)
+        self.assertEqual(config["route"]["final"], "proxy")
+        self.assertEqual(config["inbounds"][0]["type"], "mixed")
+        self.assertEqual(config["outbounds"][-1]["tag"], "node/local/node-a")
+        self.assertEqual(config["outbounds"][-1]["domain_resolver"], "local-dns")
+
+    def test_local_and_subscription_nodes_share_a_group_without_tag_collisions(self):
+        local = {
+            "outbounds": [
+                {"type": "trojan", "tag": "node-a", "server": "local.invalid"}
+            ]
+        }
+        self.configure_local_nodes(local, subscription=True)
+        config = module.read_json(self.runtime.prepare() / "config.json")
+        tags = ["node/local/node-a", "node/subscription/node-a"]
+        self.assertEqual(config["outbounds"][1]["outbounds"], tags)
+        self.assertEqual([n["tag"] for n in config["outbounds"][2:]], tags)
+        self.assertEqual(config["outbounds"][2]["server"], "local.invalid")
+        self.assertEqual(self.downloads, 1)
+
+    def test_local_node_reordering_keeps_service_but_content_changes_are_read(self):
+        nodes = [
+            {"type": "trojan", "tag": tag, "server": "local.invalid"}
+            for tag in ("b", "a")
+        ]
+        path = self.configure_local_nodes({"outbounds": nodes})
+        old = self.active_snapshot()
+        nodes.reverse()
+        path.write_text(json.dumps({"outbounds": nodes}))
+        candidate = self.runtime.prepare()
+        self.assertEqual(
+            (old / "config.json").read_bytes(), (candidate / "config.json").read_bytes()
+        )
+        with (
+            mock.patch.object(self.runtime, "ready", return_value=True),
+            mock.patch.object(self.runtime, "restart") as restart,
+        ):
+            self.runtime.apply(candidate)
+        restart.assert_not_called()
+        nodes[0]["server"] = "changed.invalid"
+        path.write_text(json.dumps({"outbounds": nodes}))
+        config = module.read_json(self.runtime.prepare() / "config.json")
+        self.assertEqual(config["outbounds"][2]["server"], "changed.invalid")
+        self.assertEqual(self.downloads, 0)
+
+    def test_invalid_local_sources_preserve_current_without_partial_publication(self):
+        old = self.active_snapshot()
+        invalid = [
+            '{"outbounds": ["private-password',
+            "[]",
+            '{"outbounds": []}',
+            '{"outbounds": ["private-password"]}',
+            '{"outbounds": [{"type": "private-password", "tag": "x"}]}',
+            'vless://private-password@example.invalid:443',
+            json.dumps(
+                {"outbounds": [{"type": "vless", "tag": "x", "detour": "missing"}]}
+            ),
+        ]
+        for content in invalid:
+            with self.subTest(content=content):
+                path = self.configure_local_nodes(self.document, subscription=True)
+                path.write_text(content)
+                with self.assertRaises(module.Failure) as failure:
+                    self.runtime.prepare()
+                self.assertNotIn("private-password", str(failure.exception))
+                self.assertEqual(self.runtime.snapshot(), old)
+        self.check_status = 1
+        self.configure_local_nodes(self.document, subscription=True)
+        with self.assertRaises(module.Failure):
+            self.runtime.prepare()
+        self.assertEqual(self.runtime.snapshot(), old)
+
+    def test_local_source_permissions_links_and_missing_files_preserve_current(self):
+        old = self.active_snapshot()
+        path = self.configure_local_nodes(self.document)
+        path.chmod(0o644)
+        with self.assertRaises(module.Failure):
+            self.runtime.prepare()
+        path.chmod(0o600)
+        target = path.rename(self.root / "target.json")
+        path.symlink_to(target)
+        with self.assertRaises(module.Failure):
+            self.runtime.prepare()
+        path.unlink()
+        with self.assertRaises(FileNotFoundError):
+            self.runtime.prepare()
+        self.assertEqual(self.runtime.snapshot(), old)
+        self.assertEqual(self.downloads, 1)
+
+    def test_node_sources_have_a_bounded_read(self):
+        old = self.active_snapshot()
+        path = self.configure_local_nodes(self.document)
+        with path.open("wb") as stream:
+            stream.truncate(module.SOURCE_SIZE_LIMIT + 1)
+        with self.assertRaisesRegex(module.Failure, "8 MiB"):
+            self.runtime.prepare()
+        self.assertEqual(self.runtime.snapshot(), old)
+        self.assertEqual(self.downloads, 1)
+
+    def test_no_node_source_fails_before_credentials_or_downloads(self):
+        self.policy["requestFile"] = None
+        runtime = module.Runtime(self.policy)
+        with self.assertRaisesRegex(module.Failure, "nodesFile"):
+            runtime.prepare()
+        self.assertEqual(self.downloads, 0)
+        self.assertFalse(runtime.credentials.exists())
 
     def test_each_prepare_downloads_but_never_publishes(self):
         old = self.active_snapshot()

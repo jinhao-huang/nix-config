@@ -198,20 +198,26 @@ Create `~/.config/sing-box/subscription.curl` outside Git with directory mode
 url = "https://subscription.example/private-token?format=json"
 ```
 
-Each switch downloads nodes, validates a private configuration, and restarts only
-when needed. Download or validation failure preserves the running proxy. Startup
-failure aborts the switch and attempts to restore the previous configuration
-using the current sing-box package. If recovery fails, restore the previous Home
-Manager generation and its saved private configuration; binaries are not rolled
-back automatically. Proxy credentials are
-generated once in `~/.local/state/sing-box/auth.json` (mode `0600`). Neither secret
-is read by Nix evaluation or stored in the Nix store.
+For local nodes, set `singBox.nodesFile` in [hosts/linux.nix](hosts/linux.nix) to a
+private JSON file containing `{"outbounds": [...]}`, with the same permissions.
+Set `singBox.subscription.requestFile = null` to skip downloads, or configure
+both inputs to combine their nodes in one automatic selection group. Only
+independent native sing-box nodes are imported; share links are not supported.
+
+Each switch reads the configured sources, validates a private configuration, and
+restarts only when needed. Input or validation failure preserves the running
+proxy. Startup failure aborts the switch and attempts to restore the previous
+configuration using the current sing-box package. If recovery fails, restore the
+previous Home Manager generation and its saved private configuration; binaries
+are not rolled back automatically. Proxy credentials are generated once in
+`~/.local/state/sing-box/auth.json` (mode `0600`). No secret is read by Nix
+evaluation or stored in the Nix store.
 
 Configure the port and local routing in the host's `singBox` entry in
 [the Linux inventory](hosts/linux.nix). The authenticated mixed listener binds
 loopback; an occupied port aborts activation. Local destinations and pinned China
 domains go direct; other requests
-use subscription nodes. Add laboratory domains and directly reachable campus
+use proxy nodes. Add laboratory domains and directly reachable campus
 networks before use. Tailnet-only targets need a separate userspace Tailscale exit.
 
 For one command, or a temporary proxy-enabled shell:

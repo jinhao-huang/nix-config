@@ -20,6 +20,7 @@ class Failure(Exception):
     pass
 
 
+SOURCE_SIZE_LIMIT = 8 * 1024 * 1024
 NODE_TYPES = {
     "anytls",
     "http",
@@ -105,11 +106,18 @@ def write_json(path, value):
         os.fsync(stream.fileno())
 
 
-def read_json(path):
+def read_json(path, *, size_limit=None):
     try:
-        return json.loads(path.read_text())
+        if size_limit is None:
+            content = path.read_text()
+        else:
+            with path.open("rb") as stream:
+                content = stream.read(size_limit + 1)
+            if len(content) > size_limit:
+                raise Failure(f"Node source exceeds the 8 MiB limit: {path}")
+        return json.loads(content)
     except (ValueError, UnicodeError) as error:
-        # Parser exceptions can include subscription contents or passwords.
+        # Parser exceptions can include node contents or passwords.
         raise Failure(f"Invalid JSON in private file: {path}") from error
 
 
@@ -118,7 +126,7 @@ def check_dependencies(value):
         for key, item in value.items():
             if item and (key in DEPENDENCIES or key.endswith(("_path", "_file"))):
                 raise Failure(
-                    f"Subscription node has an unsupported dependency field: {key}"
+                    f"Proxy node has an unsupported dependency field: {key}"
                 )
             check_dependencies(item)
     elif isinstance(value, list):
@@ -126,39 +134,43 @@ def check_dependencies(value):
             check_dependencies(item)
 
 
-def import_nodes(document):
+def import_nodes(document, source):
     if not isinstance(document, dict) or not isinstance(
         document.get("outbounds"), list
     ):
         raise Failure(
-            "Subscription must be native sing-box JSON with an outbounds array."
+            f"Node source {source} must be native sing-box JSON with an outbounds array."
         )
     nodes = []
     tags = set()
-    for index, source in enumerate(document["outbounds"]):
-        if not isinstance(source, dict):
-            raise Failure(f"Subscription outbound {index} must be an object.")
-        kind = source.get("type")
+    for index, outbound in enumerate(document["outbounds"]):
+        if not isinstance(outbound, dict):
+            raise Failure(f"Node source {source} outbound {index} must be an object.")
+        kind = outbound.get("type")
         if isinstance(kind, str) and kind in NON_NODE_TYPES:
             continue
         if not isinstance(kind, str) or kind not in NODE_TYPES:
             raise Failure(
-                f"Subscription outbound {index} has an unsupported node type."
+                f"Node source {source} outbound {index} has an unsupported node type."
             )
-        tag = source.get("tag")
+        tag = outbound.get("tag")
         if not isinstance(tag, str) or not tag or tag in tags:
-            raise Failure(f"Subscription node {index} needs a unique, nonempty tag.")
+            raise Failure(
+                f"Node source {source} node {index} needs a unique, nonempty tag."
+            )
         tags.add(tag)
-        node = copy.deepcopy(source)
+        node = copy.deepcopy(outbound)
         # Provider resolver references are replaced by the local bootstrap policy.
         node.pop("domain_resolver", None)
         check_dependencies(node)
         node["domain_resolver"] = "local-dns"
-        node["tag"] = "node/" + tag
+        node["tag"] = f"node/{source}/{tag}"
         nodes.append(node)
     if not nodes:
-        raise Failure("Subscription contains no supported independent proxy nodes.")
-    return sorted(nodes, key=lambda node: node["tag"])
+        raise Failure(
+            f"Node source {source} contains no supported independent proxy nodes."
+        )
+    return nodes
 
 
 def without_proxy_environment():
@@ -175,7 +187,10 @@ class Runtime:
         state = Path(policy["stateDirectory"])
         self.state = state.parent.resolve() / state.name
         self.snapshots = self.state / "snapshots"
-        self.request = Path(policy["requestFile"])
+        self.request = (
+            Path(policy["requestFile"]) if policy["requestFile"] is not None else None
+        )
+        self.nodes = Path(policy["nodesFile"]) if policy["nodesFile"] is not None else None
         self.credentials = Path(policy["credentialsFile"])
 
     def systemctl(self, *arguments, check=True):
@@ -196,7 +211,11 @@ class Runtime:
     def check_inputs(self):
         private_location(self.state)
         private_location(self.credentials)
-        private_file(self.request)
+        if self.request is None and self.nodes is None:
+            raise Failure("Configure subscription.requestFile, nodesFile, or both.")
+        for path in (self.request, self.nodes):
+            if path is not None:
+                private_file(path)
         if self.credentials.exists() or self.credentials.is_symlink():
             private_file(self.credentials)
 
@@ -288,6 +307,50 @@ class Runtime:
                 f"sing-box rejected the private configuration; details: {snapshot / 'check.log'}"
             )
 
+    def subscription_nodes(self, candidate):
+        response = candidate / "subscription.json"
+        with (candidate / "download.log").open("w") as log:
+            os.chmod(log.name, 0o600)
+            result = subprocess.run(
+                [
+                    self.policy["curl"],
+                    "--disable",
+                    "--config",
+                    str(self.request),
+                    "--silent",
+                    "--show-error",
+                    "--fail",
+                    "--location",
+                    "--proto",
+                    "=https",
+                    "--proto-redir",
+                    "=https",
+                    "--connect-timeout",
+                    "10",
+                    "--max-time",
+                    "60",
+                    "--max-filesize",
+                    str(SOURCE_SIZE_LIMIT),
+                    "--output",
+                    str(response),
+                ],
+                stdout=log,
+                stderr=log,
+                env=without_proxy_environment(),
+                timeout=65,
+                check=False,
+            )
+        if result.returncode:
+            raise Failure(
+                f"Subscription download failed; private diagnostics: {candidate / 'download.log'}"
+            )
+        os.chmod(response, 0o600)
+        nodes = import_nodes(
+            read_json(response, size_limit=SOURCE_SIZE_LIMIT), "subscription"
+        )
+        response.unlink()
+        return nodes
+
     def prepare(self):
         self.check_inputs()
         self.systemctl("show-environment")
@@ -299,47 +362,14 @@ class Runtime:
         self.preflight_port(self.policy["listenPort"])
         candidate = Path(tempfile.mkdtemp(prefix="snapshot-", dir=self.snapshots))
         try:
-            response = candidate / "subscription.json"
-            with (candidate / "download.log").open("w") as log:
-                os.chmod(log.name, 0o600)
-                result = subprocess.run(
-                    [
-                        self.policy["curl"],
-                        "--disable",
-                        "--config",
-                        str(self.request),
-                        "--silent",
-                        "--show-error",
-                        "--fail",
-                        "--location",
-                        "--proto",
-                        "=https",
-                        "--proto-redir",
-                        "=https",
-                        "--connect-timeout",
-                        "10",
-                        "--max-time",
-                        "60",
-                        "--max-filesize",
-                        "8388608",
-                        "--output",
-                        str(response),
-                    ],
-                    stdout=log,
-                    stderr=log,
-                    env=without_proxy_environment(),
-                    timeout=65,
-                    check=False,
+            nodes = []
+            if self.nodes is not None:
+                nodes += import_nodes(
+                    read_json(self.nodes, size_limit=SOURCE_SIZE_LIMIT), "local"
                 )
-            if result.returncode:
-                raise Failure(
-                    f"Subscription download failed; private diagnostics: {candidate / 'download.log'}"
-                )
-            os.chmod(response, 0o600)
-            if response.stat().st_size > 8388608:
-                raise Failure("Subscription exceeds the 8 MiB limit.")
-            nodes = import_nodes(read_json(response))
-            response.unlink()
+            if self.request is not None:
+                nodes += self.subscription_nodes(candidate)
+            nodes.sort(key=lambda node: node["tag"])
             config = copy.deepcopy(self.policy["baseConfig"])
             config["inbounds"][0]["users"] = [auth]
             config["outbounds"] += [

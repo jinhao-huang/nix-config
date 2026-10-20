@@ -21,7 +21,7 @@ Edit [hosts/linux.nix](../hosts/linux.nix). Each top-level attribute names a
 | `deepseekHarness.port` | `modules.deepseek-harness.service.port`. |
 | `deepseekHarness.proxyPort` | `modules.deepseek-harness.service.proxyPort`. |
 | `deepseekHarness.httpsPort` | `modules.tailscale.serve.httpsPort`. The Harness public port follows it. |
-| `singBox` | Attribute set passed to `modules.sing-box`; supply `listenPort` and any optional settings below. |
+| `singBox` | Attribute set passed to `modules.sing-box`; supply `listenPort` and at least one node source. |
 
 For example, a host can include:
 
@@ -33,6 +33,7 @@ deepseekHarness = {
 };
 singBox = {
   listenPort = 21009;
+  subscription.requestFile = "/home/alice/.config/sing-box/subscription.curl";
   routing.directDomainSuffixes = [ "internal" ];
 };
 ```
@@ -42,8 +43,10 @@ host entry. For example, `modules.sing-box.routing.directDomains` becomes
 `singBox.routing.directDomains`. Omitted settings use module defaults unless
 a profile supplies a value. The Linux profile enables sing-box by default;
 set `singBox.enable = false` to disable it for one host.
-Subscription URLs, headers, and proxy credentials remain in private runtime
-files; the inventory may contain their paths.
+Configure `singBox.subscription.requestFile`, `singBox.nodesFile`, or both.
+Both default to `null`; local-only input does not download a subscription.
+Subscription requests, node definitions, and proxy credentials remain in private
+runtime files; the inventory may contain their paths.
 
 The [Linux profile](../profiles/home/linux.nix) enables the features and connects
 Serve to the private Harness proxy. It derives the public URL and trusted
@@ -91,6 +94,7 @@ Generation does not read secrets or activate services.
 - [`modules.deepseek-harness.service.publicPort`](#modulesdeepseek-harnessservicepublicport)
 - [`modules.sing-box.enable`](#modulessing-boxenable)
 - [`modules.sing-box.listenPort`](#modulessing-boxlistenport)
+- [`modules.sing-box.nodesFile`](#modulessing-boxnodesfile)
 - [`modules.sing-box.package`](#modulessing-boxpackage)
 - [`modules.sing-box.proxyCredentialsFile`](#modulessing-boxproxycredentialsfile)
 - [`modules.sing-box.routing.directDomainSuffixes`](#modulessing-boxroutingdirectdomainsuffixes)
@@ -322,7 +326,7 @@ integer between 1 and 65535 (both inclusive)
 
 
 
-Whether to enable an authenticated local HTTP/SOCKS proxy with subscription nodes\.
+Whether to enable an authenticated local HTTP/SOCKS proxy with private proxy nodes\.
 
 
 
@@ -401,6 +405,45 @@ also checks for conflicts with the Harness backend and proxy\.
 
 ```nix
 21009
+```
+
+*Declared by:*
+ - [modules/sing-box/default\.nix](../modules/sing-box/default.nix)
+
+
+
+## modules\.sing-box\.nodesFile
+
+
+
+Private runtime native sing-box JSON with an outbounds array, at most
+8 MiB\. Only independent proxy nodes are imported; listeners, routing,
+DNS, and proxy groups remain module-managed\. Node tags must be unique
+within each source; local and subscription tags are namespaced separately\.
+Changes take effect on the next switch\. Null disables local node input\.
+Configure this option, subscription\.requestFile, or both\. Use an absolute
+path outside Git and the Nix store\. The directory must have mode 0700 and
+the file mode 0600; Nix never reads its contents\. Share links are not supported\.
+
+
+
+*Type:*
+null or string
+
+
+
+*Default:*
+
+```nix
+null
+```
+
+
+
+*Example:*
+
+```nix
+"/home/alice/.config/sing-box/nodes.json"
 ```
 
 *Declared by:*
@@ -552,7 +595,7 @@ list of string
 
 
 
-Domain suffixes routed through subscription nodes before the China
+Domain suffixes routed through proxy nodes before the China
 domain set is checked\. Private destinations and explicit direct
 domain, suffix, and CIDR rules take precedence\.
 
@@ -589,20 +632,23 @@ list of string
 
 
 Private runtime curl configuration containing the HTTPS subscription URL
-and headers\. Use an absolute path outside the Nix store\. The directory
-must have mode 0700 and the file mode 0600; Nix never reads its contents\.
+and headers\. The response must be native sing-box JSON with an outbounds
+array, at most 8 MiB\. Null disables subscription downloads\. Configure
+this option, nodesFile, or both; both sources join the same URLTest group\.
+Use an absolute path outside Git and the Nix store\. The directory must
+have mode 0700 and the file mode 0600; Nix never reads its contents\.
 
 
 
 *Type:*
-string
+null or string
 
 
 
 *Default:*
 
 ```nix
-"${config.xdg.configHome}/sing-box/subscription.curl"
+null
 ```
 
 

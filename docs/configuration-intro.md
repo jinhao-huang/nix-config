@@ -21,7 +21,7 @@ Edit [hosts/linux.nix](../hosts/linux.nix). Each top-level attribute names a
 | `deepseekHarness.port` | `modules.deepseek-harness.service.port`. |
 | `deepseekHarness.proxyPort` | `modules.deepseek-harness.service.proxyPort`. |
 | `deepseekHarness.httpsPort` | `modules.tailscale.serve.httpsPort`. The Harness public port follows it. |
-| `singBox` | Attribute set passed to `modules.sing-box`; supply `listenPort` and any optional settings below. |
+| `singBox` | Attribute set passed to `modules.sing-box`; supply `listenPort` and at least one node source. |
 
 For example, a host can include:
 
@@ -33,6 +33,7 @@ deepseekHarness = {
 };
 singBox = {
   listenPort = 21009;
+  subscription.requestFile = "/home/alice/.config/sing-box/subscription.curl";
   routing.directDomainSuffixes = [ "internal" ];
 };
 ```
@@ -42,8 +43,10 @@ host entry. For example, `modules.sing-box.routing.directDomains` becomes
 `singBox.routing.directDomains`. Omitted settings use module defaults unless
 a profile supplies a value. The Linux profile enables sing-box by default;
 set `singBox.enable = false` to disable it for one host.
-Subscription URLs, headers, and proxy credentials remain in private runtime
-files; the inventory may contain their paths.
+Configure `singBox.subscription.requestFile`, `singBox.nodesFile`, or both.
+Both default to `null`; local-only input does not download a subscription.
+Subscription requests, node definitions, and proxy credentials remain in private
+runtime files; the inventory may contain their paths.
 
 The [Linux profile](../profiles/home/linux.nix) enables the features and connects
 Serve to the private Harness proxy. It derives the public URL and trusted

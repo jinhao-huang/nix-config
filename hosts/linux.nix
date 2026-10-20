@@ -11,6 +11,7 @@
     };
     singBox = {
       listenPort = 21009;
+      subscription.requestFile = "/home/huangjh/.config/sing-box/subscription.curl";
       routing.directDomainSuffixes = [ "internal" ];
     };
   };
