@@ -19,6 +19,12 @@ in
       default = { };
       description = "Host-specific Pi startup defaults.";
     };
+    webSearch.allowRanges = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      example = [ "198.18.0.0/15" ];
+      description = "IP ranges pi-web-access may fetch despite its SSRF restrictions.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -49,14 +55,16 @@ in
       };
     };
 
-    # Read-only store symlink: edit here and redeploy to change.
-    home.file.".pi/agent/web-search.json".text = builtins.toJSON {
-      # "auto-summary" returns a model-generated summary without the curator
-      # window or manual approval; use "none" for raw results.
-      workflow = "auto-summary";
-      # Exempt the Surge TUN/fake-IP range (RFC 2544 198.18.0.0/15) from the
-      # pi-web-access SSRF guard, otherwise every fetch/web_search is blocked.
-      ssrf.allowRanges = [ "198.18.0.0/15" ];
-    };
+    # pi-web-access has no native Home Manager configuration option.
+    home.file.".pi/agent/web-search.json".text = builtins.toJSON (
+      {
+        # "auto-summary" returns a model-generated summary without the curator
+        # window or manual approval; use "none" for raw results.
+        workflow = "auto-summary";
+      }
+      // lib.optionalAttrs (cfg.webSearch.allowRanges != [ ]) {
+        ssrf.allowRanges = cfg.webSearch.allowRanges;
+      }
+    );
   };
 }

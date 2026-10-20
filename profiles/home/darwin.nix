@@ -30,7 +30,11 @@
   modules.rust.enable = true;
   modules.gemini-cli.enable = true;
   modules.opencode.enable = false;
-  modules.pi.enable = true;
+  modules.pi = {
+    enable = true;
+    # Surge Enhanced Mode resolves proxied domains into this fake-IP range.
+    webSearch.allowRanges = [ "198.18.0.0/15" ];
+  };
   modules.deepseek-harness.enable = true;
   modules.ai-agents.enable = true;
   modules.zed.enable = true;
