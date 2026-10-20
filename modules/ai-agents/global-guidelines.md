@@ -20,6 +20,10 @@ Use Chinese for conversation, reasoning, planning, bug analysis, and working art
 
 Choose the language by the artifact's audience and lifecycle, not by whether it happens to be written to a file. For mixed artifacts such as temporary HTML reports, keep markup, code identifiers, and code comments in English while rendering the user-visible prose in Chinese. If the same material is explicitly destined for tracked project documentation, use English.
 
+## Execution Environments
+
+- Apply machine-specific guidance where the command actually executes. For SSH, containers, remote builders, or cloud tools, use that execution environment's networking and service configuration.
+
 ## Finished Prose
 
 - Write documents, coursework, reports, and other prose deliverables directly in the author's voice for their intended reader. Match the requested genre, template, and language.

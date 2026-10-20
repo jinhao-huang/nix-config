@@ -36,11 +36,19 @@
     webSearch.allowRanges = [ "198.18.0.0/15" ];
   };
   modules.deepseek-harness.enable = true;
-  modules.ai-agents.enable = true;
+  modules.ai-agents = {
+    enable = true;
+    repoRelativePath = "nix-config";
+    environment = ''
+      ## Local Execution Environment
+
+      - Network access on this Mac is normally handled by Surge. Run commands normally; inspect the active takeover and routing state if access fails.
+      - For Surge operations or network diagnosis on this Mac, read `~/.agents/skills/surge/SKILL.md` and use `surge-cli`.
+    '';
+  };
   modules.zed.enable = true;
   modules.mise.enable = true;
   modules.typst.enable = true;
 
-  modules.ai-agents.repoRelativePath = "nix-config";
   programs.gpg.enable = true;
 }

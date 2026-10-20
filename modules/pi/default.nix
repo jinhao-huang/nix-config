@@ -32,8 +32,6 @@ in
 
     programs.pi-coding-agent = {
       enable = true;
-      # Pi owns its deployment snapshot; other agents use live repository links.
-      context = ../ai-agents/global-guidelines.md;
 
       settings = {
         defaultProjectTrust = "ask";

@@ -107,6 +107,13 @@ darwin_profile=laptop # Use `desktop` on the desktop Mac.
 nix run .#deploy -- switch "$darwin_profile"
 ```
 
+## Agent instructions
+
+[Shared guidance](modules/ai-agents/global-guidelines.md) and the machine context
+in [home profiles](profiles/home) are deployed together. After editing either,
+rebuild and switch, then start a new agent session. Skills remain live-linked
+from this repository.
+
 ## Pi startup defaults
 
 Set `pi.model = { provider = "provider-id"; id = "model-id"; };` and

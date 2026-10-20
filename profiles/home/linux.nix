@@ -48,6 +48,19 @@ in
   modules.ai-agents = {
     enable = true;
     repoRelativePath = "nix-config";
+    environment = ''
+      ## Local Execution Environment
+
+      - Home Manager manages this Linux user environment. The host operating system and Nix daemon remain administrator-owned; use `systemctl --user` for managed user services.
+    ''
+    + lib.optionalString config.modules.sing-box.enable ''
+
+      ### Network Access
+
+      - For external HTTP/SOCKS access, run commands that support proxy environment variables through `with-proxy COMMAND [ARGUMENT ...]`, for example `with-proxy curl -I https://github.com`. Local-only commands can run normally.
+      - The wrapper checks the managed sing-box user service and injects its credentials and bypass list into the child environment. It does not start the service; SSH transports, independent daemons, and tools that ignore proxy environment variables need their own network configuration.
+      - If the wrapper reports the proxy unavailable, inspect `systemctl --user status sing-box` and `journalctl --user -u sing-box -n 50 --no-pager` before retrying. Keep credentials and subscription data out of prompts and logs.
+    '';
   };
   modules.sing-box.enable = lib.mkDefault true;
   modules.tailscale = {
