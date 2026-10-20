@@ -1,6 +1,7 @@
 """Prepare private sing-box snapshots and coordinate their systemd activation."""
 
 import copy
+from contextlib import contextmanager
 import errno
 import json
 import os
@@ -58,15 +59,64 @@ PROXY_VARIABLES = {
 }
 
 
-def private_directory(path):
-    if path.is_symlink():
-        raise Failure(f"Private directory must not be a symlink: {path}")
-    path.mkdir(mode=0o700, parents=True, exist_ok=True)
-    info = path.stat()
-    if info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) != 0o700:
+def canonical_directory(path):
+    # Resolve home aliases while preserving the leaf for no-follow checks.
+    return path.parent.resolve() / path.name
+
+
+@contextmanager
+def directory_fd(path, *, create=False, missing_ok=False):
+    parent = path.parent.resolve()
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC
+    fd = os.open(parent.anchor, flags)
+    try:
+        for part in (*parent.parts[1:], path.name):
+            info = os.fstat(fd)
+            # User-owned XDG parents may be group-writable; leave them unchanged.
+            writable_by_others = info.st_mode & (0o022 if info.st_uid == 0 else 0o002)
+            if info.st_uid not in (0, os.getuid()) or (
+                writable_by_others and not info.st_mode & stat.S_ISVTX
+            ):
+                raise Failure(f"Unsafe ancestor directory for private data: {path}")
+            try:
+                child = os.open(part, flags, dir_fd=fd)
+            except FileNotFoundError:
+                if create:
+                    os.mkdir(part, mode=0o700, dir_fd=fd)
+                    child = os.open(part, flags, dir_fd=fd)
+                elif missing_ok:
+                    yield None
+                    return
+                else:
+                    raise
+            os.close(fd)
+            fd = child
+        yield fd
+    finally:
+        os.close(fd)
+
+
+def check_directory(info, path, *, check_mode=True):
+    if info.st_uid != os.getuid():
         raise Failure(
-            f"Private directory must be owned by this user with mode 0700: {path}"
+            f"Private directory must be owned by UID {os.getuid()} "
+            f"(got UID {info.st_uid}): {path}"
         )
+    if check_mode and stat.S_IMODE(info.st_mode) != 0o700:
+        raise Failure(
+            f"Private directory must have mode 0700 "
+            f"(got {stat.S_IMODE(info.st_mode):04o}): {path}"
+        )
+
+
+def private_directory(path):
+    private_location(path)
+    with directory_fd(path, create=True) as fd:
+        info = os.fstat(fd)
+        check_directory(info, path, check_mode=False)
+        if stat.S_IMODE(info.st_mode) != 0o700:
+            os.fchmod(fd, 0o700)
+        check_directory(os.fstat(fd), path)
 
 
 def private_location(path):
@@ -79,22 +129,51 @@ def private_location(path):
         )
 
 
-def private_file(path):
+def check_secret(info, path, *, check_mode=True):
+    if not stat.S_ISREG(info.st_mode):
+        raise Failure(
+            f"Secret must be a regular file, not a link or special file: {path}"
+        )
+    if info.st_uid != os.getuid():
+        raise Failure(
+            f"Secret must be owned by UID {os.getuid()} "
+            f"(got UID {info.st_uid}): {path}"
+        )
+    if info.st_nlink != 1:
+        raise Failure(f"Secret must not have multiple hard links: {path}")
+    mode = stat.S_IMODE(info.st_mode)
+    if not mode & 0o400 or (check_mode and mode not in (0o400, 0o600)):
+        raise Failure(
+            f"Secret must be owner-readable with mode 0400 or 0600 "
+            f"(got {mode:04o}): {path}"
+        )
+
+
+def private_file(path, *, check_mode=True, repair=False):
     private_location(path)
-    info = path.lstat()
-    if (
-        not stat.S_ISREG(info.st_mode)
-        or info.st_uid != os.getuid()
-        or info.st_mode & 0o077
-    ):
-        raise Failure(
-            f"Secret must be a regular, user-owned file with mode 0600: {path}"
+    with directory_fd(path.parent) as parent_fd:
+        check_directory(
+            os.fstat(parent_fd), path.parent, check_mode=check_mode and not repair
         )
-    parent = path.parent.stat()
-    if parent.st_uid != os.getuid() or stat.S_IMODE(parent.st_mode) != 0o700:
-        raise Failure(
-            f"Secret directory must be user-owned with mode 0700: {path.parent}"
-        )
+        info = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+        check_secret(info, path, check_mode=check_mode and not repair)
+        flags = os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK
+        fd = os.open(path.name, flags, dir_fd=parent_fd)
+        try:
+            opened = os.fstat(fd)
+            check_secret(opened, path, check_mode=check_mode and not repair)
+            if (info.st_dev, info.st_ino) != (opened.st_dev, opened.st_ino):
+                raise Failure(f"Secret changed during validation: {path}")
+            if repair:
+                mode = stat.S_IMODE(opened.st_mode) & 0o600
+                if stat.S_IMODE(os.fstat(parent_fd).st_mode) != 0o700:
+                    os.fchmod(parent_fd, 0o700)
+                if stat.S_IMODE(opened.st_mode) != mode:
+                    os.fchmod(fd, mode)
+                check_directory(os.fstat(parent_fd), path.parent)
+                check_secret(os.fstat(fd), path)
+        finally:
+            os.close(fd)
 
 
 def write_json(path, value):
@@ -184,8 +263,8 @@ def without_proxy_environment():
 class Runtime:
     def __init__(self, policy):
         self.policy = policy
-        state = Path(policy["stateDirectory"])
-        self.state = state.parent.resolve() / state.name
+        self.config = canonical_directory(Path(policy["configDirectory"]))
+        self.state = canonical_directory(Path(policy["stateDirectory"]))
         self.snapshots = self.state / "snapshots"
         self.request = (
             Path(policy["requestFile"]) if policy["requestFile"] is not None else None
@@ -208,21 +287,52 @@ class Runtime:
             raise Failure(f"systemd user operation failed; private diagnostics: {log}")
         return result
 
-    def check_inputs(self):
+    def managed_file(self, path):
+        return canonical_directory(path.parent) in (self.config, self.state)
+
+    def check_inputs(self, *, allow_permission_repair=False):
+        private_location(self.config)
         private_location(self.state)
         private_location(self.credentials)
+        for directory in (self.config, self.state, self.snapshots):
+            with directory_fd(directory, missing_ok=True) as fd:
+                if fd is not None:
+                    check_directory(
+                        os.fstat(fd),
+                        directory,
+                        check_mode=not allow_permission_repair,
+                    )
         if self.request is None and self.nodes is None:
             raise Failure("Configure subscription.requestFile, nodesFile, or both.")
         for path in (self.request, self.nodes):
             if path is not None:
-                private_file(path)
+                private_file(
+                    path,
+                    check_mode=not (
+                        allow_permission_repair and self.managed_file(path)
+                    ),
+                )
         if self.credentials.exists() or self.credentials.is_symlink():
-            private_file(self.credentials)
+            private_file(
+                self.credentials,
+                check_mode=not (
+                    allow_permission_repair and self.managed_file(self.credentials)
+                ),
+            )
+        elif not self.managed_file(self.credentials):
+            with directory_fd(self.credentials.parent) as fd:
+                check_directory(os.fstat(fd), self.credentials.parent)
 
     def initialize(self):
-        private_location(self.state)
+        self.check_inputs(allow_permission_repair=True)
+        # Only these module-owned directories and configured secrets are repaired.
+        private_directory(self.config)
         private_directory(self.state)
         private_directory(self.snapshots)
+        for path in (self.request, self.nodes, self.credentials):
+            if path is not None and path.exists() and self.managed_file(path):
+                private_file(path, repair=True)
+        self.check_inputs()
 
     def snapshot(self, name="current"):
         link = self.state / name
@@ -243,7 +353,8 @@ class Runtime:
 
     def authentication(self):
         if not self.credentials.exists():
-            private_directory(self.credentials.parent)
+            if self.managed_file(self.credentials):
+                private_directory(self.credentials.parent)
             write_json(
                 self.credentials,
                 {
@@ -545,8 +656,10 @@ def main():
         runtime.apply(Path(sys.argv[3]))
     elif action == "with-proxy":
         runtime.with_proxy(sys.argv[3:])
-    elif action in {"initialize", "check_inputs"}:
-        getattr(runtime, action)()
+    elif action == "check_inputs":
+        runtime.check_inputs(allow_permission_repair=True)
+    elif action == "initialize":
+        runtime.initialize()
     else:
         raise Failure("Unknown sing-box runtime operation.")
 

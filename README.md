@@ -213,7 +213,11 @@ activation fails if host policy denies it. Logs: `journalctl --user -u tailscale
 ### sing-box without sudo
 
 Create `~/.config/sing-box/subscription.curl` outside Git with directory mode
-`0700` and file mode `0600`. Use native sing-box JSON over HTTPS:
+`0700` and file mode `0600`. Each switch repairs permissions in the sing-box XDG
+config and state directories for user-owned directories and configured regular
+files; read-only inputs stay read-only. Links and wrong owners are rejected;
+custom locations elsewhere require correct permissions in advance.
+Use native sing-box JSON over HTTPS:
 
 ```text
 url = "https://subscription.example/private-token?format=json"

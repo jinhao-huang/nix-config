@@ -4,6 +4,7 @@ import importlib.util
 import json
 import os
 import socket
+import stat
 import subprocess
 import tempfile
 import unittest
@@ -23,13 +24,16 @@ class RuntimeTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name).resolve()
         self.root.chmod(0o700)
-        request = self.root / "subscription.curl"
+        self.config = self.root / "config/sing-box"
+        self.config.mkdir(parents=True, mode=0o700)
+        request = self.config / "subscription.curl"
         request.write_text('url = "https://example.invalid/private-token"\n')
         request.chmod(0o600)
         with socket.socket() as listener:
             listener.bind(("127.0.0.1", 0))
             port = listener.getsockname()[1]
         self.policy = {
+            "configDirectory": str(self.config),
             "stateDirectory": str(self.root / "state"),
             "requestFile": str(request),
             "nodesFile": None,
@@ -82,7 +86,7 @@ class RuntimeTests(unittest.TestCase):
         return candidate
 
     def configure_local_nodes(self, document, *, subscription=False):
-        path = self.root / "nodes.json"
+        path = self.config / "nodes.json"
         path.write_text(json.dumps(document))
         path.chmod(0o600)
         self.policy["nodesFile"] = str(path)
@@ -279,6 +283,189 @@ class RuntimeTests(unittest.TestCase):
             with self.assertRaisesRegex(module.Failure, "listenPort"):
                 self.runtime.prepare()
         self.assertEqual(self.downloads, 0)
+
+    def test_activation_repairs_only_managed_permissions_before_preparing(self):
+        local = self.configure_local_nodes(self.document, subscription=True)
+        self.runtime.authentication()
+        files = (self.runtime.request, local, self.runtime.credentials)
+        directories = (self.config, self.runtime.state, self.runtime.snapshots)
+        for path in files:
+            path.chmod(0o6744)
+        for path in directories:
+            path.chmod(0o755)
+        shared_mode = self.config.parent.stat().st_mode
+        unrelated = self.config / "unrelated"
+        unrelated.write_text("not a configured secret")
+        unrelated.chmod(0o644)
+        self.runtime.check_inputs(allow_permission_repair=True)
+        for path in files:
+            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o6744)
+        for path in directories:
+            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o755)
+        self.runtime.initialize()
+        for path in files:
+            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o600)
+        for path in directories:
+            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o700)
+        self.assertEqual(self.config.parent.stat().st_mode, shared_mode)
+        self.assertEqual(stat.S_IMODE(unrelated.stat().st_mode), 0o644)
+        with mock.patch.object(module.os, "fchmod") as chmod:
+            self.runtime.initialize()
+        chmod.assert_not_called()
+        candidate = self.runtime.prepare()
+        self.assertEqual(
+            len(module.read_json(candidate / "config.json")["outbounds"]), 4
+        )
+
+    def test_activation_preserves_read_only_secret_permissions(self):
+        self.runtime.request.chmod(0o400)
+        self.runtime.initialize()
+        self.assertEqual(stat.S_IMODE(self.runtime.request.stat().st_mode), 0o400)
+        self.runtime.prepare()
+
+    def test_activation_repairs_linux_defaults_without_changing_xdg_parents(self):
+        self.config.parent.chmod(0o775)
+        self.config.chmod(0o775)
+        self.runtime.request.chmod(0o664)
+        state_home = self.root / "local/state"
+        state_home.mkdir(parents=True, mode=0o775)
+        state_home.chmod(0o775)
+        self.policy["stateDirectory"] = str(state_home / "sing-box")
+        self.policy["credentialsFile"] = str(state_home / "sing-box/auth.json")
+        runtime = module.Runtime(self.policy)
+        runtime.check_inputs(allow_permission_repair=True)
+        self.assertFalse(runtime.state.exists())
+        runtime.initialize()
+        self.assertEqual(stat.S_IMODE(self.config.stat().st_mode), 0o700)
+        self.assertEqual(stat.S_IMODE(runtime.request.stat().st_mode), 0o600)
+        self.assertEqual(stat.S_IMODE(runtime.state.stat().st_mode), 0o700)
+        self.assertEqual(stat.S_IMODE(runtime.snapshots.stat().st_mode), 0o700)
+        self.assertEqual(stat.S_IMODE(self.config.parent.stat().st_mode), 0o775)
+        self.assertEqual(stat.S_IMODE(state_home.stat().st_mode), 0o775)
+        runtime.prepare()
+
+    def test_activation_creates_missing_state_ancestors_with_private_permissions(self):
+        self.policy["stateDirectory"] = str(self.root / "new/local/state/sing-box")
+        self.policy["credentialsFile"] = self.policy["stateDirectory"] + "/auth.json"
+        runtime = module.Runtime(self.policy)
+        runtime.initialize()
+        for path in (runtime.state, runtime.state.parent, self.root / "new"):
+            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o700)
+
+    def test_activation_rejects_world_writable_shared_ancestors(self):
+        self.config.parent.chmod(0o777)
+        try:
+            with self.assertRaisesRegex(module.Failure, "Unsafe ancestor"):
+                self.runtime.initialize()
+            self.assertEqual(stat.S_IMODE(self.config.parent.stat().st_mode), 0o777)
+        finally:
+            self.config.parent.chmod(0o700)
+
+    def test_activation_refuses_file_swapped_for_a_symlink_after_stat(self):
+        target = self.root / "unrelated"
+        target.write_text("not a secret")
+        target.chmod(0o644)
+        open_file = os.open
+
+        def swap_file(path, flags, *args, **kwargs):
+            if path == self.runtime.request.name:
+                self.runtime.request.unlink()
+                self.runtime.request.symlink_to(target)
+            return open_file(path, flags, *args, **kwargs)
+
+        with (
+            mock.patch.object(module.os, "open", side_effect=swap_file),
+            mock.patch.object(module.os, "fchmod") as chmod,
+        ):
+            with self.assertRaises(OSError):
+                self.runtime.initialize()
+            chmod.assert_not_called()
+        self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o644)
+
+    def test_activation_does_not_repair_external_input_or_credentials(self):
+        for key in ("requestFile", "nodesFile", "credentialsFile"):
+            with self.subTest(key=key):
+                external = self.root / "external.json"
+                external.write_text("{}")
+                external.chmod(0o644)
+                policy = dict(self.policy, **{key: str(external)})
+                runtime = module.Runtime(policy)
+                with self.assertRaises(module.Failure):
+                    runtime.check_inputs(allow_permission_repair=True)
+                with self.assertRaises(module.Failure):
+                    runtime.initialize()
+                self.assertEqual(stat.S_IMODE(external.stat().st_mode), 0o644)
+                external.chmod(0o600)
+                runtime.check_inputs(allow_permission_repair=True)
+
+    def test_activation_refuses_unsafe_inputs_without_changing_current(self):
+        old = self.active_snapshot()
+        request = self.runtime.request
+        content = request.read_bytes()
+        target = self.config / "target"
+        target.write_bytes(content)
+        target.chmod(0o644)
+        for kind in ("symlink", "hardlink", "fifo", "directory", "missing"):
+            with self.subTest(kind=kind):
+                request.unlink()
+                if kind == "symlink":
+                    request.symlink_to(target)
+                elif kind == "hardlink":
+                    os.link(target, request)
+                elif kind == "fifo":
+                    os.mkfifo(request)
+                elif kind == "directory":
+                    request.mkdir()
+                with self.assertRaises((module.Failure, FileNotFoundError)):
+                    self.runtime.initialize()
+                self.assertEqual(self.runtime.snapshot(), old)
+                self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o644)
+                if kind == "directory":
+                    request.rmdir()
+                elif kind != "missing":
+                    request.unlink()
+                request.write_bytes(content)
+                request.chmod(0o600)
+
+    def test_activation_refuses_symlinked_managed_directories(self):
+        for path in (self.config, self.runtime.state, self.runtime.snapshots):
+            with self.subTest(path=path):
+                target = path.with_name(path.name + "-target")
+                path.rename(target)
+                path.symlink_to(target, target_is_directory=True)
+                with self.assertRaises((module.Failure, OSError)):
+                    self.runtime.initialize()
+                path.unlink()
+                target.rename(path)
+
+    def test_activation_refuses_foreign_owned_files_and_directories(self):
+        fstat = os.fstat
+        for path in (self.runtime.request, self.config, self.runtime.state):
+            inode = path.stat().st_ino
+
+            def foreign_owner(fd):
+                info = fstat(fd)
+                if info.st_ino == inode:
+                    values = list(info)
+                    values[4] = os.getuid() + 1
+                    return os.stat_result(values)
+                return info
+
+            with self.subTest(path=path), mock.patch.object(
+                module.os, "fstat", side_effect=foreign_owner
+            ), mock.patch.object(module.os, "fchmod") as chmod:
+                with self.assertRaisesRegex(module.Failure, "UID"):
+                    self.runtime.initialize()
+                chmod.assert_not_called()
+
+    def test_permission_repair_failure_preserves_current(self):
+        old = self.active_snapshot()
+        self.runtime.request.chmod(0o644)
+        with mock.patch.object(module.os, "fchmod", side_effect=PermissionError):
+            with self.assertRaises(PermissionError):
+                self.runtime.initialize()
+        self.assertEqual(self.runtime.snapshot(), old)
+        self.assertEqual(self.downloads, 1)
 
     def test_preflight_accepts_a_reusable_port_after_a_closed_connection(self):
         with socket.socket() as listener:

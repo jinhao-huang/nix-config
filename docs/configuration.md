@@ -423,8 +423,11 @@ DNS, and proxy groups remain module-managed\. Node tags must be unique
 within each source; local and subscription tags are namespaced separately\.
 Changes take effect on the next switch\. Null disables local node input\.
 Configure this option, subscription\.requestFile, or both\. Use an absolute
-path outside Git and the Nix store\. The directory must have mode 0700 and
-the file mode 0600; Nix never reads its contents\. Share links are not supported\.
+path outside Git and the Nix store\. Activation repairs permissions only
+in the sing-box XDG config and state directories; other locations must
+already have directory mode 0700 and file mode 0600 or 0400\. Files must
+be user-owned and readable, with no symlinks or multiple hard links\.
+Nix never reads their contents\. Share links are not supported\.
 
 
 
@@ -457,8 +460,10 @@ null
 
 
 Private username/password JSON, generated once if absent\. Use an
-absolute path outside the Nix store\. The file has mode 0600 and remains
-runtime state; Nix never reads its contents\.
+absolute path outside Git and the Nix store\. The file has mode 0600 and
+remains runtime state; Nix never reads its contents\. Permissions are
+repaired only in the sing-box XDG config and state directories\. A custom
+parent directory elsewhere must already exist with mode 0700\.
 
 
 
@@ -636,8 +641,11 @@ Private runtime curl configuration containing the HTTPS subscription URL
 and headers\. The response must be native sing-box JSON with an outbounds
 array, at most 8 MiB\. Null disables subscription downloads\. Configure
 this option, nodesFile, or both; both sources join the same URLTest group\.
-Use an absolute path outside Git and the Nix store\. The directory must
-have mode 0700 and the file mode 0600; Nix never reads its contents\.
+Use an absolute path outside Git and the Nix store\. Activation repairs
+permissions only in the sing-box XDG config and state directories;
+other locations must already have directory mode 0700 and file mode
+0600 or 0400\. Files must be user-owned and readable, with no symlinks
+or multiple hard links\. Nix never reads their contents\.
 
 
 

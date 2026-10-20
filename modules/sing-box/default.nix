@@ -6,6 +6,7 @@
 }:
 let
   cfg = config.modules.sing-box;
+  configDirectory = "${config.xdg.configHome}/sing-box";
   stateDirectory = "${config.xdg.stateHome}/sing-box";
   localDomains = lib.unique ([ "localhost" ] ++ cfg.routing.directDomains);
   noProxy = lib.unique (
@@ -85,7 +86,7 @@ let
   };
   policy = pkgs.writeText "sing-box-policy.json" (
     builtins.toJSON {
-      inherit stateDirectory baseConfig;
+      inherit configDirectory stateDirectory baseConfig;
       inherit (cfg) listenPort nodesFile;
       requestFile = cfg.subscription.requestFile;
       credentialsFile = cfg.proxyCredentialsFile;
@@ -130,8 +131,11 @@ in
         and headers. The response must be native sing-box JSON with an outbounds
         array, at most 8 MiB. Null disables subscription downloads. Configure
         this option, nodesFile, or both; both sources join the same URLTest group.
-        Use an absolute path outside Git and the Nix store. The directory must
-        have mode 0700 and the file mode 0600; Nix never reads its contents.
+        Use an absolute path outside Git and the Nix store. Activation repairs
+        permissions only in the sing-box XDG config and state directories;
+        other locations must already have directory mode 0700 and file mode
+        0600 or 0400. Files must be user-owned and readable, with no symlinks
+        or multiple hard links. Nix never reads their contents.
       '';
     };
     nodesFile = lib.mkOption {
@@ -145,8 +149,11 @@ in
         within each source; local and subscription tags are namespaced separately.
         Changes take effect on the next switch. Null disables local node input.
         Configure this option, subscription.requestFile, or both. Use an absolute
-        path outside Git and the Nix store. The directory must have mode 0700 and
-        the file mode 0600; Nix never reads its contents. Share links are not supported.
+        path outside Git and the Nix store. Activation repairs permissions only
+        in the sing-box XDG config and state directories; other locations must
+        already have directory mode 0700 and file mode 0600 or 0400. Files must
+        be user-owned and readable, with no symlinks or multiple hard links.
+        Nix never reads their contents. Share links are not supported.
       '';
     };
     proxyCredentialsFile = lib.mkOption {
@@ -156,8 +163,10 @@ in
       example = "/home/alice/.local/state/sing-box/lab-auth.json";
       description = ''
         Private username/password JSON, generated once if absent. Use an
-        absolute path outside the Nix store. The file has mode 0600 and remains
-        runtime state; Nix never reads its contents.
+        absolute path outside Git and the Nix store. The file has mode 0600 and
+        remains runtime state; Nix never reads its contents. Permissions are
+        repaired only in the sing-box XDG config and state directories. A custom
+        parent directory elsewhere must already exist with mode 0700.
       '';
     };
     routing = {
@@ -238,7 +247,8 @@ in
       NO_PROXY = lib.concatStringsSep "," noProxy;
     };
 
-    # No native Home Manager sing-box module exists. Secrets are assembled only at activation.
+    # No native Home Manager sing-box module exists. Runtime secret synchronization
+    # also needs ownership and no-follow checks before repairing permissions.
     home.activation.checkSingBoxInputs = lib.hm.dag.entryBefore [ "writeBoundary" ] ''
       run ${runtime} check_inputs
     '';
