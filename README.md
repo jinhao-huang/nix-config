@@ -31,9 +31,8 @@ nix --extra-experimental-features "nix-command flakes" \
 Then run the initial activation from the repository root:
 
 ```sh
-sudo -H nix --extra-experimental-features "nix-command flakes" \
-  run nix-darwin/nix-darwin-26.05#darwin-rebuild -- \
-  switch --flake ".#$darwin_profile"
+nix --extra-experimental-features "nix-command flakes" \
+  run .#deploy -- switch "$darwin_profile"
 ```
 
 If the full build requires transparent proxying, download the latest official
@@ -43,9 +42,10 @@ adoption flow for an existing app declared as a cask, so the full activation
 registers the manually placed application as the managed `surge` cask instead
 of installing a conflicting second copy.
 
-The `-H` option gives the root process its own home directory and avoids Nix's
-warning that `/Users/jinhaohuang` is not owned by root. It does not change the
-user targeted by the nix-darwin or Home Manager configuration.
+Run the deployment command in the repository as the regular user. It creates
+the local inventory before evaluating the host configuration and uses that
+configuration's CLI. Darwin switching invokes `sudo -H`; Linux switching runs
+without sudo.
 
 During the first build, Nix asks whether to trust the `cache.numtide.com`
 substituter and its public key declared by this flake. This is a security prompt,
@@ -84,7 +84,7 @@ configuration:
 ```sh
 launchctl bootout "gui/$UID/org.nix-community.home.proton-pass-ssh-agent" 2>/dev/null || true
 pass-cli login
-sudo darwin-rebuild switch --flake ".#$darwin_profile"
+nix run .#deploy -- switch "$darwin_profile"
 ```
 
 Authentication and launch-agent lifecycles are intentionally managed
@@ -97,14 +97,14 @@ pass-cli logout
 ```
 
 After logging in again, set `darwin_profile` again and run
-`sudo darwin-rebuild switch --flake ".#$darwin_profile"` to load the agent in
+`nix run .#deploy -- switch "$darwin_profile"` to load the agent in
 the current user session. Future user sessions load it automatically.
 
 ## Subsequent rebuilds
 
 ```sh
 darwin_profile=laptop # Use `desktop` on the desktop Mac.
-sudo darwin-rebuild switch --flake ".#$darwin_profile"
+nix run .#deploy -- switch "$darwin_profile"
 ```
 
 ## Pi startup defaults
@@ -113,16 +113,18 @@ Set `pi.model = { provider = "provider-id"; id = "model-id"; };` and
 `pi.thinkingLevel` in [the Darwin inventory](hosts/darwin.nix) or
 [the Linux inventory](hosts/linux.nix). Omitted values use Pi defaults.
 
-For local overrides, create the Git-ignored `hosts/inventory.local.nix`, for
-example `{ laptop.pi.thinkingLevel = "high"; }`, then build from the repository
-root:
+The deployment command creates Git-ignored `hosts/inventory.local.nix` if absent,
+preserves existing files, and loads it on every build and switch. Edit it for
+local overrides, for example `{ laptop.pi.thinkingLevel = "high"; }`. To build
+without activating:
 
 ```sh
-nix build --no-link ".#darwinConfigurations.$darwin_profile.system" \
-  --override-input host-local "path:$PWD/hosts/inventory.local.nix"
+nix run .#deploy -- build "$darwin_profile"
 ```
 
-Pass the same override when switching; without it, only tracked defaults apply.
+Direct Nix or rebuild commands need
+`--override-input host-local "path:$PWD/hosts/inventory.local.nix"` to load local
+overrides; without it, only tracked defaults apply.
 Omitted fields inherit; `null` clears a default, and `model` replaces the provider
 and ID together. Changes require rebuilding and switching; Pi's global settings
 remain read-only. Keep credentials out of both inventories: ignored overrides
@@ -137,13 +139,11 @@ using the existing Lix installation (no sudo).
 ### First-time setup
 
 Before switching, review existing shell startup files and preserve any required
-lab initialization in the shell modules. Obtain the Home Manager CLI selected
-by this configuration, then build and activate the user environment:
+lab initialization in the shell modules, then build and activate the user
+environment:
 
 ```sh
-hm_cli=$(nix build --no-link --print-out-paths \
-  .#homeConfigurations.iscas-r750xa.config.programs.home-manager.package)
-"$hm_cli/bin/home-manager" -b before-hm switch --flake .#iscas-r750xa
+nix run .#deploy -- switch iscas-r750xa -b before-hm
 ```
 
 The `-b before-hm` option moves conflicting existing files to paths with the
@@ -153,26 +153,26 @@ behavior.
 ### Subsequent updates
 
 ```sh
-home-manager switch --flake .#iscas-r750xa
+nix run .#deploy -- switch iscas-r750xa
 ```
 
 ### Optional validation and troubleshooting
 
-To preview activation, run this after setting `hm_cli` above and before the
-actual switch. The `-n` option skips activation changes, but may still build
-or download packages:
+To preview activation, run this before the actual switch. The `-n` option skips
+activation changes, but may still build or download packages; the deployment
+command still initializes the local inventory if absent:
 
 ```sh
-"$hm_cli/bin/home-manager" -n -b before-hm switch --flake .#iscas-r750xa
+nix run .#deploy -- switch iscas-r750xa -n -b before-hm
 ```
 
 To check that the user environment builds without activating it:
 
 ```sh
-nix build --no-link .#homeConfigurations.iscas-r750xa.activationPackage
+nix run .#deploy -- build iscas-r750xa
 ```
 
-A separate build is optional because `home-manager switch` also builds the
+A separate build is optional because the switch command also builds the
 environment. If Nix reports store or daemon connection errors, check store
 access with:
 

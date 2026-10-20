@@ -163,6 +163,7 @@ rec {
           };
         in
         {
+          deploy = pkgs.callPackage ./packages/deploy { nix = pkgs.lixPackageSets.stable.lix; };
           mise = unstablePkgs.mise;
           proton-pass-cli = unstablePkgs.proton-pass-cli;
           typst = unstablePkgs.typst;
