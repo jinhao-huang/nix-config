@@ -1,8 +1,9 @@
 {
+  "kind": "upstream",
   "repository": "https://github.com/mattpocock/skills",
   "revision": "d81f3a183412e71a5b1e84ca21bc1a35eea03a60",
   "reviewed_on": "2026-10-02",
-  "license": "skills/MATT-POCOCK-LICENSE",
+  "license": "skill-sources/mattpocock-skills.LICENSE",
   "skills": {
     "code-review": {
       "upstream_path": "skills/engineering/code-review",

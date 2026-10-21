@@ -214,6 +214,7 @@ rec {
         system:
         {
           configuration-reference = self.packages.${system}.configuration-reference.tests.up-to-date;
+          ai-agent-skills = (mkPkgs nixpkgs system).callPackage ./modules/ai-agents/checks { };
         }
         // nixpkgs.lib.mapAttrs' (
           name: _: nixpkgs.lib.nameValuePair "${name}-home" self.homeConfigurations.${name}.activationPackage

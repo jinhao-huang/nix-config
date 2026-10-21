@@ -40,6 +40,7 @@
   modules.ai-agents = {
     enable = true;
     repoRelativePath = "nix-config";
+    externalSkills.surge = "/Applications/Surge.app/Contents/Resources/Skills/surge";
     environment = ''
       ## Local Execution Environment
 

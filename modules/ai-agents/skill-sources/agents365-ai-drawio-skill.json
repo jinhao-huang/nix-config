@@ -1,0 +1,15 @@
+{
+  "kind": "upstream",
+  "repository": "https://github.com/Agents365-ai/drawio-skill",
+  "revision": "7aa92f73819766eb914fffac66762cf2adb5d828",
+  "revision_note": "Recovered by comparing the vendored files with upstream history available before the local introduction; the original import revision was not recorded.",
+  "reviewed_on": "2026-10-21",
+  "license": "skills/drawio-skill/LICENSE",
+  "skills": {
+    "drawio-skill": {
+      "upstream_path": "skills/drawio-skill",
+      "local_path": "skills/drawio-skill",
+      "adaptations": []
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "kind": "upstream",
+  "repository": "https://github.com/github/awesome-copilot",
+  "revision": "e24be77e6f203409cf99ab7d5a67e1540cb386d3",
+  "revision_note": "Recovered by comparing the vendored files with upstream history available before the local introduction; the original import revision was not recorded.",
+  "reviewed_on": "2026-10-21",
+  "license": "skills/git-commit/LICENSE",
+  "skills": {
+    "git-commit": {
+      "upstream_path": "skills/git-commit",
+      "local_path": "skills/git-commit",
+      "adaptations": [
+        "Add the upstream URL to discovery metadata and normalize Markdown formatting.",
+        "Simplify the multiline commit-message example while retaining the upstream workflow and safety rules."
+      ]
+    }
+  }
+}

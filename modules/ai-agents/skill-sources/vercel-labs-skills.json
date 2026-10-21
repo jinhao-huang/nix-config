@@ -1,0 +1,15 @@
+{
+  "kind": "upstream",
+  "repository": "https://github.com/vercel-labs/skills",
+  "revision": "773fb2c7bbf16781670a3520affc4abd0c6151ae",
+  "revision_note": "Recovered by comparing the vendored files with upstream history available before the local introduction; the original import revision was not recorded.",
+  "reviewed_on": "2026-10-21",
+  "license": "skill-sources/vercel-labs-skills.LICENSE",
+  "skills": {
+    "find-skills": {
+      "upstream_path": "skills/find-skills",
+      "local_path": "skills/find-skills",
+      "adaptations": []
+    }
+  }
+}

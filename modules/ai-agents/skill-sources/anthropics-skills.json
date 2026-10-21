@@ -1,4 +1,5 @@
 {
+  "kind": "upstream",
   "repository": "https://github.com/anthropics/skills",
   "revision": "8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4",
   "reviewed_on": "2026-10-02",

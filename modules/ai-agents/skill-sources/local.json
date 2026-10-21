@@ -1,0 +1,10 @@
+{
+  "kind": "local",
+  "reviewed_on": "2026-10-21",
+  "skills": {
+    "refactor": {
+      "local_path": "skills/refactor",
+      "notes": "Maintained in nix-config. Introduced in 59ef83bbaac3ea75c13acdc6c2db6cf7456c5038 and rewritten in a5c55ad; repository history records no external upstream."
+    }
+  }
+}

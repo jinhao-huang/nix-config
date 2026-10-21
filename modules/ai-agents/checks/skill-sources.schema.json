@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["kind", "reviewed_on", "skills"],
+  "additionalProperties": false,
+  "properties": {
+    "kind": { "enum": ["upstream", "local"] },
+    "repository": { "type": "string", "pattern": "^https://github.com/[^/]+/[^/]+$" },
+    "revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "revision_note": { "type": "string", "minLength": 1 },
+    "reviewed_on": { "type": "string", "format": "date" },
+    "license": { "type": "string", "minLength": 1 },
+    "skills": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z0-9]+(-[a-z0-9]+)*$": {
+          "type": "object",
+          "required": ["local_path"],
+          "additionalProperties": false,
+          "properties": {
+            "local_path": { "type": "string", "minLength": 1 },
+            "upstream_path": { "type": "string", "minLength": 1 },
+            "adaptations": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+            "notes": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "kind": { "const": "upstream" } } },
+      "then": {
+        "required": ["repository", "revision", "license"],
+        "properties": {
+          "skills": {
+            "additionalProperties": { "required": ["upstream_path", "adaptations"] }
+          }
+        }
+      },
+      "else": {
+        "not": {
+          "anyOf": [
+            { "required": ["repository"] },
+            { "required": ["revision"] },
+            { "required": ["revision_note"] },
+            { "required": ["license"] }
+          ]
+        },
+        "properties": {
+          "skills": {
+            "additionalProperties": {
+              "required": ["notes"],
+              "not": { "anyOf": [{ "required": ["upstream_path"] }, { "required": ["adaptations"] }] }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

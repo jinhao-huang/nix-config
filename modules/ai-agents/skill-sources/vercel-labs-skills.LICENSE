@@ -1,0 +1,9 @@
+The upstream package.json declares the MIT license at revision
+773fb2c7bbf16781670a3520affc4abd0c6151ae:
+
+https://github.com/vercel-labs/skills/blob/773fb2c7bbf16781670a3520affc4abd0c6151ae/package.json
+
+  "license": "MIT"
+
+That revision does not include a standalone license text. This notice records
+the upstream declaration; it does not supply missing copyright or license text.
