@@ -27,13 +27,13 @@ in
       }
     ];
 
-    environment.systemPackages = [ pkgs.tailscale ];
+    environment.systemPackages = [ cfg.package ];
 
     # The upstream service module also installs /etc/resolver/ts.net.
     # A userspace ingress must leave system routing and DNS to Surge.
     launchd.daemons.tailscale-ingress = {
       command = lib.escapeShellArgs [
-        (lib.getExe' pkgs.tailscale "tailscaled")
+        (lib.getExe' cfg.package "tailscaled")
         "--tun=userspace-networking"
         "--statedir=/var/lib/tailscale-ingress"
         "--config=${tailscaleConfig}"

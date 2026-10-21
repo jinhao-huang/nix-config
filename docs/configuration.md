@@ -116,6 +116,7 @@ after editing either source.
 - [`modules.tailscale.enable`](#modulestailscaleenable)
 - [`modules.tailscale.incoming.enable`](#modulestailscaleincomingenable)
 - [`modules.tailscale.outboundProxy.enable`](#modulestailscaleoutboundproxyenable)
+- [`modules.tailscale.package`](#modulestailscalepackage)
 - [`modules.tailscale.serve.enable`](#modulestailscaleserveenable)
 - [`modules.tailscale.serve.httpsPort`](#modulestailscaleservehttpsport)
 - [`modules.tailscale.serve.target`](#modulestailscaleservetarget)
@@ -708,6 +709,30 @@ false
 
 ```nix
 true
+```
+
+*Declared by:*
+ - [modules/tailscale/options\.nix](../modules/tailscale/options.nix)
+
+
+
+## modules\.tailscale\.package
+
+
+
+The tailscale package to use\.
+
+
+
+*Type:*
+package
+
+
+
+*Default:*
+
+```nix
+pkgs.tailscale
 ```
 
 *Declared by:*

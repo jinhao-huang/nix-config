@@ -114,6 +114,7 @@ rec {
             {
               nix.settings = nixConfig;
               nixpkgs.config = nixpkgsConfig;
+              modules.tailscale.package = self.packages.${darwinHost.system}.tailscale;
             }
             ./profiles/system/darwin
             nix-homebrew.darwinModules.nix-homebrew
@@ -166,6 +167,7 @@ rec {
           deploy = pkgs.callPackage ./packages/deploy { nix = pkgs.lixPackageSets.stable.lix; };
           mise = unstablePkgs.mise;
           proton-pass-cli = unstablePkgs.proton-pass-cli;
+          tailscale = unstablePkgs.tailscale;
           typst = unstablePkgs.typst;
           configuration-reference = configurationReference;
           update-configuration-reference = configurationReference.update;
@@ -194,6 +196,7 @@ rec {
               home.username = host.username;
               home.homeDirectory = host.homeDirectory;
               modules.pi.defaults = host.pi;
+              modules.tailscale.package = self.packages.${host.system}.tailscale;
               programs.mise.package = self.packages.${host.system}.mise;
               programs.pi-coding-agent.package = llm-agents.packages.${host.system}.pi;
               modules.deepseek-harness = {

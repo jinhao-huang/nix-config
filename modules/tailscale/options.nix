@@ -1,10 +1,17 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   cfg = config.modules.tailscale;
 in
 {
   options.modules.tailscale = {
     enable = lib.mkEnableOption "a userspace Tailscale daemon";
+
+    package = lib.mkPackageOption pkgs "tailscale" { };
 
     incoming.enable = lib.mkEnableOption ''
       incoming tailnet connections to local services. Userspace networking

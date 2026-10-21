@@ -26,7 +26,7 @@ let
   userClient = pkgs.writeShellApplication {
     name = "tailscale-user";
     text = ''
-      exec ${lib.getExe' pkgs.tailscale "tailscale"} \
+      exec ${lib.getExe' cfg.package "tailscale"} \
         --socket="''${XDG_RUNTIME_DIR:?XDG_RUNTIME_DIR is not set}/tailscale/tailscaled.sock" "$@"
     '';
   };
@@ -75,7 +75,7 @@ in
     ];
 
     home.packages = [
-      pkgs.tailscale
+      cfg.package
       userClient
     ];
 
@@ -84,7 +84,7 @@ in
       Service = {
         ExecStart = lib.escapeShellArgs (
           [
-            (lib.getExe' pkgs.tailscale "tailscaled")
+            (lib.getExe' cfg.package "tailscaled")
             "--tun=userspace-networking"
             "--port=0"
             "--statedir=%S/tailscale"
@@ -119,7 +119,7 @@ in
       };
       Service = {
         ExecStart = lib.escapeShellArgs [
-          (lib.getExe' pkgs.tailscale "tailscale")
+          (lib.getExe' cfg.package "tailscale")
           "--socket=%t/tailscale/tailscaled.sock"
           "serve"
           "--yes"

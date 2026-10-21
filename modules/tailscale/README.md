@@ -32,6 +32,14 @@ macOS Remote Login and `authorized_keys`.
 
 ## Maintain
 
+Both platform modules use `modules.tailscale.package` for the daemon and CLI.
+The flake selects Tailscale from `nixpkgs-unstable`. Update that input for new
+Tailscale releases and Go security fixes. Verify both versions with the selected
+package's `tailscale version` before activating. Check releases weekly and
+prioritize applicable security bulletins.
+Client update checks and auto-apply are disabled; Nix manages installation.
+A new build takes effect only after activation reloads the daemon.
+
 Configure ingress and SSH in the
 [Darwin profile](../../profiles/system/darwin/default.nix).
 Nix generates a locked native configuration, so CLI preference changes and
