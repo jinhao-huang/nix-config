@@ -1,11 +1,29 @@
 # Configuration reference
 
-This reference covers Linux host fields and every sing-box, DeepSeek Harness,
-and Tailscale option provided by this repository. Option entries are generated
-from their Nix declarations, including types, defaults, examples, and source
-links. Defaults describe the modules; profiles and host inventory supply the
-values used on a particular machine. An option without a default is required
-when its feature is enabled.
+This reference covers host inventory, Pi startup defaults, and every sing-box,
+DeepSeek Harness, and Tailscale option provided by this repository. Service
+option entries are generated from Nix declarations, including types, defaults,
+examples, and source links. Defaults describe the modules; profiles and host
+inventory supply the values used on a particular machine. An option without a
+default is required when its feature is enabled.
+
+## Pi startup defaults
+
+Set `pi.model = { provider = "provider-id"; id = "model-id"; };` and
+`pi.thinkingLevel` in [hosts/darwin.nix](../hosts/darwin.nix) or
+[hosts/linux.nix](../hosts/linux.nix). Omitted values use Pi defaults; see
+[the schema](../modules/pi/startup-defaults-type.nix) for accepted values.
+
+The deployment command creates Git-ignored `hosts/inventory.local.nix` if absent,
+preserves existing files, and loads it on every build and switch. Only Pi
+overrides are allowed, for example `{ laptop.pi.thinkingLevel = "high"; }`.
+Omitted fields inherit; `null` clears a default, and `model` replaces the provider
+and ID together. Rebuild and switch to apply changes; Pi's global settings remain
+read-only. Keep credentials out of both inventories: ignored overrides also
+enter the Nix store.
+
+Direct Nix or rebuild commands use tracked defaults unless passed
+`--override-input host-local "path:$PWD/hosts/inventory.local.nix"`.
 
 ## Linux host fields
 
@@ -69,20 +87,12 @@ Package selection belongs in [flake.nix](../flake.nix). On macOS, Tailscale is
 configured in the [system profile](../profiles/system/darwin/default.nix), and
 Harness policy in the [Home Manager profile](../profiles/home/darwin.nix).
 
-## Regenerate and check
+## Maintaining this reference
 
-From the repository root:
-
-```sh
-nix run .#update-configuration-reference
-```
-
-Edit option descriptions and examples in the linked Nix declarations, and edit
-this introduction in `docs/configuration-intro.md`. The generated
-`docs/configuration.md` is checked against the current declarations by
-`checks.<system>.configuration-reference`. Build the `configuration-reference`
-package to obtain both `configuration.md` and machine-readable `options.json`.
-Generation does not read secrets or activate services.
+Option entries are generated from Nix declarations; this introduction comes
+from [configuration-intro.md](configuration-intro.md). Follow the
+[generation and validation instructions](development.md#generated-reference)
+after editing either source.
 
 ## Option index
 

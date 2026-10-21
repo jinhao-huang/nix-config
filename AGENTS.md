@@ -1,133 +1,49 @@
-# Repository Guidelines
+# Repository guidelines
 
-## Project Structure & Module Organization
+This flake manages personal macOS systems with nix-darwin and Home Manager,
+and Linux user environments with standalone Home Manager.
 
-This repository is a Nix flake for personal macOS and Linux user environments.
-`flake.nix` defines the flake inputs, package outputs, the `laptop` and `desktop`
-nix-darwin configurations, and standalone Linux Home Manager configurations.
-Keep `flake.nix` focused on composition and package-source selection. User-level
-Home Manager profiles live in `profiles/home`: `common.nix` owns shared CLI
-policy, while `darwin.nix` and `linux.nix` own their platform-specific policy.
-Darwin system policy lives in `profiles/system/darwin`: `default.nix` composes
-shared settings, preferences, Homebrew application choices, and Remote Login;
-`laptop.nix` and `desktop.nix` own role-specific application choices.
-Keep host data in `hosts/darwin.nix` and `hosts/linux.nix`; `hosts/default.nix`
-composes them and validates the optional `host-local` input. Local overrides
-may only change Pi startup defaults. Keep their schema and settings generation
-in `modules/pi`. This repository manages Linux user environments rather than
-the host operating system.
+## Read by task
 
-Keep README focused on user-facing setup, daily use, and troubleshooting.
-Keep additions very short and match the brevity of nearby sections. Include only
-essential commands and critical caveats; point to configuration instead of
-listing its options. Put detailed rationale and analysis in task reports.
-Document architecture and contributor validation in agent or developer guidance.
+- Before changing flake composition, host inventory, profiles, or modules, read
+  [development guidance](docs/development.md) for ownership and module conventions.
+- Before validating a change, follow the applicable
+  [validation rules](docs/development.md#validation). Evaluation alone does not
+  build a Darwin system closure.
+- For setup, activation, and input updates, start at [README.md](README.md).
+  For host fields and service options, use the generated
+  [configuration reference](docs/configuration.md).
 
-Group cohesive features under `modules/<name>`. Single-entry features expose
-`default.nix` when imported as a directory. Features targeting multiple module
-evaluators expose explicit `home-manager.nix` and `nix-darwin.nix` entry points;
-profiles import the matching file. Declare their `_class` as `homeManager` or
-`darwin` and express platform restrictions with assertions. Keep shared options
-and private implementations within the feature directory.
+## Implementation rules
 
-Compose configuration choices in profiles. Keep independently reusable feature
-implementations in modules and profile-specific helpers beside their owning
-profile. Select system features from system profiles and user-level features
-from Home Manager profiles. Keep related data beside its owning module, such as
-`modules/ssh/inventory.nix` and `modules/starship/plain-text-symbols.toml`.
-Custom package derivations live in `packages/<name>/default.nix`.
-Use `home-manager.sharedModules` only for policy that must apply to every
-configured Home Manager user; otherwise import the user module explicitly from
-the relevant profile.
+Compose choices in profiles, host data in `hosts`, reusable features in
+`modules`, and package-source selection in `flake.nix`. Use native
+`programs.*.package` options rather than passing package sets through
+`extraSpecialArgs`. Local inventory may override only Pi startup defaults;
+keep its schema and settings generation in `modules/pi`.
 
-Use native `programs.*.package` options when available. Keep package-source
-selection in flake composition rather than passing package sets through
-`extraSpecialArgs`. Darwin owns the system Lix installation; standalone Linux
-Home Manager selects activation and shell tools without managing the host daemon.
+Format touched Nix files with `nixfmt`, using two-space indentation and qualified
+`lib.*` calls. Prefer attribute sets to ad hoc string concatenation, and comment
+only non-obvious decisions. Use lowercase kebab-case directories. Keep reusable
+options typed and owned by their module; prefer `lib.mkEnableOption` for optional features.
+Share values through module options; reserve `specialArgs` and
+`extraSpecialArgs` for inputs, inventory, and import resolution.
 
-## Build, Test, and Development Commands
+Check native Home Manager or nix-darwin options before generating raw files or
+activation scripts. Document why an exception is needed. Activation scripts are
+for runtime validation, external secret synchronization, or migration that cannot
+be modeled declaratively. Make them idempotent, preserve usable state on failure,
+quote arguments with `lib.escapeShellArg`, and use Nix store paths for tools.
+Home Manager external side effects must respect `DRY_RUN_CMD`.
 
-- `nix flake check --no-build`: evaluate standard flake outputs without building
-  checks; use it as a fast structural check.
-- `nix flake check --all-systems --no-build`: also evaluate Linux Home Manager
-  activation packages registered as checks from the host inventory.
-- `nix build --no-link .#darwinConfigurations.laptop.system
-  .#darwinConfigurations.desktop.system`: build both complete macOS system
-  closures without creating a `result` symlink; use this for shared Darwin
-  changes.
-- `darwin-rebuild build --flake .#laptop` or `darwin-rebuild build --flake
-  .#desktop`: build one role without activating it; use the affected role for
-  role-specific changes.
-- `sudo darwin-rebuild switch --flake .#laptop` or `sudo darwin-rebuild switch
-  --flake .#desktop`: build and activate the explicitly selected role.
-- `nix build .#mise` or `nix build .#proton-pass-cli`: build an exported
-  package.
-- `nix build --no-link .#homeConfigurations.iscas-r750xa.activationPackage`:
-  build the Linux user environment on an x86_64 Linux builder without activation.
-- `home-manager switch --flake .#iscas-r750xa`: activate the Linux profile as
-  its declared user, without sudo. See the README for first-time setup.
-- `nix flake update`: update all locked inputs in `flake.lock`; use
-  `nix flake update <input-name>` for targeted updates.
-- Homebrew tap inputs (`homebrew-cask`, `homebrew-core`, `homebrew-steipete`,
-  `homebrew-jinhao-huang`) must always be updated together with
-  `nix-homebrew` in the same change, because its `brew-src` input pins the
-  Homebrew version. Updating taps alone can land cask DSL that the pinned
-  brew cannot parse and abort activation; see the unlock runbook in
-  `profiles/system/darwin/homebrew.nix`.
+## Documentation and delivery
 
-## Coding Style & Naming Conventions
+Keep README a short entry point for setup and daily commands. Put platform
+procedures in `docs/darwin.md` or `docs/linux.md`, architecture and contributor
+validation in `docs/development.md`, and feature-specific maintenance beside
+its module. Keep each fact in one place and link to it elsewhere. Treat bundled
+skills and agent prompts as deployed project inputs, not general project docs.
 
-Format Nix files with `nixfmt`. Use two-space indentation, attribute sets over
-ad hoc string concatenation where practical, and short comments only when they
-explain non-obvious configuration decisions. Name modules and packages with
-lowercase kebab-case directories, for example `modules/ai-agents` or
-`packages/proton-pass-cli`.
-
-Prefer qualified `lib.*` calls over broad `with lib;` scopes. Declare reusable
-module interfaces with typed options, use `lib.mkEnableOption` for optional
-features, and keep option declarations with the module that owns the behavior.
-Use normal module options for values shared between modules. Reserve
-`specialArgs` and `extraSpecialArgs` for flake inputs, host inventory, or values
-needed during import resolution rather than general configuration plumbing.
-
-Before using `home.file`, `xdg.configFile`, or custom activation code, check
-whether Home Manager or nix-darwin provides a native module option for the
-software. Prefer native module options whenever they can express the desired
-configuration. Use raw generated files only when no suitable native option
-exists, and document why the exception is necessary.
-
-Prefer declarative Home Manager or nix-darwin options over activation scripts
-for files, symlinks, packages, and services. Use activation scripts only for
-runtime state validation, external secret synchronization, or migration that
-cannot be modeled declaratively. Keep such scripts idempotent, preserve usable
-state on failure, quote generated shell arguments with `lib.escapeShellArg`, and
-use Nix store paths for required tools. Home Manager activation scripts must
-respect `DRY_RUN_CMD` when they perform external side effects.
-
-## Testing Guidelines
-
-There is no separate unit test suite. Run `nixfmt --check` on every touched Nix
-file and use `nix flake check --no-build` as baseline validation. Because
-`nix flake check` does not build the nix-darwin system closure, Darwin and
-integrated Home Manager changes must also pass the applicable complete-system
-build above before switching: build both roles for shared changes and the
-affected role for role-specific changes. For package changes, build the affected
-package directly and verify hashes, supported platforms, and `meta.mainProgram`
-when applicable. Use
-`nix flake check --all-systems --no-build` when changing cross-platform package
-outputs. Register new files with Git before running flake commands because Git
-flakes ignore untracked paths.
-Standalone Linux activation packages are registered under
-`checks.<system>.<name>-home`; use `nix flake check --all-systems --no-build` to
-evaluate them from a different platform. For Linux changes, also explicitly
-evaluate and build the affected `homeConfigurations.<name>.activationPackage`.
-Use a Linux builder for the complete closure.
-
-## Commit & Pull Request Guidelines
-
-Git history uses Conventional Commits such as `feat(ai-agents): ...`,
-`chore(deps): ...`, and `docs(ai-agents): ...`. Keep commits scoped and mention
-the touched module or package when useful. Pull requests should summarize the
-configuration impact, list validation commands run, call out lockfile updates,
-and include screenshots only for editor or UI configuration changes where visual
-behavior matters.
+Use Conventional Commits, scoped to the affected module or package when useful.
+PR descriptions explain configuration impact, validation, and lockfile updates;
+include screenshots only when editor or UI behavior matters.
