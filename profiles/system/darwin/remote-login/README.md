@@ -1,7 +1,8 @@
 # macOS Remote Login
 
 Enables Apple's built-in SSH server for both Darwin profiles. See
-[default.nix](default.nix) for the login policy and authorized client keys.
+[default.nix](default.nix) for the login policy and
+[host inventory](../../../../hosts/darwin.nix) for authorized client keys.
 User-managed `~/.ssh/authorized_keys` is ignored.
 
 ## Boundaries

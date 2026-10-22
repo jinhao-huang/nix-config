@@ -3,6 +3,7 @@
     system = "x86_64-linux";
     username = "huangjh";
     homeDirectory = "/home/huangjh";
+    authorizedKeyFiles = [ ../modules/ssh/public-keys/cas.pub ];
     pi = { };
     tailscaleHostname = "iscas-r750xa.bison-agama.ts.net";
     deepseekHarness = {

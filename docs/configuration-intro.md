@@ -35,6 +35,7 @@ Edit [hosts/linux.nix](../hosts/linux.nix). Each top-level attribute names a
 | `system` | Package architecture, such as `x86_64-linux` or `aarch64-linux`. |
 | `username` | `home.username`. |
 | `homeDirectory` | Absolute `home.homeDirectory`. |
+| `authorizedKeyFiles` | Public key paths combined into Home Manager's `~/.ssh/authorized_keys`. |
 | `pi` | Optional Pi startup defaults passed to `modules.pi.defaults`; see [the schema](../modules/pi/startup-defaults-type.nix). |
 | `tailscaleHostname` | `modules.deepseek-harness.service.publicHost`, using the node's actual MagicDNS hostname. |
 | `deepseekHarness.port` | `modules.deepseek-harness.service.port`. |
@@ -75,6 +76,13 @@ proxy must use distinct loopback ports. Serve's HTTPS port belongs to the
 tailnet listener and is not part of that loopback conflict check.
 
 ## Platform and configuration scope
+
+Set `authorizedKeyFiles` per host in [hosts/linux.nix](../hosts/linux.nix) or
+[hosts/darwin.nix](../hosts/darwin.nix). Linux combines the files into a managed
+`~/.ssh/authorized_keys`; Darwin passes them to nix-darwin's native
+`users.users.<name>.openssh.authorizedKeys.keyFiles`. An empty list authorizes
+no keys through that managed source. These files contain public keys only;
+never add private keys. Tailscale SSH uses its own authorization policy.
 
 - sing-box runs as a Linux systemd user service.
 - Harness policy applies on macOS and Linux. macOS uses the official desktop

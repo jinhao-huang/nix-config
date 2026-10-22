@@ -195,6 +195,9 @@ rec {
             {
               home.username = host.username;
               home.homeDirectory = host.homeDirectory;
+              home.file.".ssh/authorized_keys".text = nixpkgs.lib.concatMapStrings (
+                file: builtins.readFile file + "\n"
+              ) host.authorizedKeyFiles;
               modules.pi.defaults = host.pi;
               modules.tailscale.package = self.packages.${host.system}.tailscale;
               programs.mise.package = self.packages.${host.system}.mise;
