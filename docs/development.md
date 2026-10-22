@@ -9,9 +9,9 @@ profile terminology.
 | Location | Responsibility |
 | --- | --- |
 | [flake.nix](../flake.nix) | Inputs, package sources, configuration composition, exported packages, and checks. |
-| [hosts](../hosts) | Darwin roles and Linux account data; `default.nix` validates and merges optional `host-local` Pi overrides. |
+| [hosts](../hosts) | Host data, including machine-specific application choices; `default.nix` validates and merges optional `host-local` Pi overrides. |
 | [profiles/home](../profiles/home) | Shared CLI policy in `common.nix`; platform-specific user choices in `darwin.nix` and `linux.nix`. |
-| [profiles/system/darwin](../profiles/system/darwin) | Shared macOS settings, preferences, applications, and Remote Login; role-specific application choices in `laptop.nix` and `desktop.nix`. |
+| [profiles/system/darwin](../profiles/system/darwin) | Shared macOS settings, preferences, applications, and Remote Login; combines shared applications with each host's application list. |
 | [modules](../modules) | Independently reusable features, their options, and supporting data. |
 | [packages](../packages) | Custom derivations, including the deployment command and configuration-reference generator. |
 
@@ -23,7 +23,8 @@ distinct loopback ports.
 
 ## Module conventions
 
-Compose feature choices in the owning profile. Keep profile-specific helpers
+Compose shared feature choices in the owning profile and keep machine-specific
+application lists in host inventory. Keep profile-specific helpers
 beside that profile and feature data beside its module, such as SSH inventory
 or Starship symbols. Use `home-manager.sharedModules` only for policy that must
 apply to every configured Home Manager user; otherwise import the module from
@@ -57,7 +58,7 @@ it does not build checks or complete Darwin closures.
 | Change | Additional validation before switching |
 | --- | --- |
 | Shared Darwin or integrated Home Manager | `nix build --no-link .#darwinConfigurations.laptop.system .#darwinConfigurations.desktop.system` |
-| One Darwin role | `darwin-rebuild build --flake .#laptop` (or `desktop`). |
+| One Darwin host | `darwin-rebuild build --flake .#laptop` (or `desktop`). |
 | Linux home profile | `nix flake check --all-systems --no-build`, then explicitly evaluate and build `homeConfigurations.<name>.activationPackage` on a Linux builder. |
 | Package | Build the affected exported package; verify hashes, supported platforms, and `meta.mainProgram` where applicable. Also evaluate all systems when package outputs change. |
 | sing-box runtime or linger helper | `python3 modules/sing-box/tests.py` in addition to the relevant Linux checks. |

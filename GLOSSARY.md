@@ -13,9 +13,9 @@ Linux development servers.
 The personal macOS user environment, including desktop applications, language
 tools, and personal SSH agent integration.
 
-**Darwin role**:
-A macOS workstation category, currently laptop or desktop, that determines
-machine-specific application choices.
+**Darwin host**:
+A personal macOS workstation, currently laptop or desktop, with its own
+account details and application choices.
 
 **Darwin system profile**:
 The personal macOS system environment, including workstation preferences,

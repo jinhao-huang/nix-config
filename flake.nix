@@ -102,7 +102,7 @@ rec {
         "jinhao-huang/homebrew-tap" = homebrew-jinhao-huang;
       };
       mkDarwinConfiguration =
-        darwinHost: roleProfile:
+        darwinHost:
         nix-darwin.lib.darwinSystem {
           specialArgs = {
             inherit
@@ -151,7 +151,6 @@ rec {
                 ohMyTmux = oh-my-tmux;
               };
             }
-            roleProfile
           ];
         };
     in
@@ -179,10 +178,7 @@ rec {
       # Build Darwin profiles using:
       # $ darwin-rebuild build --flake .#laptop
       # $ darwin-rebuild build --flake .#desktop
-      darwinConfigurations = {
-        laptop = mkDarwinConfiguration hosts.darwin.laptop ./profiles/system/darwin/laptop.nix;
-        desktop = mkDarwinConfiguration hosts.darwin.desktop ./profiles/system/darwin/desktop.nix;
-      };
+      darwinConfigurations = nixpkgs.lib.mapAttrs (_: mkDarwinConfiguration) hosts.darwin;
 
       homeConfigurations = nixpkgs.lib.mapAttrs (
         _: host:

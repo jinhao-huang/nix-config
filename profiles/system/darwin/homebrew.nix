@@ -111,7 +111,8 @@
       "zcode"
       "zed"
       "zotero"
-    ];
+    ]
+    ++ darwinHost.homebrew.casks;
   };
 
   nix-homebrew = {

@@ -25,6 +25,20 @@ enter the Nix store.
 Direct Nix or rebuild commands use tracked defaults unless passed
 `--override-input host-local "path:$PWD/hosts/inventory.local.nix"`.
 
+## Darwin host fields
+
+Edit [hosts/darwin.nix](../hosts/darwin.nix). Each top-level attribute names a
+`darwinConfigurations` entry. Supply these fields for each host:
+
+| Host field | Purpose or module option |
+| --- | --- |
+| `system` | Package architecture, such as `aarch64-darwin`. |
+| `username` | Primary user account managed by nix-darwin and Home Manager. |
+| `homeDirectory` | Absolute home directory for the primary user. |
+| `authorizedKeyFiles` | Public key paths passed to nix-darwin's `users.users.<name>.openssh.authorizedKeys.keyFiles`. |
+| `homebrew.casks` | Machine-specific casks added to the shared application list in the [Homebrew profile](../profiles/system/darwin/homebrew.nix); use `[]` for none. |
+| `pi` | Optional Pi startup defaults passed to `modules.pi.defaults`; see [the schema](../modules/pi/startup-defaults-type.nix). |
+
 ## Linux host fields
 
 Edit [hosts/linux.nix](../hosts/linux.nix). Each top-level attribute names a
