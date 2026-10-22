@@ -28,6 +28,7 @@ in
     ./common.nix
     ../../modules/mise
     ../../modules/pi
+    ../../modules/hermes
     ../../modules/deepseek-harness
     ../../modules/ai-agents
     ../../modules/sing-box
@@ -38,6 +39,7 @@ in
   modules.bash.enable = true;
   modules.mise.enable = true;
   modules.pi.enable = true;
+  modules.hermes.enable = true;
   modules.deepseek-harness = {
     enable = true;
     service = {

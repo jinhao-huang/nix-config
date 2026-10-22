@@ -47,6 +47,7 @@ rec {
     };
 
     llm-agents.url = "github:numtide/llm-agents.nix";
+    hermes-agent.url = "github:NousResearch/hermes-agent";
 
     oh-my-tmux = {
       url = "github:gpakosz/.tmux";
@@ -69,6 +70,7 @@ rec {
       home-manager-unstable,
       host-local,
       llm-agents,
+      hermes-agent,
       oh-my-tmux,
       ...
     }:
@@ -188,6 +190,7 @@ rec {
           pkgs = mkPkgs nixpkgs host.system;
           extraSpecialArgs = {
             homeManagerUnstable = home-manager-unstable;
+            hermesAgentModule = hermes-agent.homeManagerModules.default;
             ohMyTmux = oh-my-tmux;
           };
           modules = [
