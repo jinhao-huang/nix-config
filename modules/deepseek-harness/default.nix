@@ -48,7 +48,7 @@ in
         example = "server.example.ts.net";
         description = ''
           Tailnet HTTPS hostname, without a scheme or port, required when the Web
-          service is enabled. The Linux inventory supplies tailscaleHostname.
+          service is enabled. The Linux inventory supplies deepseekHarness.publicHost.
         '';
       };
       publicPort = lib.mkOption {

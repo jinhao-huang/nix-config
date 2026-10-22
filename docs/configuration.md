@@ -37,7 +37,7 @@ Edit [hosts/linux.nix](../hosts/linux.nix). Each top-level attribute names a
 | `homeDirectory` | Absolute `home.homeDirectory`. |
 | `authorizedKeyFiles` | Public key paths combined into Home Manager's `~/.ssh/authorized_keys`. |
 | `pi` | Optional Pi startup defaults passed to `modules.pi.defaults`; see [the schema](../modules/pi/startup-defaults-type.nix). |
-| `tailscaleHostname` | `modules.deepseek-harness.service.publicHost`, using the node's actual MagicDNS hostname. |
+| `deepseekHarness.publicHost` | `modules.deepseek-harness.service.publicHost`, using the node's actual MagicDNS hostname. |
 | `deepseekHarness.port` | `modules.deepseek-harness.service.port`. |
 | `deepseekHarness.proxyPort` | `modules.deepseek-harness.service.proxyPort`. |
 | `deepseekHarness.httpsPort` | `modules.tailscale.serve.httpsPort`. The Harness public port follows it. |
@@ -288,7 +288,7 @@ integer between 1 and 65535 (both inclusive)
 
 
 Tailnet HTTPS hostname, without a scheme or port, required when the Web
-service is enabled\. The Linux inventory supplies tailscaleHostname\.
+service is enabled\. The Linux inventory supplies deepseekHarness\.publicHost\.
 
 
 

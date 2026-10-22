@@ -5,8 +5,8 @@
     homeDirectory = "/home/huangjh";
     authorizedKeyFiles = [ ../modules/ssh/public-keys/cas.pub ];
     pi = { };
-    tailscaleHostname = "iscas-r750xa.bison-agama.ts.net";
     deepseekHarness = {
+      publicHost = "iscas-r750xa.bison-agama.ts.net";
       port = 3080;
       proxyPort = 3081;
       httpsPort = 443;

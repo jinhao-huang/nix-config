@@ -205,8 +205,7 @@ rec {
               modules.deepseek-harness = {
                 package = llm-agents.packages.${host.system}.dsh;
                 service = {
-                  publicHost = host.tailscaleHostname;
-                  inherit (host.deepseekHarness) port proxyPort;
+                  inherit (host.deepseekHarness) publicHost port proxyPort;
                 };
               };
               modules.tailscale.serve.httpsPort = host.deepseekHarness.httpsPort;
