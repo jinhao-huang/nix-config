@@ -186,7 +186,7 @@ rec {
           pkgs = mkPkgs nixpkgs host.system;
           extraSpecialArgs = {
             homeManagerUnstable = home-manager-unstable;
-            hermesAgentModule = hermes-agent.homeManagerModules.default;
+            hermesAgent = hermes-agent;
             ohMyTmux = oh-my-tmux;
           };
           modules = [
@@ -198,6 +198,7 @@ rec {
                 file: builtins.readFile file + "\n"
               ) host.authorizedKeyFiles;
               modules.pi.defaults = host.pi;
+              services.hermes-agent = host.hermes;
               modules.tailscale.package = self.packages.${host.system}.tailscale;
               programs.mise.package = self.packages.${host.system}.mise;
               programs.pi-coding-agent.package = llm-agents.packages.${host.system}.pi;

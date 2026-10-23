@@ -27,8 +27,9 @@ nix run .#deploy -- switch "$deploy_host"
 
 `build` does not activate the configuration. `switch` builds and activates it,
 invoking `sudo -H` on macOS and running without sudo on Linux. Both commands
-create and load Git-ignored `hosts/inventory.local.nix`; it may override only
-[Pi startup defaults](docs/configuration.md#pi-startup-defaults). Keep secrets
+create and load Git-ignored `hosts/inventory.local.nix`; it may override
+[Pi startup defaults](docs/configuration.md#pi-startup-defaults) and
+[Linux Hermes settings](modules/hermes/README.md#per-host-configuration). Keep secrets
 out of Nix values, including ignored overrides: they enter the Nix store.
 
 ## Update inputs

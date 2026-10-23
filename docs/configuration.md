@@ -1,9 +1,9 @@
 # Configuration reference
 
 This reference covers host inventory, Pi startup defaults, and every sing-box,
-DeepSeek Harness, and Tailscale option provided by this repository. Service
-option entries are generated from Nix declarations, including types, defaults,
-examples, and source links. Defaults describe the modules; profiles and host
+DeepSeek Harness, and Tailscale option provided by this repository. Service option
+entries are generated from Nix declarations, including types, defaults, examples,
+and source links. Defaults describe the modules; profiles and host
 inventory supply the values used on a particular machine. An option without a
 default is required when its feature is enabled.
 
@@ -15,12 +15,16 @@ Set `pi.model = { provider = "provider-id"; id = "model-id"; };` and
 [the schema](../modules/pi/startup-defaults-type.nix) for accepted values.
 
 The deployment command creates Git-ignored `hosts/inventory.local.nix` if absent,
-preserves existing files, and loads it on every build and switch. Only Pi
-overrides are allowed, for example `{ laptop.pi.thinkingLevel = "high"; }`.
+preserves existing files, and loads it on every build and switch. Pi overrides
+use `{ laptop.pi.thinkingLevel = "high"; }`.
 Omitted fields inherit; `null` clears a default, and `model` replaces the provider
 and ID together. Rebuild and switch to apply changes; Pi's global settings remain
 read-only. Keep credentials out of both inventories: ignored overrides also
 enter the Nix store.
+
+Linux entries may also contain `hermes` overrides; see
+[Hermes configuration](../modules/hermes/README.md#local-overrides). Other override
+fields are rejected.
 
 Direct Nix or rebuild commands use tracked defaults unless passed
 `--override-input host-local "path:$PWD/hosts/inventory.local.nix"`.
@@ -56,6 +60,7 @@ Edit [hosts/linux.nix](../hosts/linux.nix). Each top-level attribute names a
 | `deepseekHarness.proxyPort` | `modules.deepseek-harness.service.proxyPort`. |
 | `deepseekHarness.httpsPort` | `modules.tailscale.serve.httpsPort`. The Harness public port follows it. |
 | `singBox` | Attribute set passed to `modules.sing-box`; supply `listenPort` and at least one node source. |
+| `hermes` | Attribute set passed to official `services.hermes-agent`; model, state paths, private env-file paths, and messaging settings. |
 
 For example, a host can include:
 
@@ -99,6 +104,7 @@ no keys through that managed source. These files contain public keys only;
 never add private keys. Tailscale SSH uses its own authorization policy.
 
 - sing-box runs as a Linux systemd user service.
+- Hermes runs as a Linux user gateway; see its [configuration guide](../modules/hermes/README.md).
 - Harness policy applies on macOS and Linux. macOS uses the official desktop
   application; the Web backend and private proxy are Linux user services.
 - Tailscale's `enable`, `incoming.enable`, and `ssh.enable` options apply to

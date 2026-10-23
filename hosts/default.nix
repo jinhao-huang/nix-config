@@ -19,16 +19,18 @@ let
       lib.mapAttrs (
         name: host:
         if !builtins.isAttrs host then
-          throw "host-local.${name} must be an attribute set containing only pi."
-        else if lib.subtractLists [ "pi" ] (builtins.attrNames host) != [ ] then
-          throw "host-local.${name} may only override pi defaults."
-        else if !builtins.isAttrs (host.pi or { }) then
-          throw "host-local.${name}.pi must be an attribute set."
+          throw "host-local.${name} must be an attribute set containing only pi and hermes."
+        else if lib.subtractLists [ "pi" "hermes" ] (builtins.attrNames host) != [ ] then
+          throw "host-local.${name} may only override pi defaults and Hermes settings."
+        else if !(builtins.isAttrs (host.pi or { }) && builtins.isAttrs (host.hermes or { })) then
+          throw "host-local.${name}.pi and .hermes must be attribute sets."
+        else if host ? hermes && !(builtins.hasAttr name inventories.linux) then
+          throw "host-local.${name}.hermes requires a Linux host."
         else
-          host.pi or { }
+          host
       ) local;
   merged = lib.mapAttrs (
-    _: inventory:
+    platform: inventory:
     lib.mapAttrs (
       name: host:
       host
@@ -42,10 +44,13 @@ let
                   type = piStartupDefaultsType;
                 };
                 # Replace the model pair together; absent fields inherit.
-                config.defaults = (host.pi or { }) // (overrides.${name} or { });
+                config.defaults = (host.pi or { }) // (overrides.${name}.pi or { });
               }
             ];
           }).config.defaults;
+      }
+      // lib.optionalAttrs (platform == "linux") {
+        hermes = lib.recursiveUpdate (host.hermes or { }) (overrides.${name}.hermes or { });
       }
     ) inventory
   ) inventories;

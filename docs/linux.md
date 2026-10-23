@@ -72,28 +72,26 @@ restore the previous Home Manager generation and saved private configuration;
 binaries are not rolled back automatically. Logs: `journalctl --user -u sing-box`;
 private diagnostics: `~/.local/state/sing-box/snapshots/`.
 
-## Hermes CLI
+## Hermes
 
-The Linux profile enables `modules.hermes.enable` through the
-[local Hermes module](../modules/hermes), which imports the official Home Manager
-module and installs Hermes from its flake. Run setup after switching:
+Complete the [host and secret configuration](../modules/hermes/README.md), then
+[switch](../README.md#build-and-switch) and open a new shell. User linger keeps
+the gateway running after logout; open the CLI/TUI when needed:
 
 ```sh
-with-proxy hermes setup
+systemctl --user status hermes-agent
+journalctl --user -u hermes-agent -n 50 --no-pager
 with-proxy hermes --tui
 ```
 
-The CLI keeps interactive configuration, credentials, sessions, and memory in
-`~/.hermes`; Home Manager sets `HERMES_HOME` without managing those files or
-starting a gateway. Run `hermes` directly when a proxy is unnecessary.
+Verify a real model reply and Telegram exchange. Use `systemctl --user` for
+gateway lifecycle commands. With sing-box enabled, the gateway starts through
+`with-proxy` and restarts with it; run `hermes` directly when no proxy is needed.
 
-`hermes --version` may show upstream's `v0.0.0` placeholder. Identify the build
-by the upstream commit it prints and the revision in `flake.lock`.
-
-Update the `hermes-agent` flake input, then build and switch using the
-[repository commands](../README.md#build-and-switch). Nix owns the runtime;
-do not use `hermes update`. Back up `~/.hermes` before upgrading: rolling back
-Home Manager does not restore application state. Nix is an upstream
+Upgrade the `hermes-agent` flake input and switch; avoid `hermes update`. Back up
+`~/.hermes` first: Home Manager rollback does not restore application state.
+`hermes --version` may show `v0.0.0`; identify the build by its printed commit and
+`flake.lock`. Nix is an upstream
 [Tier 2 platform](https://hermes-agent.nousresearch.com/docs/getting-started/platform-support/).
 
 ## DeepSeek Harness

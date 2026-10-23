@@ -9,7 +9,7 @@ profile terminology.
 | Location | Responsibility |
 | --- | --- |
 | [flake.nix](../flake.nix) | Inputs, package sources, configuration composition, exported packages, and checks. |
-| [hosts](../hosts) | Host data, including machine-specific application choices; `default.nix` validates and merges optional `host-local` Pi overrides. |
+| [hosts](../hosts) | Host data, including machine-specific application choices; `default.nix` validates and merges optional `host-local` Pi and Linux Hermes overrides. |
 | [profiles/home](../profiles/home) | Shared CLI policy in `common.nix`; platform-specific user choices in `darwin.nix` and `linux.nix`. |
 | [profiles/system/darwin](../profiles/system/darwin) | Shared macOS settings, preferences, applications, and Remote Login; combines shared applications with each host's application list. |
 | [modules](../modules) | Independently reusable features, their options, and supporting data. |
