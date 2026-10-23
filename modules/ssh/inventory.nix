@@ -1,7 +1,8 @@
 let
+  sshKeys = import ./public-keys;
   identities = {
-    personal.publicKey = ./public-keys/personal.pub;
-    cas.publicKey = ./public-keys/cas.pub;
+    personal.publicKey = sshKeys.personal;
+    cas.publicKey = sshKeys.cas;
   };
 in
 {

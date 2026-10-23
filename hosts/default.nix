@@ -4,9 +4,10 @@
 }:
 let
   piStartupDefaultsType = import ../modules/pi/startup-defaults-type.nix { inherit lib; };
+  sshKeys = import ../modules/ssh/public-keys;
   inventories = {
-    darwin = import ./darwin.nix;
-    linux = import ./linux.nix;
+    darwin = import ./darwin.nix { inherit sshKeys; };
+    linux = import ./linux.nix { inherit sshKeys; };
   };
   hostNames = lib.concatMap builtins.attrNames (builtins.attrValues inventories);
   unknownHosts = lib.subtractLists hostNames (builtins.attrNames local);

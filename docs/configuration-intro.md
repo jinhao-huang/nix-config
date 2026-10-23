@@ -98,6 +98,12 @@ tailnet listener and is not part of that loopback conflict check.
 
 ## Platform and configuration scope
 
+Register shared public-key paths in
+[the SSH key catalog](../modules/ssh/public-keys/default.nix).
+[hosts/default.nix](../hosts/default.nix) passes the catalog as `sshKeys` to both
+host inventories. Select keys by name, such as
+`authorizedKeyFiles = [ sshKeys.personal ];`.
+
 Set `authorizedKeyFiles` per host in [hosts/linux.nix](../hosts/linux.nix) or
 [hosts/darwin.nix](../hosts/darwin.nix). Linux combines the files into a managed
 `~/.ssh/authorized_keys`; Darwin passes them to nix-darwin's native
