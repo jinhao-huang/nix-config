@@ -1,5 +1,7 @@
 # Tailscale ingress on macOS
 
+English | [简体中文](README.zh-CN.md)
+
 Runs a userspace Tailscale daemon for inbound access while Surge handles egress.
 System routing, DNS, and the shared Surge profile remain unchanged. The custom
 module avoids the DNS resolver file added by nix-darwin's `services.tailscale`.

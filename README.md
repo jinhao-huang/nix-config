@@ -1,5 +1,7 @@
 # Personal Nix environments
 
+English | [简体中文](README.zh-CN.md)
+
 Nix flake for personal macOS workstations and Linux development-server user
 environments. macOS uses nix-darwin with Home Manager; Linux uses standalone
 Home Manager and leaves the host OS and Nix daemon to its administrator.
@@ -12,6 +14,8 @@ Home Manager and leaves the host OS and Nix daemon to its administrator.
 | Set up a Linux account; use SSH and user services | [Linux](docs/linux.md) |
 | Change host fields, Pi defaults, or service options | [Configuration reference](docs/configuration.md) |
 | Change the architecture, modules, or validation | [Development](docs/development.md) |
+| Look up profile terminology | [Glossary](GLOSSARY.md) |
+| Maintain English and Chinese documentation | [Documentation synchronization](docs/development.md#documentation-sync) |
 
 ## Build and switch
 

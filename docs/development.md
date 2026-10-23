@@ -1,5 +1,7 @@
 # Development
 
+English | [简体中文](development.zh-CN.md)
+
 ## Architecture and ownership
 
 The flake composes host data, profiles, and feature modules into Darwin systems
@@ -85,3 +87,59 @@ nix run .#update-configuration-reference
 [configuration.md](configuration.md) is generated; edit its sources instead.
 The `configuration-reference` package also exports machine-readable
 `options.json`. Generation reads no secrets and activates no services.
+
+## Documentation sync
+
+Maintain English documentation and its Simplified Chinese companion in the same
+change. A change to behavior, prerequisites, commands, host fields, option names,
+types, defaults, examples, validation, or maintenance procedures triggers a review
+of both languages. A correction originating in either language must reach the
+other when it changes meaning. Code and Nix declarations determine behavior;
+resolve disagreements against the implementation before updating both documents.
+
+Use the same directory and basename with the suffix `.zh-CN.md`. Each document
+links to its language counterpart, and Chinese navigation links to Chinese
+guides where available. Keep commands, identifiers, paths, literal values, and
+code examples consistent. Translate explanatory prose; preserve required code
+and agent-input language conventions. The following table defines coverage:
+
+| English document | Chinese companion |
+| --- | --- |
+| [README.md](../README.md) | [README.zh-CN.md](../README.zh-CN.md) |
+| [GLOSSARY.md](../GLOSSARY.md) | [GLOSSARY.zh-CN.md](../GLOSSARY.zh-CN.md) |
+| [docs/darwin.md](darwin.md) | [docs/darwin.zh-CN.md](darwin.zh-CN.md) |
+| [docs/linux.md](linux.md) | [docs/linux.zh-CN.md](linux.zh-CN.md) |
+| [docs/development.md](development.md) | [docs/development.zh-CN.md](development.zh-CN.md) |
+| [docs/configuration.md](configuration.md) | [docs/configuration.zh-CN.md](configuration.zh-CN.md) |
+| [modules/ai-agents/README.md](../modules/ai-agents/README.md) | [modules/ai-agents/README.zh-CN.md](../modules/ai-agents/README.zh-CN.md) |
+| [modules/hermes/README.md](../modules/hermes/README.md) | [modules/hermes/README.zh-CN.md](../modules/hermes/README.zh-CN.md) |
+| [modules/starship/README.md](../modules/starship/README.md) | [modules/starship/README.zh-CN.md](../modules/starship/README.zh-CN.md) |
+| [modules/tailscale/README.md](../modules/tailscale/README.md) | [modules/tailscale/README.zh-CN.md](../modules/tailscale/README.zh-CN.md) |
+| [profiles/system/darwin/remote-login/README.md](../profiles/system/darwin/remote-login/README.md) | [profiles/system/darwin/remote-login/README.zh-CN.md](../profiles/system/darwin/remote-login/README.zh-CN.md) |
+
+`docs/configuration.md` remains generated from
+`docs/configuration-intro.md` and Nix option declarations. Edit those sources,
+regenerate the English reference, then manually synchronize the complete Chinese
+reference, including its introduction and every option entry. The Chinese
+reference is maintained directly; the generator does not overwrite it. Preserve
+option headings and their anchors, types, defaults, examples, and declaration
+links. Add and remove option entries in both languages together. Generated
+`options.json` remains machine-readable and untranslated.
+
+When adding, moving, or deleting a project guide, update both language versions,
+their inbound links, and this coverage table. Bundled third-party skill documents,
+agent prompts, `AGENTS.md`, source records, and licenses remain deployment or
+agent inputs under their existing language conventions; they do not require
+translated companions.
+
+Before delivering a documentation change:
+
+1. Compare both versions against the implementation and each other, including
+   conditions, limitations, and command effects.
+2. Check relative links and heading anchors after renames or heading changes.
+3. If reference sources changed, regenerate and run the configuration-reference
+   check above; compare the option inventory, types, defaults, and code examples
+   against the Chinese reference.
+4. Review Chinese prose for clarity while preserving facts and uncertainty.
+   Report which document pairs changed and what validation ran. For a behavior
+   change requiring no documentation update, explain why in the delivery notes.

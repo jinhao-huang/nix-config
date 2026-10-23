@@ -1,5 +1,7 @@
 # Hermes
 
+English | [简体中文](README.zh-CN.md)
+
 The Linux profile runs Hermes through the official Home Manager service module.
 Configuration and credentials are declarative; sessions and memory remain writable.
 

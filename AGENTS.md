@@ -39,6 +39,14 @@ Home Manager external side effects must respect `DRY_RUN_CMD`.
 
 ## Documentation and delivery
 
+Maintain English documentation and Simplified Chinese `*.zh-CN.md` companions.
+When changing documented behavior, commands, options, or maintenance procedures,
+update both languages in the same change. Before editing documentation or
+completing a behavior change, follow the
+[documentation synchronization rules](docs/development.md#documentation-sync),
+including the generated-reference workflow and coverage table. Keep source code,
+agent instructions, and deployment inputs in their existing language conventions.
+
 Keep README a short entry point for setup and daily commands. Put platform
 procedures in `docs/darwin.md` or `docs/linux.md`, architecture and contributor
 validation in `docs/development.md`, and feature-specific maintenance beside

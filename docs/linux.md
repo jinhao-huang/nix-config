@@ -1,5 +1,7 @@
 # Linux setup and services
 
+English | [简体中文](linux.zh-CN.md)
+
 On `iscas-r750xa`, run from this checkout as `huangjh`, using the existing Lix
 installation without sudo. Home Manager manages the user environment; the host
 OS and Nix daemon remain administrator-owned. Configure hosts in

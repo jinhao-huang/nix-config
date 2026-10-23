@@ -1,5 +1,7 @@
 # AI agent skills
 
+English | [简体中文](README.zh-CN.md)
+
 Keep each bundled skill in `skills/<name>/`, including its scripts, references,
 assets, and any skill-specific license. Keep the directory name and the
 `SKILL.md` frontmatter name identical.

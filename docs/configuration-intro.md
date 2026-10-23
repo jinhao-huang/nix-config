@@ -1,5 +1,7 @@
 # Configuration reference
 
+English | [简体中文](configuration.zh-CN.md)
+
 This reference covers host inventory, Pi startup defaults, and every sing-box,
 DeepSeek Harness, and Tailscale option provided by this repository. Service option
 entries are generated from Nix declarations, including types, defaults, examples,

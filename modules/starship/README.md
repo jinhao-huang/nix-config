@@ -1,5 +1,7 @@
 # Starship Module
 
+English | [简体中文](README.zh-CN.md)
+
 This module configures the Starship prompt.
 
 ## Maintenance

@@ -1,5 +1,7 @@
 # macOS setup
 
+English | [简体中文](darwin.zh-CN.md)
+
 Run from the repository root as the regular user. Select the machine's role;
 it is independent of the hardware model and macOS hostname:
 

@@ -1,5 +1,7 @@
 # Personal Environments
 
+English | [简体中文](GLOSSARY.zh-CN.md)
+
 This configuration covers personal macOS workstations and user environments on
 Linux development servers.
 
