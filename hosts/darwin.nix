@@ -5,6 +5,10 @@ let
     username = "jinhaohuang";
     homeDirectory = "/Users/jinhaohuang";
     authorizedKeyFiles = [ sshKeys.personal ];
+    hermes = {
+      enable = false;
+      gateway.enable = false;
+    };
   };
 in
 {

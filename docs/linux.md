@@ -89,6 +89,9 @@ with-proxy hermes --tui
 Verify a real model reply and Telegram exchange. Use `systemctl --user` for
 gateway lifecycle commands. With sing-box enabled, the gateway starts through
 `with-proxy` and restarts with it; run `hermes` directly when no proxy is needed.
+Switch also restarts active Hermes services after settings or secret-file changes.
+See [state ownership and removal](../modules/hermes/README.md#data-paths-and-removal)
+before disabling or deleting data.
 
 Upgrade the `hermes-agent` flake input and switch; avoid `hermes update`. Back up
 `~/.hermes` first: Home Manager rollback does not restore application state.

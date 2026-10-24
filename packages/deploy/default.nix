@@ -75,7 +75,7 @@ writeShellApplication {
           '  #   model = { provider = "provider-id"; id = "model-id"; };' \
           '  #   thinkingLevel = "high";' \
           '  # };' \
-          '  # Linux Hermes model and Telegram overrides are documented in:' \
+          '  # Hermes enable, model, and Telegram overrides are documented in:' \
           '  # modules/hermes/README.md#local-overrides' \
           '}' > "$local_inventory"
       )

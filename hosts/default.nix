@@ -25,13 +25,11 @@ let
           throw "host-local.${name} may only override pi defaults and Hermes settings."
         else if !(builtins.isAttrs (host.pi or { }) && builtins.isAttrs (host.hermes or { })) then
           throw "host-local.${name}.pi and .hermes must be attribute sets."
-        else if host ? hermes && !(builtins.hasAttr name inventories.linux) then
-          throw "host-local.${name}.hermes requires a Linux host."
         else
           host
       ) local;
   merged = lib.mapAttrs (
-    platform: inventory:
+    _: inventory:
     lib.mapAttrs (
       name: host:
       host
@@ -49,8 +47,6 @@ let
               }
             ];
           }).config.defaults;
-      }
-      // lib.optionalAttrs (platform == "linux") {
         hermes = lib.recursiveUpdate (host.hermes or { }) (overrides.${name}.hermes or { });
       }
     ) inventory

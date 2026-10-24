@@ -26,9 +26,9 @@ in
 {
   imports = [
     ./common.nix
+    ./hermes.nix
     ../../modules/mise
     ../../modules/pi
-    ../../modules/hermes
     ../../modules/deepseek-harness
     ../../modules/ai-agents
     ../../modules/sing-box
@@ -40,13 +40,8 @@ in
   modules.mise.enable = true;
   modules.pi.enable = true;
   services.hermes-agent = {
-    enable = lib.mkDefault true;
-    gateway.enable = lib.mkDefault true;
-    workingDirectory = lib.mkDefault "${config.home.homeDirectory}/hermes-workspace";
     settings = lib.mkBefore {
-      updates.check = false;
       agent = {
-        coding_context = "off";
         environment_hint = ''
           Respond in Chinese unless the user requests another language.
           Home Manager manages this Linux user environment. Use systemctl --user
@@ -63,19 +58,6 @@ in
           Keep proxy credentials and subscription data out of messages and logs.
         '';
       };
-      terminal.backend = "local";
-      skills.external_dirs = [
-        (pkgs.linkFarm "hermes-skills" [
-          {
-            name = "research";
-            path = ../../modules/ai-agents/skills/research;
-          }
-          {
-            name = "humanizer-zh";
-            path = ../../modules/ai-agents/skills/humanizer-zh;
-          }
-        ])
-      ];
     };
   };
   modules.deepseek-harness = {
@@ -103,6 +85,9 @@ in
     '';
   };
   modules.sing-box.enable = lib.mkDefault true;
+  home.activation.restartHermes = lib.mkIf config.services.hermes-agent.enable (
+    lib.hm.dag.entryAfter [ "applySingBox" ] (lib.mkDefault "")
+  );
   systemd.user.services.hermes-agent =
     lib.mkIf
       (

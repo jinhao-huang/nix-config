@@ -11,7 +11,7 @@ profile terminology.
 | Location | Responsibility |
 | --- | --- |
 | [flake.nix](../flake.nix) | Inputs, package sources, configuration composition, exported packages, and checks. |
-| [hosts](../hosts) | Host data, including machine-specific application choices; `default.nix` validates and merges optional `host-local` Pi and Linux Hermes overrides. |
+| [hosts](../hosts) | Host data, including machine-specific application choices; `default.nix` validates and merges optional `host-local` Pi and Hermes overrides. |
 | [profiles/home](../profiles/home) | Shared CLI policy in `common.nix`; platform-specific user choices in `darwin.nix` and `linux.nix`. |
 | [profiles/system/darwin](../profiles/system/darwin) | Shared macOS settings, preferences, applications, and Remote Login; combines shared applications with each host's application list. |
 | [modules](../modules) | Independently reusable features, their options, and supporting data. |
@@ -64,6 +64,7 @@ it does not build checks or complete Darwin closures.
 | Linux home profile | `nix flake check --all-systems --no-build`, then explicitly evaluate and build `homeConfigurations.<name>.activationPackage` on a Linux builder. |
 | Package | Build the affected exported package; verify hashes, supported platforms, and `meta.mainProgram` where applicable. Also evaluate all systems when package outputs change. |
 | sing-box runtime or linger helper | `python3 modules/sing-box/tests.py` in addition to the relevant Linux checks. |
+| Hermes runtime or activation | `nix build --no-link .#checks.aarch64-darwin.hermes-runtime` (substitute the native system on Linux), plus the platform checks above. |
 | Bundled skills or source metadata | `nix build --no-link .#checks.aarch64-darwin.ai-agent-skills` (substitute the native system on Linux). |
 | Configuration reference | Regenerate as below, then run `nix build --no-link .#checks.aarch64-darwin.configuration-reference` (substitute the native system on Linux). |
 

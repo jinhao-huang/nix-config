@@ -67,6 +67,27 @@ pass-cli logout
 After logging in again, switch to reload the agent in the current user session.
 Future user sessions load it automatically.
 
+## Hermes
+
+Hermes is optional and disabled on both Macs. Follow its
+[host configuration and secret-file guide](../modules/hermes/README.md) to enable
+CLI/TUI use or a messaging gateway, then switch and open a new shell:
+
+```sh
+hermes --tui
+```
+
+If the gateway is enabled, check it with:
+
+```sh
+launchctl print "gui/$UID/org.nix-community.home.hermes-agent"
+tail -n 50 ~/Library/Logs/hermes-agent.err.log
+```
+
+Surge handles egress. Update the `hermes-agent` flake input and switch instead of
+running `hermes update`. The [Hermes guide](../modules/hermes/README.md#data-paths-and-removal)
+lists state paths, restart behavior, and removal steps.
+
 ## Remote access and Harness
 
 - [Tailscale ingress](../modules/tailscale/README.md) covers enrollment,

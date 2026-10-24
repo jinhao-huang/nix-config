@@ -1,7 +1,8 @@
-{ config, ... }:
+{ config, lib, ... }:
 {
   imports = [
     ./common.nix
+    ./hermes.nix
     ../../modules/fonts
     ../../modules/proton-pass
     ../../modules/go
@@ -37,6 +38,15 @@
     webSearch.allowRanges = [ "198.18.0.0/15" ];
   };
   modules.deepseek-harness.enable = true;
+  services.hermes-agent.settings = lib.mkBefore {
+    agent.environment_hint = ''
+      Respond in Chinese unless the user requests another language.
+      Home Manager and nix-darwin manage this macOS environment.
+      Network access is normally handled by Surge. Run commands normally;
+      inspect the active takeover and routing state if access fails.
+    '';
+    security.fake_ip_ranges = [ "198.18.0.0/15" ];
+  };
   modules.ai-agents = {
     enable = true;
     repoRelativePath = "nix-config";

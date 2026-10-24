@@ -16,7 +16,7 @@
 
 省略字段表示继承，`null` 清除默认值，`model` 会同时替换 provider 和 ID。重新构建并切换后生效，Pi 全局设置保持只读。两个清单都不能存放凭据：被 Git 忽略的覆盖值也会进入 Nix store。
 
-Linux 条目还可包含 `hermes` 覆盖配置，见 [Hermes 本地覆盖](../modules/hermes/README.zh-CN.md#local-overrides)。其他覆盖字段会被拒绝。
+两个平台的主机条目都可包含 `hermes` 覆盖配置，见 [Hermes 本地覆盖](../modules/hermes/README.zh-CN.md#local-overrides)。其他覆盖字段会被拒绝。
 
 直接运行 Nix 或 rebuild 命令时默认使用已跟踪的值；如需加载本地覆盖，必须传入 `--override-input host-local "path:$PWD/hosts/inventory.local.nix"`。
 
@@ -32,6 +32,7 @@ Linux 条目还可包含 `hermes` 覆盖配置，见 [Hermes 本地覆盖](../mo
 | `authorizedKeyFiles` | 公钥文件路径，传给 nix-darwin 的 `users.users.<name>.openssh.authorizedKeys.keyFiles`。 |
 | `homebrew.casks` | 添加到 [Homebrew profile](../profiles/system/darwin/homebrew.nix) 共享应用列表的主机专属 cask；没有时使用 `[]`。 |
 | `pi` | 可选 Pi 启动默认值，传给 `modules.pi.defaults`；见 [schema](../modules/pi/startup-defaults-type.nix)。 |
+| `hermes` | 传给官方 `services.hermes-agent` 的属性集，两台 Mac 默认关闭。见 [Hermes 配置](../modules/hermes/README.zh-CN.md)。 |
 
 ## Linux 主机字段
 
@@ -79,7 +80,7 @@ singBox = {
 在 [hosts/linux.nix](../hosts/linux.nix) 或 [hosts/darwin.nix](../hosts/darwin.nix) 中为每台主机设置 `authorizedKeyFiles`。Linux 将文件内容合并到受管理的 `~/.ssh/authorized_keys`；Darwin 使用 nix-darwin 原生选项 `users.users.<name>.openssh.authorizedKeys.keyFiles`。空列表表示不通过该受管理来源授权任何密钥。文件只能包含公钥，不能加入私钥。Tailscale SSH 使用独立授权策略。
 
 - sing-box 作为 Linux systemd 用户服务运行。
-- Hermes 作为 Linux 用户 gateway 运行，见[配置指南](../modules/hermes/README.zh-CN.md)。
+- Hermes 支持 Linux 用户服务和 macOS launchd agent，两台 Mac 默认关闭。见[配置指南](../modules/hermes/README.zh-CN.md)。
 - Harness 策略同时适用于 macOS 和 Linux。macOS 使用官方桌面应用，Web 后端和私有代理是 Linux 用户服务。
 - Tailscale 的 `enable`、`incoming.enable` 和 `ssh.enable` 适用于 macOS 和 Linux；`outboundProxy` 与 `serve` 选项适用于 Linux。
 

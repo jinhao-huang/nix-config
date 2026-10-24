@@ -137,6 +137,7 @@ rec {
                   modules.proton-pass.package = selectedPackages.proton-pass-cli;
                   modules.typst.package = selectedPackages.typst;
                   modules.pi.defaults = darwinHost.pi;
+                  services.hermes-agent = darwinHost.hermes;
                   programs = {
                     mise.package = selectedPackages.mise;
                     claude-code.package = agentPackages.claude-code;
@@ -148,6 +149,7 @@ rec {
 
               home-manager.extraSpecialArgs = {
                 homeManagerUnstable = home-manager-unstable;
+                hermesAgent = hermes-agent;
                 ohMyTmux = oh-my-tmux;
               };
             }
@@ -220,6 +222,9 @@ rec {
         {
           configuration-reference = self.packages.${system}.configuration-reference.tests.up-to-date;
           ai-agent-skills = (mkPkgs nixpkgs system).callPackage ./modules/ai-agents/checks { };
+          hermes-runtime = (mkPkgs nixpkgs system).callPackage ./modules/hermes/tests.nix {
+            hermesAgent = hermes-agent;
+          };
         }
         // nixpkgs.lib.mapAttrs' (
           name: _: nixpkgs.lib.nameValuePair "${name}-home" self.homeConfigurations.${name}.activationPackage

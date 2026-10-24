@@ -9,7 +9,7 @@ flake 将主机数据、profile 和功能模块组合为 Darwin 系统及独立 
 | 位置 | 职责 |
 | --- | --- |
 | [flake.nix](../flake.nix) | 输入、软件包来源、配置组合、导出软件包及检查。 |
-| [hosts](../hosts) | 主机数据，包括每台机器的应用选择；`default.nix` 校验并合并可选 `host-local` 中的 Pi 和 Linux Hermes 覆盖配置。 |
+| [hosts](../hosts) | 主机数据，包括每台机器的应用选择；`default.nix` 校验并合并可选 `host-local` 中的 Pi 和 Hermes 覆盖配置。 |
 | [profiles/home](../profiles/home) | `common.nix` 管理共享 CLI 策略，`darwin.nix` 和 `linux.nix` 管理各平台用户选择。 |
 | [profiles/system/darwin](../profiles/system/darwin) | 共享 macOS 设置、偏好、应用和远程登录；将共享应用与每台主机的应用列表合并。 |
 | [modules](../modules) | 可独立复用的功能、功能选项和配套数据。 |
@@ -40,6 +40,7 @@ Darwin 集成 Home Manager，并管理系统 Lix 安装。Linux 选择激活和 
 | Linux 用户 profile | 先运行 `nix flake check --all-systems --no-build`，再在 Linux builder 上显式求值并构建 `homeConfigurations.<name>.activationPackage`。 |
 | 软件包 | 构建受影响的导出软件包，检查 hash、支持平台和适用的 `meta.mainProgram`；软件包输出改变时还要对所有 system 求值。 |
 | sing-box 运行逻辑或 linger 辅助程序 | 除相关 Linux 检查外，运行 `python3 modules/sing-box/tests.py`。 |
+| Hermes 运行时或激活 | `nix build --no-link .#checks.aarch64-darwin.hermes-runtime`（Linux 替换为本机 system），并完成上面的平台检查。 |
 | 内置技能或来源元数据 | `nix build --no-link .#checks.aarch64-darwin.ai-agent-skills`；Linux 替换为本机 system。 |
 | 配置参考 | 按下文重新生成，再运行 `nix build --no-link .#checks.aarch64-darwin.configuration-reference`；Linux 替换为本机 system。 |
 

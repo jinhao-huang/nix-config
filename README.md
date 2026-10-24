@@ -33,7 +33,7 @@ nix run .#deploy -- switch "$deploy_host"
 invoking `sudo -H` on macOS and running without sudo on Linux. Both commands
 create and load Git-ignored `hosts/inventory.local.nix`; it may override
 [Pi startup defaults](docs/configuration.md#pi-startup-defaults) and
-[Linux Hermes settings](modules/hermes/README.md#per-host-configuration). Keep secrets
+[Hermes settings](modules/hermes/README.md#per-host-configuration). Keep secrets
 out of Nix values, including ignored overrides: they enter the Nix store.
 
 ## Update inputs

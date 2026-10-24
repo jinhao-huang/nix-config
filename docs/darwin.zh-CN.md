@@ -55,6 +55,25 @@ pass-cli logout
 
 再次登录后执行 `switch`，在当前用户会话重新加载 agent。之后的新用户会话会自动加载。
 
+<a id="hermes"></a>
+
+## Hermes
+
+两台 Mac 默认关闭 Hermes。需要 CLI/TUI 或消息 gateway 时，按 [Hermes 主机配置与秘密文件指南](../modules/hermes/README.zh-CN.md)启用，切换后打开新 shell：
+
+```sh
+hermes --tui
+```
+
+启用 gateway 后，使用以下命令检查：
+
+```sh
+launchctl print "gui/$UID/org.nix-community.home.hermes-agent"
+tail -n 50 ~/Library/Logs/hermes-agent.err.log
+```
+
+Surge 负责出站网络。升级时更新 `hermes-agent` flake 输入并切换，不运行 `hermes update`。[Hermes 指南](../modules/hermes/README.zh-CN.md#数据路径与移除)列出了状态路径、重启行为和移除步骤。
+
 ## 远程访问与 Harness
 
 - [Tailscale 入站访问](../modules/tailscale/README.zh-CN.md)说明设备注册、连接检查和日志查看方法；出站流量继续由 Surge 处理。

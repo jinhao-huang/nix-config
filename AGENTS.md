@@ -19,9 +19,9 @@ and Linux user environments with standalone Home Manager.
 Compose choices in profiles, host data in `hosts`, reusable features in
 `modules`, and package-source selection in `flake.nix`. Use native
 `programs.*.package` options rather than passing package sets through
-`extraSpecialArgs`. Local inventory may override Pi startup defaults and Linux
-Hermes settings. Keep Pi's schema and settings generation in `modules/pi`;
-Hermes uses the official `services.hermes-agent` options.
+`extraSpecialArgs`. Local inventory may override Pi startup defaults and
+Hermes settings on either platform. Keep Pi's schema and settings generation in
+`modules/pi`; Hermes uses the official `services.hermes-agent` options.
 
 Format touched Nix files with `nixfmt`, using two-space indentation and qualified
 `lib.*` calls. Prefer attribute sets to ad hoc string concatenation, and comment

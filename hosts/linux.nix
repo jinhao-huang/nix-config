@@ -9,8 +9,6 @@
     hermes = {
       enable = true;
       gateway.enable = true;
-      hermesHome = "/home/huangjh/.hermes";
-      workingDirectory = "/home/huangjh/hermes-workspace";
       environmentFiles = [ "/home/huangjh/.config/hermes/secrets.env" ];
       environment.TELEGRAM_ALLOW_ALL_USERS = "false";
       settings.platforms.telegram.enabled = true;

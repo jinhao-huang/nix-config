@@ -59,6 +59,8 @@ with-proxy hermes --tui
 
 应实际验证模型回复和 Telegram 收发。gateway 生命周期通过 `systemctl --user` 管理。启用 sing-box 时，gateway 通过 `with-proxy` 启动，并随代理重启；不需要代理时可直接运行 `hermes`。
 
+修改设置或秘密文件后切换，也会重启活跃的 Hermes 服务。禁用或删除数据前，先查看[状态归属与移除步骤](../modules/hermes/README.zh-CN.md#数据路径与移除)。
+
 升级时更新 `hermes-agent` flake 输入并切换，不运行 `hermes update`。先备份 `~/.hermes`：Home Manager 回滚不会恢复应用状态。`hermes --version` 可能显示 `v0.0.0`，应结合输出的 commit 和 `flake.lock` 识别版本。Nix 属于上游的 [Tier 2 平台](https://hermes-agent.nousresearch.com/docs/getting-started/platform-support/)。
 
 ## DeepSeek Harness

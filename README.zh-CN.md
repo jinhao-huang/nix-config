@@ -25,7 +25,7 @@ nix run .#deploy -- build "$deploy_host"
 nix run .#deploy -- switch "$deploy_host"
 ```
 
-`build` 只构建，不激活配置。`switch` 构建并激活：macOS 内部调用 `sudo -H`，Linux 不使用 sudo。两者都会在缺少时创建被 Git 忽略的 `hosts/inventory.local.nix`，并加载其中的 [Pi 启动默认值](docs/configuration.zh-CN.md#pi-startup-defaults)和 [Linux Hermes 覆盖配置](modules/hermes/README.zh-CN.md#per-host-configuration)。已有本地文件会保留。
+`build` 只构建，不激活配置。`switch` 构建并激活：macOS 内部调用 `sudo -H`，Linux 不使用 sudo。两者都会在缺少时创建被 Git 忽略的 `hosts/inventory.local.nix`，并加载其中的 [Pi 启动默认值](docs/configuration.zh-CN.md#pi-startup-defaults)和 [Hermes 覆盖配置](modules/hermes/README.zh-CN.md#per-host-configuration)。已有本地文件会保留。
 
 密钥、令牌等秘密不能写入 Nix 值。本地覆盖文件即使被 Git 忽略，其值仍会进入 Nix store。
 
