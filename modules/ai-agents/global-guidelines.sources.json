@@ -1,0 +1,21 @@
+{
+  "hero-anti-overdefense": {
+    "repository": "https://github.com/wanshuiyin/HERO-Anti-OverDefense",
+    "revision": "fae28f06b6b6f1582b1554b334dc1525b807cedc",
+    "reviewed_on": "2026-10-25",
+    "upstream_path": "RULES.md",
+    "upstream_url": "https://github.com/wanshuiyin/HERO-Anti-OverDefense/blob/fae28f06b6b6f1582b1554b334dc1525b807cedc/RULES.md",
+    "license": "hero-anti-overdefense.LICENSE",
+    "local_path": "global-guidelines.md",
+    "sections": [
+      "Scope Limits",
+      "Finished Prose"
+    ],
+    "adaptations": [
+      "Keep provenance in this record instead of the always-loaded instructions.",
+      "Replace the HERO heading and delimiter banner with the native Scope Limits heading and an introductory sentence; format calibration examples as Markdown lists.",
+      "Keep upstream rules 1-6 and 8 in Scope Limits, renumbering rule 8 to 7; retain all six calibration examples, both counterexamples, and the verification gate.",
+      "Merge upstream rules 7 and 9 into Finished Prose, consolidating repeated process-trace instructions with existing coordination and disclosure guidance; retain the paper-writing principle and its treatment of unfavorable numbers."
+    ]
+  }
+}

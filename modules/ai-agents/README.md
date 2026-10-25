@@ -2,6 +2,15 @@
 
 English | [简体中文](README.zh-CN.md)
 
+Shared always-loaded instructions live in [global-guidelines.md](global-guidelines.md).
+HERO Anti-OverDefense rules are integrated into Scope Limits and Finished Prose.
+Keep upstream revisions, licenses, and local adaptations in
+[global-guidelines.sources.json](global-guidelines.sources.json), outside the
+loaded instructions. When updating HERO, compare the recorded upstream `RULES.md`
+with the integrated rules and update the source record and license together.
+Guidance changes take effect after a rebuild, switch, and new agent session; see
+[Agent guidance](../../docs/development.md#agent-guidance).
+
 Keep each bundled skill in `skills/<name>/`, including its scripts, references,
 assets, and any skill-specific license. Keep the directory name and the
 `SKILL.md` frontmatter name identical.

@@ -2,6 +2,8 @@
 
 [English](README.md) | [中文首页](../../README.zh-CN.md)
 
+[global-guidelines.md](global-guidelines.md) 保存自动加载的共享指令，HERO Anti-OverDefense 规则整合在 Scope Limits 和 Finished Prose 两节。上游版本、许可证和本地修改单独记录在 [global-guidelines.sources.json](global-guidelines.sources.json)，不放入加载的指令正文。更新 HERO 时，将所记录版本的上游 `RULES.md` 与整合后的规则比较，并同步更新来源记录和许可证。修改指令后，重新构建、切换并开启新的 agent 会话才会生效，见[Agent 指南](../../docs/development.zh-CN.md#agent-指南)。
+
 每个仓库内置技能放在 `skills/<name>/`，连同它的脚本、参考资料、资源文件和专属许可证一起保存。目录名必须与 `SKILL.md` frontmatter 的 `name` 一致。
 
 ## 来源与更新
