@@ -43,6 +43,7 @@ Darwin 集成 Home Manager，并管理系统 Lix 安装。Linux 选择激活和 
 | Hermes 运行时或激活 | `nix build --no-link .#checks.aarch64-darwin.hermes-runtime`（Linux 替换为本机 system），并完成上面的平台检查。 |
 | 内置技能或来源元数据 | `nix build --no-link .#checks.aarch64-darwin.ai-agent-skills`；Linux 替换为本机 system。 |
 | 配置参考 | 按下文重新生成，再运行 `nix build --no-link .#checks.aarch64-darwin.configuration-reference`；Linux 替换为本机 system。 |
+| GHCR credential helper | `nix build --no-link .#checks.aarch64-darwin.docker-credential-ghcr`；Linux 替换为本机 system，配置连接有改动时还需完成 Linux 用户 profile 检查。 |
 
 Linux 激活包注册为 `checks.<system>.<name>-home`。当前服务器可显式执行：
 
@@ -81,6 +82,7 @@ nix run .#update-configuration-reference
 | [docs/configuration.md](configuration.md) | [docs/configuration.zh-CN.md](configuration.zh-CN.md) |
 | [modules/ai-agents/README.md](../modules/ai-agents/README.md) | [modules/ai-agents/README.zh-CN.md](../modules/ai-agents/README.zh-CN.md) |
 | [modules/hermes/README.md](../modules/hermes/README.md) | [modules/hermes/README.zh-CN.md](../modules/hermes/README.zh-CN.md) |
+| [modules/docker-ghcr/README.md](../modules/docker-ghcr/README.md) | [modules/docker-ghcr/README.zh-CN.md](../modules/docker-ghcr/README.zh-CN.md) |
 | [modules/starship/README.md](../modules/starship/README.md) | [modules/starship/README.zh-CN.md](../modules/starship/README.zh-CN.md) |
 | [modules/tailscale/README.md](../modules/tailscale/README.md) | [modules/tailscale/README.zh-CN.md](../modules/tailscale/README.zh-CN.md) |
 | [profiles/system/darwin/remote-login/README.md](../profiles/system/darwin/remote-login/README.md) | [profiles/system/darwin/remote-login/README.zh-CN.md](../profiles/system/darwin/remote-login/README.zh-CN.md) |

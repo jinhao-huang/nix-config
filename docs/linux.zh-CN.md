@@ -47,6 +47,10 @@ url = "https://subscription.example/private-token?format=json"
 
 输入校验失败时会保留正在运行的代理。如果启动恢复失败，恢复上一代 Home Manager 配置和保存的私有配置；二进制程序不会自动回滚。服务日志见 `journalctl --user -u sing-box`，私有诊断快照位于 `~/.local/state/sing-box/snapshots/`。
 
+## 私有容器镜像
+
+若已启用 GHCR 集成，拉取私有镜像前完成 [GitHub CLI 认证](../modules/docker-ghcr/README.zh-CN.md#认证)。Docker daemon 和 Compose 仍由主机维护。
+
 ## Hermes
 
 完成 [Hermes 主机配置与秘密文件准备](../modules/hermes/README.zh-CN.md)后，执行[切换](../README.zh-CN.md#构建与激活)并打开新 shell。用户 linger 使 gateway 在退出登录后继续运行；需要交互时再打开 CLI/TUI：

@@ -7,6 +7,7 @@ let
   moduleEvaluation = home-manager.lib.homeManagerConfiguration {
     inherit pkgs;
     modules = [
+      ../../modules/docker-ghcr
       ../../modules/sing-box
       ../../modules/deepseek-harness
       ../../modules/tailscale/home-manager.nix
@@ -19,6 +20,7 @@ let
   };
   optionDocs = pkgs.nixosOptionsDoc {
     options.modules = lib.getAttrs [
+      "docker-ghcr"
       "sing-box"
       "deepseek-harness"
       "tailscale"

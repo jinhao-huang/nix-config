@@ -3,8 +3,8 @@
 English | [简体中文](configuration.zh-CN.md)
 
 This reference covers host inventory, Pi startup defaults, and every sing-box,
-DeepSeek Harness, and Tailscale option provided by this repository. Service option
-entries are generated from Nix declarations, including types, defaults, examples,
+DeepSeek Harness, GHCR authentication, and Tailscale option provided by this
+repository. Module option entries are generated from Nix declarations, including types, defaults, examples,
 and source links. Defaults describe the modules; profiles and host
 inventory supply the values used on a particular machine. An option without a
 default is required when its feature is enabled.
@@ -59,6 +59,7 @@ Edit [hosts/linux.nix](../hosts/linux.nix). Each top-level attribute names a
 | `authorizedKeyFiles` | Public key paths combined into Home Manager's `~/.ssh/authorized_keys`. |
 | `pi` | Optional Pi startup defaults passed to `modules.pi.defaults`; see [the schema](../modules/pi/startup-defaults-type.nix). |
 | `deepseekHarness.publicHost` | `modules.deepseek-harness.service.publicHost`, using the node's actual MagicDNS hostname. |
+| `dockerGhcr` | Optional attribute set passed to `modules.docker-ghcr`; enables GHCR authentication through a named GitHub CLI account. See [setup and login](../modules/docker-ghcr/README.md). |
 | `deepseekHarness.port` | `modules.deepseek-harness.service.port`. |
 | `deepseekHarness.proxyPort` | `modules.deepseek-harness.service.proxyPort`. |
 | `deepseekHarness.httpsPort` | `modules.tailscale.serve.httpsPort`. The Harness public port follows it. |
@@ -113,6 +114,8 @@ no keys through that managed source. These files contain public keys only;
 never add private keys. Tailscale SSH uses its own authorization policy.
 
 - sing-box runs as a Linux systemd user service.
+- GHCR authentication is enabled per host; the helper uses the host-provided
+  Docker daemon and Compose.
 - Hermes supports Linux user services and macOS launchd agents; both Macs default
   to disabled. See its [configuration guide](../modules/hermes/README.md).
 - Harness policy applies on macOS and Linux. macOS uses the official desktop
@@ -141,6 +144,8 @@ after editing either source.
 - [`modules.deepseek-harness.service.proxyPort`](#modulesdeepseek-harnessserviceproxyport)
 - [`modules.deepseek-harness.service.publicHost`](#modulesdeepseek-harnessservicepublichost)
 - [`modules.deepseek-harness.service.publicPort`](#modulesdeepseek-harnessservicepublicport)
+- [`modules.docker-ghcr.enable`](#modulesdocker-ghcrenable)
+- [`modules.docker-ghcr.githubUser`](#modulesdocker-ghcrgithubuser)
 - [`modules.sing-box.enable`](#modulessing-boxenable)
 - [`modules.sing-box.listenPort`](#modulessing-boxlistenport)
 - [`modules.sing-box.nodesFile`](#modulessing-boxnodesfile)
@@ -369,6 +374,64 @@ integer between 1 and 65535 (both inclusive)
 
 *Declared by:*
  - [modules/deepseek-harness/default\.nix](../modules/deepseek-harness/default.nix)
+
+
+
+## modules\.docker-ghcr\.enable
+
+
+
+Whether to enable Docker authentication to GHCR through GitHub CLI\.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+
+```nix
+false
+```
+
+
+
+*Example:*
+
+```nix
+true
+```
+
+*Declared by:*
+ - [modules/docker-ghcr/default\.nix](../modules/docker-ghcr/default.nix)
+
+
+
+## modules\.docker-ghcr\.githubUser
+
+
+
+GitHub account whose stored gh token is used for ghcr\.io, independent
+of gh’s active account\. Log in with read:packages at runtime; tokens
+are never included in the generated Docker configuration\.
+
+
+
+*Type:*
+string matching the pattern \[A-Za-z0-9]\[A-Za-z0-9-]\*
+
+
+
+*Example:*
+
+```nix
+"example-user"
+```
+
+*Declared by:*
+ - [modules/docker-ghcr/default\.nix](../modules/docker-ghcr/default.nix)
 
 
 

@@ -5,6 +5,10 @@
     username = "huangjh";
     homeDirectory = "/home/huangjh";
     authorizedKeyFiles = [ sshKeys.cas ];
+    dockerGhcr = {
+      enable = true;
+      githubUser = "jinhao-huang";
+    };
     pi = { };
     hermes = {
       enable = true;

@@ -2,7 +2,7 @@
 
 [English](configuration.md) | [中文首页](../README.zh-CN.md)
 
-本参考覆盖主机清单、Pi 启动默认值，以及本仓库提供的全部 sing-box、DeepSeek Harness 和 Tailscale 选项。英文服务选项条目由 Nix 声明生成，包含类型、默认值、示例与源文件链接；本中文版本按[同步规则](development.zh-CN.md#documentation-sync)手工维护。
+本参考覆盖主机清单、Pi 启动默认值，以及本仓库提供的全部 sing-box、DeepSeek Harness、GHCR 认证和 Tailscale 选项。英文模块选项条目由 Nix 声明生成，包含类型、默认值、示例与源文件链接；本中文版本按[同步规则](development.zh-CN.md#documentation-sync)手工维护。
 
 选项默认值描述模块本身，具体机器的实际值由 profile 和主机清单提供。没有默认值的选项，在启用对应功能时必须提供。
 
@@ -46,6 +46,7 @@
 | `authorizedKeyFiles` | 公钥文件路径，内容合并到 Home Manager 管理的 `~/.ssh/authorized_keys`。 |
 | `pi` | 可选 Pi 启动默认值，传给 `modules.pi.defaults`；见 [schema](../modules/pi/startup-defaults-type.nix)。 |
 | `deepseekHarness.publicHost` | `modules.deepseek-harness.service.publicHost`，使用节点实际的 MagicDNS 主机名。 |
+| `dockerGhcr` | 可选属性集，传给 `modules.docker-ghcr`；通过指定的 GitHub CLI 账号认证 GHCR。见[安装与登录](../modules/docker-ghcr/README.zh-CN.md)。 |
 | `deepseekHarness.port` | `modules.deepseek-harness.service.port`。 |
 | `deepseekHarness.proxyPort` | `modules.deepseek-harness.service.proxyPort`。 |
 | `deepseekHarness.httpsPort` | `modules.tailscale.serve.httpsPort`，Harness 公开端口随之设置。 |
@@ -80,6 +81,7 @@ singBox = {
 在 [hosts/linux.nix](../hosts/linux.nix) 或 [hosts/darwin.nix](../hosts/darwin.nix) 中为每台主机设置 `authorizedKeyFiles`。Linux 将文件内容合并到受管理的 `~/.ssh/authorized_keys`；Darwin 使用 nix-darwin 原生选项 `users.users.<name>.openssh.authorizedKeys.keyFiles`。空列表表示不通过该受管理来源授权任何密钥。文件只能包含公钥，不能加入私钥。Tailscale SSH 使用独立授权策略。
 
 - sing-box 作为 Linux systemd 用户服务运行。
+- GHCR 认证按主机启用，helper 使用主机提供的 Docker daemon 和 Compose。
 - Hermes 支持 Linux 用户服务和 macOS launchd agent，两台 Mac 默认关闭。见[配置指南](../modules/hermes/README.zh-CN.md)。
 - Harness 策略同时适用于 macOS 和 Linux。macOS 使用官方桌面应用，Web 后端和私有代理是 Linux 用户服务。
 - Tailscale 的 `enable`、`incoming.enable` 和 `ssh.enable` 适用于 macOS 和 Linux；`outboundProxy` 与 `serve` 选项适用于 Linux。
@@ -99,6 +101,8 @@ singBox = {
 - [`modules.deepseek-harness.service.proxyPort`](#modulesdeepseek-harnessserviceproxyport)
 - [`modules.deepseek-harness.service.publicHost`](#modulesdeepseek-harnessservicepublichost)
 - [`modules.deepseek-harness.service.publicPort`](#modulesdeepseek-harnessservicepublicport)
+- [`modules.docker-ghcr.enable`](#modulesdocker-ghcrenable)
+- [`modules.docker-ghcr.githubUser`](#modulesdocker-ghcrgithubuser)
 - [`modules.sing-box.enable`](#modulessing-boxenable)
 - [`modules.sing-box.listenPort`](#modulessing-boxlistenport)
 - [`modules.sing-box.nodesFile`](#modulessing-boxnodesfile)
@@ -268,6 +272,46 @@ integer between 1 and 65535 (both inclusive)
 *声明来源：*
 
 - [modules/deepseek-harness/default\.nix](../modules/deepseek-harness/default.nix)
+
+## modules\.docker-ghcr\.enable
+
+是否通过 GitHub CLI 为 Docker 启用 GHCR 认证。
+
+*类型：*
+boolean
+
+*默认值：*
+
+```nix
+false
+```
+
+*示例：*
+
+```nix
+true
+```
+
+*声明来源：*
+
+- [modules/docker-ghcr/default\.nix](../modules/docker-ghcr/default.nix)
+
+## modules\.docker-ghcr\.githubUser
+
+用于访问 ghcr.io 的 GitHub 账号，helper 读取该账号保存在 gh 中的令牌，不受 gh 当前活跃账号影响。需要在运行时以 `read:packages` 权限登录；令牌不会进入生成的 Docker 配置。
+
+*类型：*
+string matching the pattern \[A-Za-z0-9]\[A-Za-z0-9-]\*
+
+*示例：*
+
+```nix
+"example-user"
+```
+
+*声明来源：*
+
+- [modules/docker-ghcr/default\.nix](../modules/docker-ghcr/default.nix)
 
 ## modules\.sing-box\.enable
 

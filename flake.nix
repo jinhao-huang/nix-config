@@ -201,6 +201,7 @@ rec {
               ) host.authorizedKeyFiles;
               modules.pi.defaults = host.pi;
               services.hermes-agent = host.hermes;
+              modules.docker-ghcr = host.dockerGhcr or { };
               modules.tailscale.package = self.packages.${host.system}.tailscale;
               programs.mise.package = self.packages.${host.system}.mise;
               programs.pi-coding-agent.package = llm-agents.packages.${host.system}.pi;
@@ -221,6 +222,9 @@ rec {
         system:
         {
           configuration-reference = self.packages.${system}.configuration-reference.tests.up-to-date;
+          docker-credential-ghcr =
+            (mkPkgs nixpkgs system).callPackage ./packages/docker-credential-ghcr/tests.nix
+              { };
           ai-agent-skills = (mkPkgs nixpkgs system).callPackage ./modules/ai-agents/checks { };
           hermes-runtime = (mkPkgs nixpkgs system).callPackage ./modules/hermes/tests.nix {
             hermesAgent = hermes-agent;

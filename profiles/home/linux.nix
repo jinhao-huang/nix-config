@@ -28,6 +28,7 @@ in
     ./common.nix
     ./hermes.nix
     ../../modules/mise
+    ../../modules/docker-ghcr
     ../../modules/pi
     ../../modules/deepseek-harness
     ../../modules/ai-agents

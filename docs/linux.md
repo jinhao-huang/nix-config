@@ -74,6 +74,12 @@ restore the previous Home Manager generation and saved private configuration;
 binaries are not rolled back automatically. Logs: `journalctl --user -u sing-box`;
 private diagnostics: `~/.local/state/sing-box/snapshots/`.
 
+## Private container images
+
+If GHCR integration is enabled, complete the
+[GitHub CLI authentication](../modules/docker-ghcr/README.md#authenticate)
+before pulling private images. The Docker daemon and Compose remain host-owned.
+
 ## Hermes
 
 Complete the [host and secret configuration](../modules/hermes/README.md), then

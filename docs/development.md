@@ -67,6 +67,7 @@ it does not build checks or complete Darwin closures.
 | Hermes runtime or activation | `nix build --no-link .#checks.aarch64-darwin.hermes-runtime` (substitute the native system on Linux), plus the platform checks above. |
 | Bundled skills or source metadata | `nix build --no-link .#checks.aarch64-darwin.ai-agent-skills` (substitute the native system on Linux). |
 | Configuration reference | Regenerate as below, then run `nix build --no-link .#checks.aarch64-darwin.configuration-reference` (substitute the native system on Linux). |
+| GHCR credential helper | `nix build --no-link .#checks.aarch64-darwin.docker-credential-ghcr` (substitute the native system on Linux), plus Linux home-profile checks when wiring changes. |
 
 Linux activation packages are registered as `checks.<system>.<name>-home`.
 For the current server, explicit evaluation and build commands are:
@@ -114,6 +115,7 @@ and agent-input language conventions. The following table defines coverage:
 | [docs/configuration.md](configuration.md) | [docs/configuration.zh-CN.md](configuration.zh-CN.md) |
 | [modules/ai-agents/README.md](../modules/ai-agents/README.md) | [modules/ai-agents/README.zh-CN.md](../modules/ai-agents/README.zh-CN.md) |
 | [modules/hermes/README.md](../modules/hermes/README.md) | [modules/hermes/README.zh-CN.md](../modules/hermes/README.zh-CN.md) |
+| [modules/docker-ghcr/README.md](../modules/docker-ghcr/README.md) | [modules/docker-ghcr/README.zh-CN.md](../modules/docker-ghcr/README.zh-CN.md) |
 | [modules/starship/README.md](../modules/starship/README.md) | [modules/starship/README.zh-CN.md](../modules/starship/README.zh-CN.md) |
 | [modules/tailscale/README.md](../modules/tailscale/README.md) | [modules/tailscale/README.zh-CN.md](../modules/tailscale/README.zh-CN.md) |
 | [profiles/system/darwin/remote-login/README.md](../profiles/system/darwin/remote-login/README.md) | [profiles/system/darwin/remote-login/README.zh-CN.md](../profiles/system/darwin/remote-login/README.zh-CN.md) |
