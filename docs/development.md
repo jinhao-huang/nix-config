@@ -70,11 +70,12 @@ it does not build checks or complete Darwin closures.
 | GHCR credential helper | `nix build --no-link .#checks.aarch64-darwin.docker-credential-ghcr` (substitute the native system on Linux), plus Linux home-profile checks when wiring changes. |
 
 Linux activation packages are registered as `checks.<system>.<name>-home`.
-For the current server, explicit evaluation and build commands are:
+For a Linux host, replace `example-host` with its inventory key:
 
 ```sh
-nix eval --raw .#homeConfigurations.iscas-r750xa.activationPackage.drvPath
-nix build --no-link .#homeConfigurations.iscas-r750xa.activationPackage
+deploy_host=example-host
+nix eval --raw ".#homeConfigurations.${deploy_host}.activationPackage.drvPath"
+nix build --no-link ".#homeConfigurations.${deploy_host}.activationPackage"
 ```
 
 ## Generated reference
@@ -91,6 +92,17 @@ The `configuration-reference` package also exports machine-readable
 `options.json`. Generation reads no secrets and activates no services.
 
 ## Documentation sync
+
+Public guides may use role names such as `laptop` and `desktop` and describe
+their configuration. Use placeholders or home-relative paths for names,
+accounts, network addresses, and deployment paths that identify real machines.
+Keep those deployment details in host configuration. Preserve real option and
+input names in commands.
+
+When anonymizing a home directory, preserve the useful path beneath it, such as
+`.config/hermes/secrets.env`. Keep shared setup and activation procedures in
+the platform guides; feature guides link to that flow and document their own
+configuration and runtime steps.
 
 Maintain English documentation and its Simplified Chinese companion in the same
 change. A change to behavior, prerequisites, commands, host fields, option names,

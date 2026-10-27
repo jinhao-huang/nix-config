@@ -9,6 +9,9 @@ Use this as the only host Tailscale daemon; Surge's embedded client is separate.
 
 ## Enroll and connect
 
+After [macOS first activation](../../docs/darwin.md#first-activation), enroll
+the installed daemon once. Later starts reuse its saved identity.
+
 `enabled = true` requests a running connection but does not initiate browser
 authentication while logged out. For first enrollment, trigger authentication
 without modifying locked preferences:
@@ -22,8 +25,8 @@ The first command normally returns no response body. Authentication is
 asynchronous; retry status after a few seconds if `AuthURL` is still empty.
 Open that URL in a browser and approve the device, then confirm
 `BackendState` becomes `Running`. Connect to this node's address from
-`sudo tailscale ip -4`, rather than Surge's node. Subsequent starts reuse the
-identity. If authentication stalls, inspect the logs below.
+`sudo tailscale ip -4`, rather than Surge's node. If authentication stalls,
+inspect the logs below.
 
 Ordinary TCP/UDP traffic is forwarded to `127.0.0.1` on the same port; services
 must listen there and generally see a local source address. Tailnet rules should

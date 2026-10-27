@@ -45,11 +45,12 @@ Darwin 集成 Home Manager，并管理系统 Lix 安装。Linux 选择激活和 
 | 配置参考 | 按下文重新生成，再运行 `nix build --no-link .#checks.aarch64-darwin.configuration-reference`；Linux 替换为本机 system。 |
 | GHCR credential helper | `nix build --no-link .#checks.aarch64-darwin.docker-credential-ghcr`；Linux 替换为本机 system，配置连接有改动时还需完成 Linux 用户 profile 检查。 |
 
-Linux 激活包注册为 `checks.<system>.<name>-home`。当前服务器可显式执行：
+Linux 激活包注册为 `checks.<system>.<name>-home`。对 Linux 主机求值和构建时，将 `example-host` 替换为清单中的键名：
 
 ```sh
-nix eval --raw .#homeConfigurations.iscas-r750xa.activationPackage.drvPath
-nix build --no-link .#homeConfigurations.iscas-r750xa.activationPackage
+deploy_host=example-host
+nix eval --raw ".#homeConfigurations.${deploy_host}.activationPackage.drvPath"
+nix build --no-link ".#homeConfigurations.${deploy_host}.activationPackage"
 ```
 
 <a id="generated-reference"></a>
@@ -67,6 +68,10 @@ nix run .#update-configuration-reference
 <a id="documentation-sync"></a>
 
 ## 文档同步规则
+
+公开指南可以使用 `laptop`、`desktop` 等角色名并说明其配置。对于能定位真实机器的名称、账号、网络地址和部署路径，使用占位符或相对 home 目录的写法，实际部署细节留在主机配置中。命令里的真实选项名和输入名保持准确。
+
+泛化 home 目录时，保留其下有用的路径结构，例如 `.config/hermes/secrets.env`。统一的安装和激活流程放在平台指南中，功能文档链接到该流程，只说明自身的配置和运行步骤。
 
 英文文档与简体中文版本必须在同一次变更中维护。行为、前置条件、命令、主机字段、选项名、类型、默认值、示例、验证方式或维护流程发生变化时，都要检查两种语言的文档。无论修正最初发生在哪一种语言，只要改变含义，就要同步另一种。行为以代码和 Nix 声明为准；文档冲突时，先核对实现，再修正两种版本。
 

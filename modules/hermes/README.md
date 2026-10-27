@@ -11,8 +11,8 @@ memory, scheduled jobs, and locally created skills remain writable.
 Set `hermes` in [hosts/linux.nix](../../hosts/linux.nix) or
 [hosts/darwin.nix](../../hosts/darwin.nix). Fields map to official
 [`services.hermes-agent` options](https://hermes-agent.nousresearch.com/docs/getting-started/nix-setup#home-manager-module).
-`iscas-r750xa` enables the messaging gateway; `laptop` and `desktop` disable both
-Hermes and the gateway. `hermes.enable = true` installs the CLI and manages its
+Enable Hermes and its gateway separately per host.
+`hermes.enable = true` installs the CLI and manages its
 configuration. `hermes.gateway.enable = true` additionally runs a systemd user
 service on Linux or a launchd agent on macOS. Leave the gateway disabled for
 CLI/TUI use only. The optional web backend remains disabled by default.
@@ -28,7 +28,7 @@ needed. Platform profiles own environment hints and proxy integration.
 Add host-specific values to Git-ignored `hosts/inventory.local.nix`. Hermes
 attributes merge recursively; scalars and lists replace tracked values. Use the
 [deployment command](../../README.md#build-and-switch) to load this file.
-Replace the following model values to enable CLI/TUI use on a Mac:
+Replace the model values and secret-file path to enable CLI/TUI use on a Mac:
 
 ```nix
 {
@@ -41,12 +41,14 @@ Replace the following model values to enable CLI/TUI use on a Mac:
       base_url = "https://llm.example.internal/v1";
       api_mode = "chat_completions";
     };
-    environmentFiles = [ "/Users/jinhaohuang/.config/hermes/secrets.env" ];
+    environmentFiles = [ "/Users/example/.config/hermes/secrets.env" ];
   };
 }
 ```
 
-Use `iscas-r750xa.hermes` for server overrides. Local validation requires both
+Replace `/Users/example` with the managed user's absolute home directory;
+keep `.config/hermes/secrets.env` as the secret-file location. Use the target
+inventory key for other hosts. Local validation requires both
 `settings.model.provider` and `settings.model.default`. A custom endpoint also
 needs the correct `base_url` and API protocol. For Telegram, supply
 `environment.TELEGRAM_ALLOWED_USERS` as comma-separated numeric user IDs. To
@@ -54,13 +56,13 @@ receive proactive messages or cron results, also set
 `environment.TELEGRAM_HOME_CHANNEL`.
 
 Local Nix values enter the Nix store. Keep keys and tokens in private runtime
-files. The tracked inventory supplies no model or allowed user IDs; prepare
-them before switching an enabled host.
+files. Prepare model settings and allowed user IDs before switching an enabled host.
 
 ## Secrets and activation
 
-The Linux host reads `/home/huangjh/.config/hermes/secrets.env`. Create the
-user-owned file with mode `0600` or `0400` and its parent with mode `0700`:
+Keep the secret file at `~/.config/hermes/secrets.env`, outside Git, and declare
+its absolute path in `hermes.environmentFiles`. Create the user-owned file with
+mode `0600` or `0400` and its parent with mode `0700`:
 
 ```dotenv
 OPENAI_API_KEY=replace-on-the-server
@@ -73,7 +75,9 @@ unreadable or non-private secret files, missing Telegram tokens, invalid user
 IDs, and public Telegram access. Builds do not require runtime secrets. These
 checks do not test external authentication.
 
-Switch after changing settings or a secret file. Activation:
+Prepare these inputs before the platform guide's first activation. For later
+settings or secret-file changes, use the repository's routine build and switch
+flow. Activation:
 
 1. Validates inputs before the Home Manager write boundary and again before
    applying state.
@@ -100,6 +104,18 @@ Regression checks run with:
 nix build --no-link .#checks.aarch64-darwin.hermes-runtime
 ```
 
+## Maintenance
+
+To enable Hermes after initial setup, prepare the configuration and secret file
+above, then use the [routine rebuild flow](../../README.md#build-and-switch).
+Open a new CLI session after switching; check the gateway only if it is enabled.
+
+Upgrade the `hermes-agent` flake input and switch; avoid `hermes update`. Back up
+`~/.hermes` first: Home Manager rollback does not restore application state.
+`hermes --version` may show `v0.0.0`; identify the build by its printed commit and
+`flake.lock`. Nix is an upstream
+[Tier 2 platform](https://hermes-agent.nousresearch.com/docs/getting-started/platform-support/).
+
 ## Configuration ownership and isolation
 
 Managed mode blocks ordinary setup, config mutation, update, and gateway
@@ -120,13 +136,14 @@ Codex/Claude logins; it does not restrict shell access to those files.
 
 ## Data paths and removal
 
-| Data | Linux host | macOS when enabled |
+| Data | Linux | macOS when enabled |
 | --- | --- | --- |
-| State root (`hermesHome`) | `/home/huangjh/.hermes` | `/Users/jinhaohuang/.hermes` |
-| Workspace (`workingDirectory`) | `/home/huangjh/hermes-workspace` | `/Users/jinhaohuang/hermes-workspace` |
-| Secret source (`environmentFiles`) | `/home/huangjh/.config/hermes/secrets.env` | Explicit runtime paths; the example above uses `~/.config/hermes/secrets.env` |
+| State root (`hermesHome`) | `~/.hermes` | `~/.hermes` |
+| Workspace (`workingDirectory`) | `~/hermes-workspace` | `~/hermes-workspace` |
+| Secret source (`environmentFiles`) | `~/.config/hermes/secrets.env` | `~/.config/hermes/secrets.env` |
 | Service logs | User journal for `hermes-agent` / `hermes-backend` | `~/Library/Logs/hermes-agent.log`, `hermes-agent.err.log`; corresponding `hermes-backend` files if enabled |
 
+Here `~` denotes the managed user's home directory.
 The state root contains `config.yaml`, the credential copy `.env`, `.managed`,
 optional `auth.json` and MCP tokens, `state.db`, sessions, memories, cron jobs
 and outputs, skills, plugins, caches, and application logs. `.restart-needed`

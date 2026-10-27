@@ -6,8 +6,8 @@
 
 ## 维护
 
-`plain-text-symbols.toml` 由 Starship preset 命令生成。需要更新时，例如升级 Starship 后，执行：
+`plain-text-symbols.toml` 由 Starship preset 命令生成。需要更新时，例如升级 Starship 后，在仓库根目录执行：
 
 ```bash
-starship preset plain-text-symbols > ~/nix-config/modules/starship/plain-text-symbols.toml
+starship preset plain-text-symbols > modules/starship/plain-text-symbols.toml
 ```

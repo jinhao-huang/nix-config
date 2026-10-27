@@ -8,6 +8,12 @@ Home Manager and leaves the host OS and Nix daemon to its administrator.
 
 ## Setup and documentation
 
+Have Nix or Lix and Git available, then check out the repository at
+`~/nix-config`. The profiles use that location for live AI skill links; if you
+choose another location, update `modules.ai-agents.repoRelativePath` in the home
+profile before activation. Follow one platform guide through its preparation,
+first activation, and authentication steps.
+
 | Task | Guide |
 | --- | --- |
 | Set up a Mac; authenticate GitHub CLI and Proton Pass | [macOS](docs/darwin.md) |
@@ -19,17 +25,18 @@ Home Manager and leaves the host OS and Nix daemon to its administrator.
 
 ## Build and switch
 
-Run from this checkout as the regular user, after completing the platform's
-setup guide. Choose `laptop` or `desktop` for macOS, or a host from
+These are routine rebuild commands for an already configured machine; the
+platform guide owns first activation. Run as the regular user from the checkout.
+Choose `laptop` or `desktop` for macOS, or a host from
 [hosts/linux.nix](hosts/linux.nix) for Linux:
 
 ```sh
-deploy_host=laptop # Or desktop / iscas-r750xa
+deploy_host=laptop # Or desktop; use your Linux inventory key on Linux.
 nix run .#deploy -- build "$deploy_host"
 nix run .#deploy -- switch "$deploy_host"
 ```
 
-`build` does not activate the configuration. `switch` builds and activates it,
+Use `build` when you want to check a build without activating it. `switch` builds and activates it,
 invoking `sudo -H` on macOS and running without sudo on Linux. Both commands
 create and load Git-ignored `hosts/inventory.local.nix`; it may override
 [Pi startup defaults](docs/configuration.md#pi-startup-defaults) and

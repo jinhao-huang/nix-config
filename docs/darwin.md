@@ -6,26 +6,39 @@ Run from the repository root as the regular user. Select the machine's role;
 it is independent of the hardware model and macOS hostname:
 
 ```sh
-darwin_profile=laptop # Use desktop on the desktop Mac.
+deploy_host=laptop # Use desktop on the desktop Mac.
 ```
 
 Set this variable again in each new shell.
 
-## First activation
+## Before first activation
 
-Nix must already be installed. If the build needs transparent proxying, place
+Nix and Git must already be installed. Check `username`, `homeDirectory`,
+`authorizedKeyFiles`, and the application choices in
+[hosts/darwin.nix](../hosts/darwin.nix) for the selected role. If enabling
+Hermes, prepare its [model settings and secret file](../modules/hermes/README.md)
+now; otherwise leave it disabled for this activation.
+
+If the build needs transparent proxying, place
 the official Surge Mac release at `/Applications/Surge.app`, open it, and enable
 Enhanced Mode first. Homebrew Bundle adopts this copy as the managed `surge`
 cask during activation.
 
-Authenticate Proton Pass before its launch agent starts, then activate
-nix-darwin. These commands also work before `darwin-rebuild` is available:
+Authenticate Proton Pass before its launch agent starts:
 
 ```sh
 nix --extra-experimental-features "nix-command flakes" \
   run .#proton-pass-cli -- login
+```
+
+## First activation
+
+Activate nix-darwin once after the preparation above. This command also works
+before `darwin-rebuild` is available:
+
+```sh
 nix --extra-experimental-features "nix-command flakes" \
-  run .#deploy -- switch "$darwin_profile"
+  run .#deploy -- switch "$deploy_host"
 ```
 
 Nix may ask to trust this flake's `cache.numtide.com` substituter and public key.
@@ -35,7 +48,7 @@ after activation to load the environment.
 
 ## GitHub CLI
 
-Sign in after activation:
+Sign in once after activation; later shells reuse the saved login:
 
 ```sh
 gh auth login --web --git-protocol ssh --skip-ssh-key
@@ -46,32 +59,10 @@ gh auth status
 uses the system credential store when available. Keep it out of Nix values;
 inject `GH_TOKEN` from a runtime secret store for headless automation.
 
-## Proton Pass session recovery and logout
-
-If activation preceded authentication, stop the agent before logging in, then
-reactivate:
-
-```sh
-launchctl bootout "gui/$UID/org.nix-community.home.proton-pass-ssh-agent" 2>/dev/null || true
-pass-cli login
-nix run .#deploy -- switch "$darwin_profile"
-```
-
-Stop the agent before explicitly logging out so loaded SSH keys leave memory:
-
-```sh
-launchctl bootout "gui/$UID/org.nix-community.home.proton-pass-ssh-agent" 2>/dev/null || true
-pass-cli logout
-```
-
-After logging in again, switch to reload the agent in the current user session.
-Future user sessions load it automatically.
-
 ## Hermes
 
-Hermes is optional and disabled on both Macs. Follow its
-[host configuration and secret-file guide](../modules/hermes/README.md) to enable
-CLI/TUI use or a messaging gateway, then switch and open a new shell:
+Hermes is optional and disabled on `laptop` and `desktop` by default. If you
+enabled it before activation, open the CLI/TUI:
 
 ```sh
 hermes --tui
@@ -84,9 +75,9 @@ launchctl print "gui/$UID/org.nix-community.home.hermes-agent"
 tail -n 50 ~/Library/Logs/hermes-agent.err.log
 ```
 
-Surge handles egress. Update the `hermes-agent` flake input and switch instead of
-running `hermes update`. The [Hermes guide](../modules/hermes/README.md#data-paths-and-removal)
-lists state paths, restart behavior, and removal steps.
+Surge handles egress. To enable Hermes later or update it, follow the
+[Hermes configuration and maintenance guide](../modules/hermes/README.md), then
+use the routine rebuild flow. Do not run `hermes update`.
 
 ## Remote access and Harness
 
@@ -100,4 +91,27 @@ lists state paths, restart behavior, and removal steps.
   additional session-log uploads, and Desktop product analytics; model requests
   still send task context.
 
+## Maintenance and recovery
+
 For routine rebuilds and input updates, see the [README](../README.md).
+The following Proton Pass steps are recovery and logout procedures, not part
+of first setup.
+
+If activation preceded authentication, stop the agent before logging in, then
+reactivate:
+
+```sh
+launchctl bootout "gui/$UID/org.nix-community.home.proton-pass-ssh-agent" 2>/dev/null || true
+pass-cli login
+nix run .#deploy -- switch "$deploy_host"
+```
+
+Stop the agent before explicitly logging out so loaded SSH keys leave memory:
+
+```sh
+launchctl bootout "gui/$UID/org.nix-community.home.proton-pass-ssh-agent" 2>/dev/null || true
+pass-cli logout
+```
+
+After logging in again, switch to reload the agent in the current user session.
+Future user sessions load it automatically.

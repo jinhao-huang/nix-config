@@ -8,7 +8,7 @@ Linux 和 macOS 均使用官方 Home Manager 模块。Nix 管理程序、服务�
 
 ## 每台主机的配置
 
-在 [hosts/linux.nix](../../hosts/linux.nix) 或 [hosts/darwin.nix](../../hosts/darwin.nix) 中设置 `hermes`，字段对应官方 [`services.hermes-agent` 选项](https://hermes-agent.nousresearch.com/docs/getting-started/nix-setup#home-manager-module)。`iscas-r750xa` 启用消息 gateway，`laptop` 和 `desktop` 默认关闭 Hermes 和 gateway。`hermes.enable = true` 安装 CLI 并管理配置；再设置 `hermes.gateway.enable = true`，就会在 Linux 运行 systemd 用户服务，在 macOS 运行 launchd agent。只使用 CLI/TUI 时保持 gateway 关闭。可选 Web 后端默认关闭。
+在 [hosts/linux.nix](../../hosts/linux.nix) 或 [hosts/darwin.nix](../../hosts/darwin.nix) 中设置 `hermes`，字段对应官方 [`services.hermes-agent` 选项](https://hermes-agent.nousresearch.com/docs/getting-started/nix-setup#home-manager-module)。Hermes 与消息 gateway 按主机分别启用。`hermes.enable = true` 安装 CLI 并管理配置；再设置 `hermes.gateway.enable = true`，就会在 Linux 运行 systemd 用户服务，在 macOS 运行 launchd agent。只使用 CLI/TUI 时保持 gateway 关闭。可选 Web 后端默认关闭。
 
 [共享策略](../../profiles/home/hermes.nix) 关闭更新检查、自动借用 Codex／Claude 登录（`auth.adopt_external_logins`）和按需安装依赖（`security.allow_lazy_installs`）。需要额外依赖时，通过 `extraPackages`、`extraDependencyGroups` 或 `extraPythonPackages` 声明。平台 profile 负责环境提示和代理接线。
 
@@ -16,7 +16,7 @@ Linux 和 macOS 均使用官方 Home Manager 模块。Nix 管理程序、服务�
 
 ### 本地覆盖
 
-将主机专属值写入被 Git 忽略的 `hosts/inventory.local.nix`，使用[部署命令](../../README.zh-CN.md#构建与激活)加载。Hermes 属性递归合并，标量和列表替换已跟踪的值。例如，在 Mac 上启用 CLI/TUI 时，替换下面的模型示例值：
+将主机专属值写入被 Git 忽略的 `hosts/inventory.local.nix`，使用[部署命令](../../README.zh-CN.md#构建与激活)加载。Hermes 属性递归合并，标量和列表替换已跟踪的值。在 Mac 上启用 CLI/TUI 时，替换下面的模型值和秘密文件路径：
 
 ```nix
 {
@@ -29,18 +29,18 @@ Linux 和 macOS 均使用官方 Home Manager 模块。Nix 管理程序、服务�
       base_url = "https://llm.example.internal/v1";
       api_mode = "chat_completions";
     };
-    environmentFiles = [ "/Users/jinhaohuang/.config/hermes/secrets.env" ];
+    environmentFiles = [ "/Users/example/.config/hermes/secrets.env" ];
   };
 }
 ```
 
-服务器覆盖使用 `iscas-r750xa.hermes`。本地校验要求同时设置 `settings.model.provider` 和 `settings.model.default`；自定义端点还需正确的 `base_url` 和 API 协议。Telegram 需要 `environment.TELEGRAM_ALLOWED_USERS`，值为逗号分隔的数字用户 ID。如果要接收主动消息或 cron 结果，还需设置 `environment.TELEGRAM_HOME_CHANNEL`。
+将 `/Users/example` 替换为受管理用户的 home 目录绝对路径，保留 `.config/hermes/secrets.env` 这一秘密文件位置。其他主机使用对应清单的键名。本地校验要求同时设置 `settings.model.provider` 和 `settings.model.default`；自定义端点还需正确的 `base_url` 和 API 协议。Telegram 需要 `environment.TELEGRAM_ALLOWED_USERS`，值为逗号分隔的数字用户 ID。如果要接收主动消息或 cron 结果，还需设置 `environment.TELEGRAM_HOME_CHANNEL`。
 
-本地 Nix 值仍会进入 Nix store，密钥和令牌应保存在私有运行时文件中。已跟踪的清单不提供模型或允许访问的用户 ID；为已启用的主机切换配置前，先准备这些值。
+本地 Nix 值仍会进入 Nix store，密钥和令牌应保存在私有运行时文件中。为已启用的主机切换配置前，先准备模型设置和允许访问的用户 ID。
 
 ## 秘密文件与激活
 
-Linux 主机读取 `/home/huangjh/.config/hermes/secrets.env`。创建该文件时，所有者为当前用户，权限使用 `0600` 或 `0400`，父目录使用 `0700`：
+将秘密文件放在 Git 之外的 `~/.config/hermes/secrets.env`，并在 `hermes.environmentFiles` 中声明其绝对路径。文件应归当前用户所有，权限使用 `0600` 或 `0400`，父目录使用 `0700`：
 
 ```dotenv
 OPENAI_API_KEY=replace-on-the-server
@@ -49,7 +49,7 @@ TELEGRAM_BOT_TOKEN=replace-on-the-server
 
 模型凭据变量应与实际提供商匹配。只使用 CLI 的 Mac 不需要 Telegram token。激活会拒绝缺少模型设置、秘密文件不可读或权限过宽、缺少 Telegram token、用户 ID 无效，以及允许 Telegram 公开访问等情况。构建不需要运行时秘密文件；这些校验也不验证外部认证是否成功。
 
-修改设置或秘密文件后执行 `switch`。激活流程会：
+在平台指南的首次激活前准备好这些输入。之后修改设置或秘密文件时，使用仓库统一的日常构建与激活流程。激活流程会：
 
 1. 在 Home Manager 写入边界之前校验输入，并在应用状态前再次校验。
 2. 创建或修复 Hermes 状态根目录及受管理状态子目录，将权限设为 `0700`。新状态文件使用私有 umask。
@@ -62,6 +62,14 @@ TELEGRAM_BOT_TOKEN=replace-on-the-server
 nix build --no-link .#checks.aarch64-darwin.hermes-runtime
 ```
 
+<a id="maintenance"></a>
+
+## 维护
+
+首次安装后再启用 Hermes 时，先准备上面的配置和秘密文件，再使用[日常重新构建流程](../../README.zh-CN.md#构建与激活)。切换后打开新的 CLI 会话，仅在启用 gateway 时检查其服务。
+
+升级时更新 `hermes-agent` flake 输入并切换，不运行 `hermes update`。先备份 `~/.hermes`：Home Manager 回滚不会恢复应用状态。`hermes --version` 可能显示 `v0.0.0`，应结合输出的 commit 和 `flake.lock` 识别版本。Nix 属于上游的 [Tier 2 平台](https://hermes-agent.nousresearch.com/docs/getting-started/platform-support/)。
+
 ## 配置归属与隔离
 
 受管模式会阻止常规 setup、配置修改、更新和 gateway 安装命令。持久默认值应修改 Nix 后切换。受管标记属于应用约定，并非文件系统权限边界：账号所有者仍可编辑普通文件，切换会恢复受管理的 YAML 和环境值。
@@ -72,14 +80,14 @@ nix build --no-link .#checks.aarch64-darwin.hermes-runtime
 
 ## 数据路径与移除
 
-| 数据 | Linux 主机 | macOS 启用后 |
+| 数据 | Linux | macOS 启用后 |
 | --- | --- | --- |
-| 状态根目录（`hermesHome`） | `/home/huangjh/.hermes` | `/Users/jinhaohuang/.hermes` |
-| 工作目录（`workingDirectory`） | `/home/huangjh/hermes-workspace` | `/Users/jinhaohuang/hermes-workspace` |
-| 秘密源文件（`environmentFiles`） | `/home/huangjh/.config/hermes/secrets.env` | 显式指定的运行时路径；上面的示例使用 `~/.config/hermes/secrets.env` |
+| 状态根目录（`hermesHome`） | `~/.hermes` | `~/.hermes` |
+| 工作目录（`workingDirectory`） | `~/hermes-workspace` | `~/hermes-workspace` |
+| 秘密源文件（`environmentFiles`） | `~/.config/hermes/secrets.env` | `~/.config/hermes/secrets.env` |
 | 服务日志 | `hermes-agent`／`hermes-backend` 的用户 journal | `~/Library/Logs/hermes-agent.log`、`hermes-agent.err.log`；启用后端时还有对应的 `hermes-backend` 文件 |
 
-状态根目录包含 `config.yaml`、凭据副本 `.env`、`.managed`、可能产生的 `auth.json` 和 MCP tokens，以及 `state.db`、会话、记忆、cron 任务及输出、技能、插件、缓存和应用日志。`.restart-needed` 是私有的空文件，用于标记待处理的服务重启。路径可以按主机覆盖，删除前应核对实际配置。
+这里的 `~` 表示受管理用户的 home 目录。状态根目录包含 `config.yaml`、凭据副本 `.env`、`.managed`、可能产生的 `auth.json` 和 MCP tokens，以及 `state.db`、会话、记忆、cron 任务及输出、技能、插件、缓存和应用日志。`.restart-needed` 是私有的空文件，用于标记待处理的服务重启。路径可以按主机覆盖，删除前应核对实际配置。
 
 设置 `hermes.enable = false` 并切换，会移除受管理的程序和服务。随后确认 gateway、后端和交互进程都已停止。禁用会保留状态、工作文件、秘密源文件和受管标记。永久删除是独立操作：先备份需要保留的内容，再明确删除选定的状态根目录、workspace、专用秘密文件和 macOS 日志文件。旧 Home Manager／nix-darwin generation 会继续引用软件，直到清理 generation 并执行垃圾回收；Linux journal 的保留策略独立管理。
 
