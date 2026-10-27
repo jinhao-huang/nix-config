@@ -43,7 +43,7 @@ gh auth login --web --git-protocol ssh --skip-ssh-key
 gh auth status
 ```
 
-`--skip-ssh-key` 将 SSH 密钥管理留给 Proton Pass agent。系统凭据存储可用时，GitHub CLI 会把令牌保存在其中。不要将令牌写入 Nix 值；无界面的自动化任务应从运行时秘密存储注入 `GH_TOKEN`。
+这些参数保留现有 agent 配置，协议选择及其对认证的影响见 [GitHub CLI、SSH 与签名](../modules/gh/README.zh-CN.md)。系统凭据存储可用时，GitHub CLI 会把令牌保存在其中。不要将令牌写入 Nix 值；无界面的自动化任务应从运行时秘密存储注入 `GH_TOKEN`。
 
 <a id="hermes"></a>
 

@@ -31,9 +31,15 @@ the `gh` login or refresh command with `with-proxy`.
 
 ```sh
 github_user=example-user
-gh auth login --hostname github.com --web --scopes read:packages
+gh auth login --hostname github.com --web \
+  --git-protocol ssh --skip-ssh-key --scopes read:packages
 gh auth status --hostname github.com
 ```
+
+The flags retain the repository's SSH preference and skip SSH key generation
+and upload. Git signing and GHCR token authentication remain independent; see
+[GitHub CLI, SSH, and signing](../gh/README.md) for the existing agent setup,
+protocol tradeoffs, and correction of a previous HTTPS choice.
 
 Complete the device authorization in a browser, signing in as the configured
 account. It must have read access to the packages you want to pull. Later shells

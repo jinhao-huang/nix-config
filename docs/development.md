@@ -128,6 +128,7 @@ and agent-input language conventions. The following table defines coverage:
 | [modules/ai-agents/README.md](../modules/ai-agents/README.md) | [modules/ai-agents/README.zh-CN.md](../modules/ai-agents/README.zh-CN.md) |
 | [modules/hermes/README.md](../modules/hermes/README.md) | [modules/hermes/README.zh-CN.md](../modules/hermes/README.zh-CN.md) |
 | [modules/docker-ghcr/README.md](../modules/docker-ghcr/README.md) | [modules/docker-ghcr/README.zh-CN.md](../modules/docker-ghcr/README.zh-CN.md) |
+| [modules/gh/README.md](../modules/gh/README.md) | [modules/gh/README.zh-CN.md](../modules/gh/README.zh-CN.md) |
 | [modules/starship/README.md](../modules/starship/README.md) | [modules/starship/README.zh-CN.md](../modules/starship/README.zh-CN.md) |
 | [modules/tailscale/README.md](../modules/tailscale/README.md) | [modules/tailscale/README.zh-CN.md](../modules/tailscale/README.zh-CN.md) |
 | [profiles/system/darwin/remote-login/README.md](../profiles/system/darwin/remote-login/README.md) | [profiles/system/darwin/remote-login/README.zh-CN.md](../profiles/system/darwin/remote-login/README.zh-CN.md) |

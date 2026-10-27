@@ -55,9 +55,11 @@ gh auth login --web --git-protocol ssh --skip-ssh-key
 gh auth status
 ```
 
-`--skip-ssh-key` leaves SSH key management with the Proton Pass agent. The token
-uses the system credential store when available. Keep it out of Nix values;
-inject `GH_TOKEN` from a runtime secret store for headless automation.
+The flags retain the existing agent setup; see
+[GitHub CLI, SSH, and signing](../modules/gh/README.md) for protocol choices and
+their effect on authentication. The token uses the system credential store when
+available. Keep it out of Nix values; inject `GH_TOKEN` from a runtime secret
+store for headless automation.
 
 ## Hermes
 

@@ -21,9 +21,12 @@ helper 始终读取 [Linux 主机清单](../../hosts/linux.nix)中 `dockerGhcr.g
 
 ```sh
 github_user=example-user
-gh auth login --hostname github.com --web --scopes read:packages
+gh auth login --hostname github.com --web \
+  --git-protocol ssh --skip-ssh-key --scopes read:packages
 gh auth status --hostname github.com
 ```
+
+这些参数保持仓库的 SSH 偏好，并跳过生成、上传 SSH 密钥。Git 签名和 GHCR 令牌认证相互独立；已有 agent 配置、协议取舍及之前误选 HTTPS 的修正方法见 [GitHub CLI、SSH 与签名](../gh/README.zh-CN.md)。
 
 在浏览器中完成设备授权，登录配置中指定的账号。该账号必须有目标镜像包的读取权限，后续 shell 和镜像拉取会复用已保存的登录状态。已有登录时，按上例设置 `github_user`，用下面的命令选择账号、补充权限，无需重新登录：
 
