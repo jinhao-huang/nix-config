@@ -51,6 +51,7 @@ After the preparation above, activate once from the repository root.
 Replace `example-host` with the target inventory key:
 
 ```sh
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 deploy_host=example-host
 nix --extra-experimental-features "nix-command flakes" \
   run .#deploy -- switch "$deploy_host" -b before-hm
@@ -73,6 +74,14 @@ Home Manager does not change the account's login shell; use `zsh` or tmux
 explicitly when needed. For Git signing, connect with `ssh -A <ssh-host>` using
 the target's SSH alias and forward an agent containing the signing key.
 Put local SSH overrides in `~/.ssh/config.local`.
+
+The Linux profile sets `XDG_RUNTIME_DIR` to `/run/user/<UID>` when it is unset
+or empty, preserving an existing value. Bash login, interactive, and SSH command
+sessions load Home Manager's session variables; Zsh loads them from `.zshenv`.
+This lets Tailscale SSH sessions use `systemctl --user`, `tailscale-user`, and
+`with-proxy` directly. Reconnect after activation to load the new environment.
+The host's systemd-logind and linger manage the runtime directory and user
+manager; shell startup does not create or start them.
 
 Home Manager activation combines the host's `authorizedKeyFiles` into a
 user-owned regular `~/.ssh/authorized_keys` file with mode `0600`, inside a
@@ -110,11 +119,6 @@ If enabled, activation starts the proxy using the inputs prepared above.
 Run `with-proxy git fetch` for one command or `with-proxy bash` for a shell.
 The wrapper requires a running proxy; start a new shell after changing its port
 or credentials. Tailnet-only destinations need a separate userspace Tailscale exit.
-
-For user-service checks, `with-proxy` preserves an existing `XDG_RUNTIME_DIR`
-or uses `/run/user/<UID>` when it is unset. This lets Tailscale SSH sessions
-without that variable use the already-running proxy without shell setup.
-The wrapper does not create runtime directories or start the user manager.
 
 Failed input validation preserves the running proxy. If startup recovery fails,
 restore the previous Home Manager generation and saved private configuration;

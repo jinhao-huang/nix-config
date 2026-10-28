@@ -37,6 +37,11 @@ in
   ];
 
   home.stateVersion = "26.05";
+  home.sessionVariables.XDG_RUNTIME_DIR = "\${XDG_RUNTIME_DIR:-/run/user/$(${lib.getExe' pkgs.coreutils "id"} -u)}";
+  # Bash also reads .bashrc for non-interactive SSH commands, before its guard.
+  programs.bash.bashrcExtra = ''
+    . "${config.home.sessionVariablesPackage}/etc/profile.d/hm-session-vars.sh"
+  '';
   modules.bash.enable = true;
   modules.mise.enable = true;
   modules.pi.enable = true;

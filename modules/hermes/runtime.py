@@ -76,17 +76,14 @@ def restart(policy):
             probe = [manager, "print", target]
             command = [manager, "kickstart", "-k", target]
             inactive_codes = (113,)  # launchd: service not found
-            environment = os.environ.copy()
         else:
             probe = [manager, "--user", "is-active", "--quiet", f"{service}.service"]
             command = [manager, "--user", "restart", f"{service}.service"]
             inactive_codes = (3, 4)  # systemd: inactive or unknown unit
-            environment = os.environ.copy()
-            environment.setdefault("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
-        result = subprocess.run(probe, env=environment, stdout=subprocess.DEVNULL,
+        result = subprocess.run(probe, stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL)
         if result.returncode == 0:
-            subprocess.run(command, env=environment, check=True)
+            subprocess.run(command, check=True)
         elif result.returncode not in inactive_codes:
             raise subprocess.CalledProcessError(result.returncode, probe)
     marker.unlink()

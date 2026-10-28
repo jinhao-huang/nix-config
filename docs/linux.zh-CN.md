@@ -32,6 +32,7 @@ url = "https://subscription.example/private-token?format=json"
 完成上述准备后，在仓库根目录激活一次。将 `example-host` 替换为目标主机清单的键名：
 
 ```sh
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 deploy_host=example-host
 nix --extra-experimental-features "nix-command flakes" \
   run .#deploy -- switch "$deploy_host" -b before-hm
@@ -44,6 +45,8 @@ nix --extra-experimental-features "nix-command flakes" \
 ## Shell 与 SSH
 
 Home Manager 不修改账号的登录 shell，需要时显式启动 `zsh` 或 tmux。若需要 Git 签名，使用 `ssh -A <ssh-host>` 连接，将占位符替换为目标主机的 SSH 别名，并转发包含签名密钥的 agent。本地 SSH 覆盖配置写入 `~/.ssh/config.local`。
+
+Linux profile 在 `XDG_RUNTIME_DIR` 未设置或为空时使用 `/run/user/<UID>`，保留已有值。Bash 登录、交互和 SSH 命令会话都会加载 Home Manager 会话变量；Zsh 从 `.zshenv` 加载。因此，通过 Tailscale SSH 登录后可以直接使用 `systemctl --user`、`tailscale-user` 和 `with-proxy`。激活后重新连接以加载新环境。运行目录和用户管理器由主机的 systemd-logind 与 linger 管理，shell 启动过程不会创建目录或启动管理器。
 
 Home Manager 激活时合并主机 `authorizedKeyFiles` 列表中的公钥，在权限为 `0700` 的 `.ssh` 目录中生成当前用户所有、权限为 `0600` 的普通文件 `~/.ssh/authorized_keys`。每次激活都会原子替换该文件，因此应修改主机的公钥列表。这里需要自定义激活步骤，因为 `home.file` 会创建指向 Nix store 的符号链接，而允许组写入的 store 目录无法通过 OpenSSH 的 `StrictModes` 检查。该步骤遵守 dry-run，复制失败时保留原文件。
 
@@ -65,8 +68,6 @@ tailscale-user status --json
 ## sing-box
 
 启用后，激活流程会使用前面准备的输入启动代理。用 `with-proxy git fetch` 代理单个命令，或用 `with-proxy bash` 启动代理 shell。包装命令要求代理已经运行；修改端口或凭据后需启动新 shell。仅能通过 tailnet 到达的目标，需要单独使用用户态 Tailscale 出站通道。
-
-检查用户服务时，`with-proxy` 保留已有的 `XDG_RUNTIME_DIR`；变量未设置时，使用 `/run/user/<UID>`。因此，缺少该变量的 Tailscale SSH 会话也能直接使用已运行的代理，无需手动配置 shell。包装命令不会创建运行目录或启动用户管理器。
 
 输入校验失败时会保留正在运行的代理。如果启动恢复失败，恢复上一代 Home Manager 配置和保存的私有配置；二进制程序不会自动回滚。服务日志见 `journalctl --user -u sing-box`，私有诊断快照位于 `~/.local/state/sing-box/snapshots/`。
 
