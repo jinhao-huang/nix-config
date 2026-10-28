@@ -619,6 +619,33 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(environment["no_proxy"], environment["NO_PROXY"])
         self.assertIn("internal", environment["no_proxy"])
 
+    def test_wrapper_finds_user_bus_and_preserves_session_environment(self):
+        self.active_snapshot()
+        for runtime_directory in (None, "/custom/user-runtime"):
+            environment = {"LANG": "C"}
+            if runtime_directory is not None:
+                environment["XDG_RUNTIME_DIR"] = runtime_directory
+            expected = runtime_directory or f"/run/user/{os.getuid()}"
+
+            def query_service(arguments, **kwargs):
+                actual = kwargs.get("env", os.environ)
+                status = 0 if actual.get("XDG_RUNTIME_DIR") == expected else 1
+                self.assertEqual(actual.get("LANG"), "C")
+                return subprocess.CompletedProcess(arguments, status)
+
+            with (
+                self.subTest(runtime_directory=runtime_directory),
+                mock.patch.dict(os.environ, environment, clear=True),
+                mock.patch.object(module.subprocess, "run", side_effect=query_service),
+                mock.patch.object(module.socket, "create_connection") as connect,
+                mock.patch.object(module.os, "execvpe") as execute,
+            ):
+                connection = connect.return_value.__enter__.return_value
+                connection.recv.side_effect = [b"\x05\x02", b"\x01\x00"]
+                self.runtime.with_proxy(["program"])
+                execute.assert_called_once()
+                self.assertEqual(dict(os.environ), environment)
+
     def test_wrapper_does_not_start_command_without_managed_service(self):
         self.active_snapshot()
         with (

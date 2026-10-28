@@ -111,6 +111,11 @@ Run `with-proxy git fetch` for one command or `with-proxy bash` for a shell.
 The wrapper requires a running proxy; start a new shell after changing its port
 or credentials. Tailnet-only destinations need a separate userspace Tailscale exit.
 
+For user-service checks, `with-proxy` preserves an existing `XDG_RUNTIME_DIR`
+or uses `/run/user/<UID>` when it is unset. This lets Tailscale SSH sessions
+without that variable use the already-running proxy without shell setup.
+The wrapper does not create runtime directories or start the user manager.
+
 Failed input validation preserves the running proxy. If startup recovery fails,
 restore the previous Home Manager generation and saved private configuration;
 binaries are not rolled back automatically. Logs: `journalctl --user -u sing-box`;

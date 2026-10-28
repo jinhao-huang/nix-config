@@ -273,8 +273,11 @@ class Runtime:
         self.credentials = Path(policy["credentialsFile"])
 
     def systemctl(self, *arguments, check=True):
+        environment = os.environ.copy()
+        environment.setdefault("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
         result = subprocess.run(
             [self.policy["systemctl"], "--user", *arguments],
+            env=environment,
             capture_output=True,
             text=True,
             timeout=25,

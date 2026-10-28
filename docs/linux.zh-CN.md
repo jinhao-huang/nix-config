@@ -66,6 +66,8 @@ tailscale-user status --json
 
 启用后，激活流程会使用前面准备的输入启动代理。用 `with-proxy git fetch` 代理单个命令，或用 `with-proxy bash` 启动代理 shell。包装命令要求代理已经运行；修改端口或凭据后需启动新 shell。仅能通过 tailnet 到达的目标，需要单独使用用户态 Tailscale 出站通道。
 
+检查用户服务时，`with-proxy` 保留已有的 `XDG_RUNTIME_DIR`；变量未设置时，使用 `/run/user/<UID>`。因此，缺少该变量的 Tailscale SSH 会话也能直接使用已运行的代理，无需手动配置 shell。包装命令不会创建运行目录或启动用户管理器。
+
 输入校验失败时会保留正在运行的代理。如果启动恢复失败，恢复上一代 Home Manager 配置和保存的私有配置；二进制程序不会自动回滚。服务日志见 `journalctl --user -u sing-box`，私有诊断快照位于 `~/.local/state/sing-box/snapshots/`。
 
 ## 私有容器镜像
