@@ -196,9 +196,7 @@ rec {
             {
               home.username = host.username;
               home.homeDirectory = host.homeDirectory;
-              home.file.".ssh/authorized_keys".text = nixpkgs.lib.concatMapStrings (
-                file: builtins.readFile file + "\n"
-              ) host.authorizedKeyFiles;
+              modules.ssh.authorizedKeyFiles = host.authorizedKeyFiles;
               modules.pi.defaults = host.pi;
               services.hermes-agent = host.hermes;
               modules.docker-ghcr = host.dockerGhcr or { };
@@ -229,6 +227,7 @@ rec {
           hermes-runtime = (mkPkgs nixpkgs system).callPackage ./modules/hermes/tests.nix {
             hermesAgent = hermes-agent;
           };
+          ssh-authorized-keys = (mkPkgs nixpkgs system).callPackage ./modules/ssh/tests.nix { };
         }
         // nixpkgs.lib.mapAttrs' (
           name: _: nixpkgs.lib.nameValuePair "${name}-home" self.homeConfigurations.${name}.activationPackage

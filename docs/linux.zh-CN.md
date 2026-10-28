@@ -45,7 +45,9 @@ nix --extra-experimental-features "nix-command flakes" \
 
 Home Manager 不修改账号的登录 shell，需要时显式启动 `zsh` 或 tmux。若需要 Git 签名，使用 `ssh -A <ssh-host>` 连接，将占位符替换为目标主机的 SSH 别名，并转发包含签名密钥的 agent。本地 SSH 覆盖配置写入 `~/.ssh/config.local`。
 
-Home Manager 根据主机的 `authorizedKeyFiles` 列表生成 `~/.ssh/authorized_keys`，系统 SSH daemon 必须读取该路径。切换后保留当前会话，并另开一次普通 SSH 连接验证。Tailscale SSH 保持启用，使用独立的授权策略。
+Home Manager 激活时合并主机 `authorizedKeyFiles` 列表中的公钥，在权限为 `0700` 的 `.ssh` 目录中生成当前用户所有、权限为 `0600` 的普通文件 `~/.ssh/authorized_keys`。每次激活都会原子替换该文件，因此应修改主机的公钥列表。这里需要自定义激活步骤，因为 `home.file` 会创建指向 Nix store 的符号链接，而允许组写入的 store 目录无法通过 OpenSSH 的 `StrictModes` 检查。该步骤遵守 dry-run，复制失败时保留原文件。
+
+系统 SSH daemon 必须读取该路径。切换后保留当前会话，并另开一次普通 SSH 连接验证。Tailscale SSH 保持启用，使用独立的授权策略。
 
 ## Tailscale
 

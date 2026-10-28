@@ -68,6 +68,7 @@ it does not build checks or complete Darwin closures.
 | Bundled skills or source metadata | `nix build --no-link .#checks.aarch64-darwin.ai-agent-skills` (substitute the native system on Linux). |
 | Configuration reference | Regenerate as below, then run `nix build --no-link .#checks.aarch64-darwin.configuration-reference` (substitute the native system on Linux). |
 | GHCR credential helper | `nix build --no-link .#checks.aarch64-darwin.docker-credential-ghcr` (substitute the native system on Linux), plus Linux home-profile checks when wiring changes. |
+| SSH authorized-key installation | `nix build --no-link .#checks.aarch64-darwin.ssh-authorized-keys` (substitute the native system on Linux), plus Linux home-profile checks when wiring changes. |
 
 Linux activation packages are registered as `checks.<system>.<name>-home`.
 For a Linux host, replace `example-host` with its inventory key:

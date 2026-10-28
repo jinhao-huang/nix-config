@@ -74,10 +74,17 @@ explicitly when needed. For Git signing, connect with `ssh -A <ssh-host>` using
 the target's SSH alias and forward an agent containing the signing key.
 Put local SSH overrides in `~/.ssh/config.local`.
 
-Home Manager generates `~/.ssh/authorized_keys` from the host's
-`authorizedKeyFiles` list; the system SSH daemon must read that path. Keep the
-current session open and test a new ordinary SSH connection after switching.
-Tailscale SSH stays enabled with its own authorization policy.
+Home Manager activation combines the host's `authorizedKeyFiles` into a
+user-owned regular `~/.ssh/authorized_keys` file with mode `0600`, inside a
+`0700` `.ssh` directory. Each activation atomically replaces the file, so edit
+the host's key list rather than the installed file. A custom activation step
+is required because `home.file` creates Nix store symlinks, and a group-writable
+store directory fails OpenSSH's `StrictModes` checks. The step respects dry-run
+and preserves the existing file if copying fails.
+
+The system SSH daemon must read that path. Keep the current session open and
+test a new ordinary SSH connection after switching. Tailscale SSH stays enabled
+with its own authorization policy.
 
 ## Tailscale
 

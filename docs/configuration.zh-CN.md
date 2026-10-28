@@ -78,7 +78,7 @@ singBox = {
 
 在 [SSH 公钥目录表](../modules/ssh/public-keys/default.nix)中登记共享公钥路径。[hosts/default.nix](../hosts/default.nix) 将目录表作为 `sshKeys` 传给两个平台的主机清单。按名称选择公钥，例如 `authorizedKeyFiles = [ sshKeys.personal ];`。
 
-在 [hosts/linux.nix](../hosts/linux.nix) 或 [hosts/darwin.nix](../hosts/darwin.nix) 中为每台主机设置 `authorizedKeyFiles`。Linux 将文件内容合并到受管理的 `~/.ssh/authorized_keys`；Darwin 使用 nix-darwin 原生选项 `users.users.<name>.openssh.authorizedKeys.keyFiles`。空列表表示不通过该受管理来源授权任何密钥。文件只能包含公钥，不能加入私钥。Tailscale SSH 使用独立授权策略。
+在 [hosts/linux.nix](../hosts/linux.nix) 或 [hosts/darwin.nix](../hosts/darwin.nix) 中为每台主机设置 `authorizedKeyFiles`。Linux 激活时将文件内容合并为受管理的普通文件 `~/.ssh/authorized_keys`；权限与替换行为见 [Linux SSH 操作说明](linux.zh-CN.md#shell-与-ssh)。Darwin 使用 nix-darwin 原生选项 `users.users.<name>.openssh.authorizedKeys.keyFiles`。空列表表示不通过该受管理来源授权任何密钥。文件只能包含公钥，不能加入私钥。Tailscale SSH 使用独立授权策略。
 
 - sing-box 作为 Linux systemd 用户服务运行。
 - GHCR 认证按主机启用，helper 使用主机提供的 Docker daemon 和 Compose。

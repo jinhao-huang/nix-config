@@ -44,6 +44,7 @@ Darwin 集成 Home Manager，并管理系统 Lix 安装。Linux 选择激活和 
 | 内置技能或来源元数据 | `nix build --no-link .#checks.aarch64-darwin.ai-agent-skills`；Linux 替换为本机 system。 |
 | 配置参考 | 按下文重新生成，再运行 `nix build --no-link .#checks.aarch64-darwin.configuration-reference`；Linux 替换为本机 system。 |
 | GHCR credential helper | `nix build --no-link .#checks.aarch64-darwin.docker-credential-ghcr`；Linux 替换为本机 system，配置连接有改动时还需完成 Linux 用户 profile 检查。 |
+| SSH 授权公钥安装 | `nix build --no-link .#checks.aarch64-darwin.ssh-authorized-keys`；Linux 替换为本机 system，配置连接有改动时还需完成 Linux 用户 profile 检查。 |
 
 Linux 激活包注册为 `checks.<system>.<name>-home`。对 Linux 主机求值和构建时，将 `example-host` 替换为清单中的键名：
 

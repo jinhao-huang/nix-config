@@ -108,7 +108,9 @@ host inventories. Select keys by name, such as
 
 Set `authorizedKeyFiles` per host in [hosts/linux.nix](../hosts/linux.nix) or
 [hosts/darwin.nix](../hosts/darwin.nix). Linux combines the files into a managed
-`~/.ssh/authorized_keys`; Darwin passes them to nix-darwin's native
+regular `~/.ssh/authorized_keys` file at activation; see the
+[Linux SSH procedure](linux.md#shell-and-ssh) for permissions and replacement
+behavior. Darwin passes them to nix-darwin's native
 `users.users.<name>.openssh.authorizedKeys.keyFiles`. An empty list authorizes
 no keys through that managed source. These files contain public keys only;
 never add private keys. Tailscale SSH uses its own authorization policy.
