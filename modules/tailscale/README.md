@@ -31,9 +31,21 @@ inspect the logs below.
 Ordinary TCP/UDP traffic is forwarded to `127.0.0.1` on the same port; services
 must listen there and generally see a local source address. Tailnet rules should
 allow only intended peers, since reachable localhost services are exposed too.
-Tailscale SSH is enabled and requires both TCP 22 access and an SSH policy for
-the local account. It uses its own server and authentication, independent of
-macOS Remote Login and `authorized_keys`.
+Both Macs disable built-in Tailscale SSH and forward tailnet TCP 22 to
+[macOS Remote Login](../../profiles/system/darwin/remote-login/README.md), using
+the configured public keys. Existing tailnet hostnames still work outside the
+LAN; tailnet rules must allow TCP 22.
+
+## Zed remote development
+
+Built-in SSH is disabled because its macOS
+[exit-status bug](https://github.com/tailscale/tailscale/issues/18256) can cause
+Zed to skip remote-server installation. After an upstream fix, set
+`modules.tailscale.ssh.enable = true` in the
+[Darwin profile](../../profiles/system/darwin/default.nix) and allow the local
+account in the tailnet SSH policy. Rebuild and switch, then verify with Tailscale
+SSH enabled that `ssh -o ControlPath=none -T user@host 'exit 37'` returns exit
+status `37` and Zed installs a missing remote server.
 
 ## Maintain
 
@@ -51,6 +63,9 @@ Nix generates a locked native configuration, so CLI preference changes and
 `up`/`login` are not the enrollment workflow. Activating a configuration change
 reloads the daemon and can interrupt connections. Explicitly set `false` or an
 empty list to clear a preference; omitting a field can preserve its previous value.
+
+When changing SSH servers, verify public-key access first and any new host-key
+fingerprint through a trusted connection before updating `known_hosts`.
 
 The [native configuration schema](https://tailscale.com/docs/reference/tailscaled/tailscaled-config-file)
 is still alpha, and `debug localapi` is not a stable CLI interface; check both

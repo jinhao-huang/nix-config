@@ -15,7 +15,7 @@
   modules.tailscale = {
     enable = true;
     incoming.enable = true;
-    ssh.enable = true;
+    ssh.enable = false;
   };
 
   nix.package = pkgs.lixPackageSets.stable.lix;

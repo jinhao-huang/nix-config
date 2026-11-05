@@ -23,7 +23,11 @@ sudo tailscale status --json
 
 普通 TCP/UDP 流量会转发到 `127.0.0.1` 的相同端口，因此服务必须监听该地址，通常只能看到本地来源地址。可达的 localhost 服务也会被暴露给获准连接的设备，tailnet 规则应限制设备和端口。
 
-Tailscale SSH 已启用，需要同时允许 TCP 22 和以本地账号登录的 SSH 策略。它使用独立的服务器与认证，与 macOS 远程登录、`authorized_keys` 无关。
+两台 Mac 均关闭内置 Tailscale SSH，将 tailnet TCP 22 转发给 [macOS 远程登录](../../profiles/system/darwin/remote-login/README.zh-CN.md)，使用已配置的公钥认证。现有 tailnet 主机名在局域网外仍可使用；tailnet 规则必须允许 TCP 22。
+
+## Zed 远程开发
+
+关闭内置 SSH 是因为其 macOS [退出码缺陷](https://github.com/tailscale/tailscale/issues/18256)可能导致 Zed 跳过远程服务安装。上游修复后，可在 [Darwin profile](../../profiles/system/darwin/default.nix) 中设置 `modules.tailscale.ssh.enable = true`，并确保 tailnet SSH 策略允许本地账号登录。重新构建并切换后，在启用 Tailscale SSH 的情况下，验证 `ssh -o ControlPath=none -T user@host 'exit 37'` 的退出码为 `37`，且 Zed 能安装尚未存在的远程服务。
 
 ## 维护
 
@@ -32,6 +36,8 @@ Tailscale SSH 已启用，需要同时允许 TCP 22 和以本地账号登录的 
 客户端更新检查和自动应用更新均已关闭，由 Nix 管理安装。新构建只有在激活重新加载 daemon 后才生效。
 
 入站访问和 SSH 在 [Darwin profile](../../profiles/system/darwin/default.nix) 中配置。Nix 生成锁定的原生配置，因此不通过 CLI 修改偏好，也不使用 `up`/`login` 完成注册。激活配置变更会重新加载 daemon，可能中断连接。需要清除偏好时，显式设置 `false` 或空列表；省略字段可能保留旧值。
+
+更换 SSH 服务器前，先验证公钥认证；若主机公钥变化，通过可信连接核对指纹后再更新 `known_hosts`。
 
 [原生配置 schema](https://tailscale.com/docs/reference/tailscaled/tailscaled-config-file)仍处于 alpha 阶段，`debug localapi` 也不是稳定 CLI 接口，更新 Tailscale 时应核对两者。
 
