@@ -36,12 +36,11 @@ in
   };
 
   home-manager.users.${darwinHost.username} = lib.mkIf serveHermes {
-    services.hermes-agent.settings.dashboard = {
-      public_url = hermesUrl;
-      basic_auth.username = darwinHost.username;
+    services.hermes-agent.settings.dashboard.public_url = hermesUrl;
+    modules.hermes.protonPassReferences = {
+      HERMES_DASHBOARD_BASIC_AUTH_USERNAME = "${darwinHost.hermesServe.loginRef}/Username";
+      HERMES_DASHBOARD_BASIC_AUTH_PASSWORD = "${darwinHost.hermesServe.loginRef}/Password";
     };
-    modules.hermes.protonPassReferences.HERMES_DASHBOARD_BASIC_AUTH_PASSWORD =
-      darwinHost.hermesServe.passwordRef;
   };
 
   # nix-darwin loads system jobs before Home Manager updates the Dashboard.

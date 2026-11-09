@@ -24,7 +24,7 @@ in
   desktop = common // {
     hermesServe = {
       host = (import ../modules/ssh/inventory.nix).mac-mini.settings.HostName;
-      passwordRef = "pass://Dev/Hermes Dashboard/password";
+      loginRef = "pass://Dev/Hermes Dashboard";
     };
     hermes = common.hermes // {
       enable = true;

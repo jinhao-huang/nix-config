@@ -41,8 +41,9 @@ LAN; tailnet rules must allow TCP 22.
 The `desktop` host's [`hermesServe`](../../hosts/darwin.nix) exposes the
 [Hermes Dashboard](../hermes/README.md) through tailnet HTTPS. Before switching:
 
-- In Proton Pass, create a Login item matching `passwordRef`. Generate a random
-  password of 32 letters and digits, and use the managed macOS username for login.
+- Check that the Proton Pass Login item referenced by `loginRef` has a username
+  and password. Use a plain username without spaces, or an email address. For a
+  new password, generate 32 random letters and digits.
 - Enable [MagicDNS and HTTPS certificates](https://tailscale.com/docs/how-to/set-up-https-certificates)
   in the tailnet. Confirm that `sudo tailscale status --json` reports the
   configured hostname in `Self.DNSName` (with a trailing dot).

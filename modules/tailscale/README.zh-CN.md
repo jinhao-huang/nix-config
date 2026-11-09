@@ -31,7 +31,7 @@ sudo tailscale status --json
 
 `desktop` 的 [`hermesServe`](../../hosts/darwin.nix) 通过 tailnet HTTPS 提供 [Hermes Dashboard](../hermes/README.zh-CN.md)。切换前完成以下准备。
 
-- 在 Proton Pass 创建 `passwordRef` 指向的登录条目，生成由字母和数字组成的 32 位随机密码。登录用户名使用受管的 macOS 账号名。
+- 确认 `loginRef` 指向的 Proton Pass 登录条目已填写用户名和密码。用户名使用不带空格的普通用户名或邮箱。新建密码时，生成一个由字母和数字组成的 32 位随机密码。
 - 在 tailnet 开启 [MagicDNS 和 HTTPS 证书](https://tailscale.com/docs/how-to/set-up-https-certificates)。执行 `sudo tailscale status --json`，确认 `Self.DNSName` 是配置的主机名，末尾带点。
 - [只向自己的身份放行](https://tailscale.com/docs/reference/examples/grants)该节点的 TCP `443`，收窄会放行 Dashboard 后端端口的规则，并保留现有 SSH 权限。
 

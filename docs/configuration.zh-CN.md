@@ -34,7 +34,7 @@
 | `pi` | 可选 Pi 启动默认值，传给 `modules.pi.defaults`；见 [schema](../modules/pi/startup-defaults-type.nix)。 |
 | `hermes` | 传给官方 `services.hermes-agent` 模块的属性集。见 [Hermes 配置](../modules/hermes/README.zh-CN.md)。 |
 | `hermesProtonPass` | 可选的 Hermes 环境变量名与 Proton Pass 字段引用映射。见[凭据准备](../modules/hermes/README.zh-CN.md#秘密文件与激活)。 |
-| `hermesServe` | 为已启用的 Hermes Dashboard 配置远程访问，可选。包含 `host`（节点的 MagicDNS 主机名）和 `passwordRef`（Proton Pass 密码引用）。见[远程访问](../modules/tailscale/README.zh-CN.md#hermes-over-https)。 |
+| `hermesServe` | 为已启用的 Hermes Dashboard 配置远程访问，可选。包含 `host`（节点的 MagicDNS 主机名）和 `loginRef`（Proton Pass 登录条目引用）。见[远程访问](../modules/tailscale/README.zh-CN.md#hermes-over-https)。 |
 
 ## Linux 主机字段
 

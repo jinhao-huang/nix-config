@@ -46,7 +46,7 @@ Edit [hosts/darwin.nix](../hosts/darwin.nix). Each top-level attribute names a
 | `pi` | Optional Pi startup defaults passed to `modules.pi.defaults`; see [the schema](../modules/pi/startup-defaults-type.nix). |
 | `hermes` | Attribute set passed to the official `services.hermes-agent` module. See [Hermes configuration](../modules/hermes/README.md). |
 | `hermesProtonPass` | Optional mapping from Hermes environment variable names to Proton Pass field references. See [credential preparation](../modules/hermes/README.md#secrets-and-activation). |
-| `hermesServe` | Optional `host` (the node's MagicDNS hostname) and `passwordRef` (a Proton Pass password reference) for the enabled Hermes Dashboard. See [remote access](../modules/tailscale/README.md#hermes-over-https). |
+| `hermesServe` | Optional `host` (the node's MagicDNS hostname) and `loginRef` (a Proton Pass Login item reference) for the enabled Hermes Dashboard. See [remote access](../modules/tailscale/README.md#hermes-over-https). |
 
 ## Linux host fields
 
