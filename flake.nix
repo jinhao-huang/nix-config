@@ -138,7 +138,7 @@ rec {
                   hermes = config.services.hermes-agent;
                   hermesPackage = agentPackages.hermes-agent;
                   hermesPython = llm-agents.inputs.nixpkgs.legacyPackages.${system}.python3;
-                  hermesPythonEnv = hermesPython.withPackages (_: hermesPackage.dependencies);
+                  hermesPythonEnv = hermesPython.withPackages (ps: hermesPackage.dependencies ++ [ ps.packaging ]);
                 in
                 {
                   imports = [ ./profiles/home/darwin.nix ];
@@ -152,14 +152,25 @@ rec {
                     {
                       package = lib.mkDefault (
                         assert lib.assertMsg (hermes.extraDependencyGroups == [ ] && hermes.extraPythonPackages == [ ])
-                          "The cached macOS Hermes package uses its published Python dependencies. Remove extraDependencyGroups and extraPythonPackages or select a cached package with the required dependencies.";
-                        hermesPackage
-                        // {
-                          # The upstream module imports Hermes through this interpreter.
-                          hermesVenv = pkgs.writeShellScriptBin "python3" ''
-                            export PYTHONPATH=${lib.escapeShellArg "${hermesPackage}/${hermesPython.sitePackages}"}
-                            exec ${hermesPythonEnv}/bin/python3 "$@"
+                          "The cached macOS Hermes package has fixed Python dependencies. Remove extraDependencyGroups and extraPythonPackages or select a cached package with the required dependencies.";
+                        pkgs.symlinkJoin {
+                          inherit (hermesPackage) name meta;
+                          paths = [ hermesPackage ];
+                          nativeBuildInputs = [ pkgs.makeWrapper ];
+                          # Numtide 0.23.0 omits the packaging runtime dependency.
+                          postBuild = ''
+                            for executable in "$out"/bin/*; do
+                              wrapProgram "$executable" --prefix PYTHONPATH : ${hermesPython.pkgs.packaging}/${hermesPython.sitePackages}
+                            done
                           '';
+                          passthru = {
+                            inherit (hermesPackage) version;
+                            # The upstream module imports Hermes through this interpreter.
+                            hermesVenv = pkgs.writeShellScriptBin "python3" ''
+                              export PYTHONPATH=${lib.escapeShellArg "${hermesPackage}/${hermesPython.sitePackages}"}
+                              exec ${hermesPythonEnv}/bin/python3 "$@"
+                            '';
+                          };
                         }
                       );
                     }
