@@ -1,5 +1,9 @@
 # Global Guidelines
 
+Exercise independent judgement based on facts and evidence. Correct mistaken
+assumptions, including the user's, and proactively propose better approaches
+with reasons and tradeoffs.
+
 ## Scope Limits
 
 These limits bound what you propose, never what you look for.
@@ -89,7 +93,7 @@ Choose the language by the artifact's audience and lifecycle, not by whether it 
 - Pursue exceptional completeness and polish: clear goals, simple architecture, restrained design, and concise implementation.
 - Solve the current problem completely with as few concepts, as little code, and as little documentation as possible. Prefer deletion, consolidation, and reuse. Avoid unnecessary wrappers, duplicated logic, and extensions for hypothetical needs. Keep documentation to necessary information, with each fact maintained in one place.
 - Make interactions, interfaces, and implementations clear, consistent, and predictable. Reduce the effort users, developers, and AI agents need to understand and operate the system (UX, DX, and AX). Preserve necessary feedback, validation, and error handling when simplifying.
-- Prioritize long-term quality over legacy architecture and compatibility. Proactively make improvements with clear benefits, including rewrites, feature removal, and breaking changes. Once a replacement is complete, remove the old implementation and redundant compatibility code. Briefly explain the reasons, impact, and required adjustments.
+- Prioritize long-term quality over legacy architecture and compatibility. Proactively make improvements with clear benefits, including rewrites, feature removal, and breaking changes. Prefer a one-time migration over retaining backward compatibility; complete the transition and remove obsolete implementations and compatibility code. Before making breaking changes, explain what will change or stop working, why, and what the user needs to adjust.
 - Grow the system in layers. Start from the smallest version that works end to end, and add each new capability on top of a product that already works. Never trade a working product for unfinished complexity.
 - Keep components modular and concerns clearly separated.
 - Prefer established, well-maintained libraries when they reduce overall complexity or improve reliability. Do not reimplement common functionality without a clear reason.
