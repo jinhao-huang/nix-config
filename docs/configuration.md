@@ -46,6 +46,7 @@ Edit [hosts/darwin.nix](../hosts/darwin.nix). Each top-level attribute names a
 | `pi` | Optional Pi startup defaults passed to `modules.pi.defaults`; see [the schema](../modules/pi/startup-defaults-type.nix). |
 | `hermes` | Attribute set passed to the official `services.hermes-agent` module. See [Hermes configuration](../modules/hermes/README.md). |
 | `hermesProtonPass` | Optional mapping from Hermes environment variable names to Proton Pass field references. See [credential preparation](../modules/hermes/README.md#secrets-and-activation). |
+| `hermesServe` | Optional `host` (the node's MagicDNS hostname) and `passwordRef` (a Proton Pass password reference) for the enabled Hermes Dashboard. See [remote access](../modules/tailscale/README.md#hermes-over-https). |
 
 ## Linux host fields
 
@@ -123,8 +124,8 @@ never add private keys. Tailscale SSH uses its own authorization policy.
   [configuration guide](../modules/hermes/README.md).
 - Harness policy applies on macOS and Linux. macOS uses the official desktop
   application; the Web backend and private proxy are Linux user services.
-- Tailscale's `enable`, `incoming.enable`, and `ssh.enable` options apply to
-  macOS and Linux. `outboundProxy` and `serve` options apply to Linux.
+- Tailscale's `outboundProxy` is Linux-only. The other Tailscale options apply
+  to macOS and Linux.
 
 Edit shared enable switches and service wiring in the platform profiles.
 Package selection belongs in [flake.nix](../flake.nix). On macOS, Tailscale is
@@ -917,7 +918,7 @@ true
 
 
 
-Whether to enable a tailnet-only HTTPS reverse proxy on Linux\. Requires incoming\.enable,
+Whether to enable a tailnet-only HTTPS reverse proxy\. Requires incoming\.enable,
 MagicDNS, tailnet HTTPS certificates, and access to the selected HTTPS
 port\. Enabling Serve unlocks native daemon preferences so the foreground
 CLI can manage its mapping; Nix reapplies preferences on daemon startup
@@ -945,7 +946,7 @@ true
 ```
 
 *Declared by:*
- - [modules/tailscale/home-manager\.nix](../modules/tailscale/home-manager.nix)
+ - [modules/tailscale/options\.nix](../modules/tailscale/options.nix)
 
 
 
@@ -977,7 +978,7 @@ integer between 1 and 65535 (both inclusive)
 ```
 
 *Declared by:*
- - [modules/tailscale/home-manager\.nix](../modules/tailscale/home-manager.nix)
+ - [modules/tailscale/options\.nix](../modules/tailscale/options.nix)
 
 
 
@@ -985,9 +986,8 @@ integer between 1 and 65535 (both inclusive)
 
 
 
-Loopback HTTP backend, required when Serve is enabled\. The Linux profile
-derives this URL from the Harness proxy port\. The mapping exists for
-the systemd service lifetime; Funnel is not enabled\.
+Loopback HTTP backend, required when Serve is enabled\. The mapping
+lasts for the lifetime of the foreground Serve process\.
 
 
 
@@ -1003,7 +1003,7 @@ string matching the pattern http://127\[\.]0\[\.]0\[\.]1:\[0-9]+
 ```
 
 *Declared by:*
- - [modules/tailscale/home-manager\.nix](../modules/tailscale/home-manager.nix)
+ - [modules/tailscale/options\.nix](../modules/tailscale/options.nix)
 
 
 

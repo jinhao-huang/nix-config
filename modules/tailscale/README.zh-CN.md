@@ -25,6 +25,18 @@ sudo tailscale status --json
 
 两台 Mac 均关闭内置 Tailscale SSH，将 tailnet TCP 22 转发给 [macOS 远程登录](../../profiles/system/darwin/remote-login/README.zh-CN.md)，使用已配置的公钥认证。现有 tailnet 主机名在局域网外仍可使用；tailnet 规则必须允许 TCP 22。
 
+<a id="hermes-over-https"></a>
+
+## 通过 HTTPS 访问 Hermes
+
+`desktop` 的 [`hermesServe`](../../hosts/darwin.nix) 通过 tailnet HTTPS 提供 [Hermes Dashboard](../hermes/README.zh-CN.md)。切换前完成以下准备。
+
+- 在 Proton Pass 创建 `passwordRef` 指向的登录条目，生成由字母和数字组成的 32 位随机密码。登录用户名使用受管的 macOS 账号名。
+- 在 tailnet 开启 [MagicDNS 和 HTTPS 证书](https://tailscale.com/docs/how-to/set-up-https-certificates)。执行 `sudo tailscale status --json`，确认 `Self.DNSName` 是配置的主机名，末尾带点。
+- [只向自己的身份放行](https://tailscale.com/docs/reference/examples/grants)该节点的 TCP `443`，收窄会放行 Dashboard 后端端口的规则，并保留现有 SSH 权限。
+
+[切换](../../README.zh-CN.md#构建与激活)后，保持 macOS 用户登录，让 Hermes LaunchAgent 运行。Serve 会等 Dashboard 启用密码认证后再开放访问。从 tailnet 内的设备打开该节点 HTTPS 网址的 `/chat`，登录并发送一条消息。如果 Serve 不可用，检查 `sudo tailscale serve status` 和 `/var/log/tailscale-serve.log`。
+
 ## Zed 远程开发
 
 关闭内置 SSH 是因为其 macOS [退出码缺陷](https://github.com/tailscale/tailscale/issues/18256)可能导致 Zed 跳过远程服务安装。上游修复后，可在 [Darwin profile](../../profiles/system/darwin/default.nix) 中设置 `modules.tailscale.ssh.enable = true`，并确保 tailnet SSH 策略允许本地账号登录。重新构建并切换后，在启用 Tailscale SSH 的情况下，验证 `ssh -o ControlPath=none -T user@host 'exit 37'` 的退出码为 `37`，且 Zed 能安装尚未存在的远程服务。
@@ -35,7 +47,7 @@ sudo tailscale status --json
 
 客户端更新检查和自动应用更新均已关闭，由 Nix 管理安装。新构建只有在激活重新加载 daemon 后才生效。
 
-入站访问和 SSH 在 [Darwin profile](../../profiles/system/darwin/default.nix) 中配置。Nix 生成锁定的原生配置，因此不通过 CLI 修改偏好，也不使用 `up`/`login` 完成注册。激活配置变更会重新加载 daemon，可能中断连接。需要清除偏好时，显式设置 `false` 或空列表；省略字段可能保留旧值。
+入站访问和 SSH 在 [Darwin profile](../../profiles/system/darwin/default.nix) 中配置。Nix 默认锁定 daemon 偏好，启用 Serve 时解锁，让 launchd 管理的前台进程能注册映射。注册按上面的步骤操作。激活配置变更会重新加载 daemon，可能中断连接。清除偏好时显式设置 `false` 或空列表，省略字段可能保留旧值。
 
 更换 SSH 服务器前，先验证公钥认证；若主机公钥变化，通过可信连接核对指纹后再更新 `known_hosts`。
 

@@ -1,7 +1,12 @@
-{ incomingEnabled, sshEnabled }:
+{
+  incomingEnabled,
+  sshEnabled,
+  serveEnabled,
+}:
 {
   version = "alpha0";
-  locked = true;
+  # The runtime mapping API is unavailable while preferences are locked.
+  locked = !serveEnabled;
   enabled = true;
   acceptDNS = false;
   acceptRoutes = false;

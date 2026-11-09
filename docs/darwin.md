@@ -63,8 +63,9 @@ store for headless automation.
 
 ## Hermes
 
-The [desktop role](../hosts/darwin.nix) enables Hermes and its local Dashboard.
-After activation, open [Chat](http://127.0.0.1:9119/chat) on that Mac or run:
+The [desktop role](../hosts/darwin.nix) enables Hermes and its Dashboard.
+Follow the [HTTPS setup](../modules/tailscale/README.md#hermes-over-https) for
+browser access. To chat in the terminal after activation, run:
 
 ```sh
 hermes --tui

@@ -9,6 +9,7 @@ let
   settings = import ./settings.nix {
     incomingEnabled = cfg.incoming.enable;
     sshEnabled = cfg.ssh.enable;
+    serveEnabled = cfg.serve.enable;
   };
 
   # The pinned nix-darwin service has no native preference options.
@@ -44,6 +45,20 @@ in
         RunAtLoad = true;
         KeepAlive = true;
         Umask = 63; # 0077 in octal.
+      };
+    };
+
+    launchd.daemons.tailscale-serve = lib.mkIf cfg.serve.enable {
+      serviceConfig = {
+        ProgramArguments = [
+          (lib.getExe' cfg.package "tailscale")
+          "serve"
+          "--yes"
+          "--https=${toString cfg.serve.httpsPort}"
+          cfg.serve.target
+        ];
+        KeepAlive = true;
+        StandardErrorPath = "/var/log/tailscale-serve.log";
       };
     };
   };

@@ -10,6 +10,7 @@ let
   settings = import ./settings.nix {
     incomingEnabled = cfg.incoming.enable;
     sshEnabled = cfg.ssh.enable;
+    serveEnabled = cfg.serve.enable;
   };
 
   # Home Manager has tray clients but no native tailscaled service module.
@@ -17,9 +18,6 @@ let
     settings
     // {
       netfilterMode = "off";
-      # Upstream rejects Serve's runtime mapping API when the native config is
-      # locked. Connection preferences still come from this file on startup.
-      locked = !cfg.serve.enable;
     }
   );
 
@@ -41,37 +39,9 @@ in
     127.0.0.1:1055. Available on Linux; this does not select an exit node
   '';
 
-  options.modules.tailscale.serve = {
-    enable = lib.mkEnableOption ''
-      a tailnet-only HTTPS reverse proxy on Linux. Requires incoming.enable,
-      MagicDNS, tailnet HTTPS certificates, and access to the selected HTTPS
-      port. Enabling Serve unlocks native daemon preferences so the foreground
-      CLI can manage its mapping; Nix reapplies preferences on daemon startup
-    '';
-    httpsPort = lib.mkOption {
-      type = lib.types.ints.between 1 65535;
-      default = 443;
-      example = 8443;
-      description = "Tailnet HTTPS port for Tailscale Serve.";
-    };
-    target = lib.mkOption {
-      type = lib.types.strMatching "http://127[.]0[.]0[.]1:[0-9]+";
-      example = "http://127.0.0.1:3081";
-      description = ''
-        Loopback HTTP backend, required when Serve is enabled. The Linux profile
-        derives this URL from the Harness proxy port. The mapping exists for
-        the systemd service lifetime; Funnel is not enabled.
-      '';
-    };
-  };
-
   config = lib.mkIf cfg.enable {
     assertions = [
       (lib.hm.assertions.assertPlatform "modules.tailscale" pkgs lib.platforms.linux)
-      {
-        assertion = cfg.serve.enable -> cfg.incoming.enable;
-        message = "Tailscale Serve requires incoming tailnet connections.";
-      }
     ];
 
     home.packages = [

@@ -49,7 +49,7 @@ gh auth status
 
 ## Hermes
 
-[桌面机角色](../hosts/darwin.nix)启用了 Hermes 和本机 Dashboard。激活后，在该 Mac 上打开 [Chat](http://127.0.0.1:9119/chat)，或在终端运行：
+[桌面机角色](../hosts/darwin.nix)启用了 Hermes 和 Dashboard。要用浏览器访问，先完成 [HTTPS 设置](../modules/tailscale/README.zh-CN.md#hermes-over-https)。激活后也可以在终端运行：
 
 ```sh
 hermes --tui

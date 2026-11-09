@@ -34,6 +34,7 @@
 | `pi` | 可选 Pi 启动默认值，传给 `modules.pi.defaults`；见 [schema](../modules/pi/startup-defaults-type.nix)。 |
 | `hermes` | 传给官方 `services.hermes-agent` 模块的属性集。见 [Hermes 配置](../modules/hermes/README.zh-CN.md)。 |
 | `hermesProtonPass` | 可选的 Hermes 环境变量名与 Proton Pass 字段引用映射。见[凭据准备](../modules/hermes/README.zh-CN.md#秘密文件与激活)。 |
+| `hermesServe` | 为已启用的 Hermes Dashboard 配置远程访问，可选。包含 `host`（节点的 MagicDNS 主机名）和 `passwordRef`（Proton Pass 密码引用）。见[远程访问](../modules/tailscale/README.zh-CN.md#hermes-over-https)。 |
 
 ## Linux 主机字段
 
@@ -85,7 +86,7 @@ singBox = {
 - GHCR 认证按主机启用，helper 使用主机提供的 Docker daemon 和 Compose。
 - Hermes 支持 Linux 用户服务和 macOS launchd agent。见[配置指南](../modules/hermes/README.zh-CN.md)。
 - Harness 策略同时适用于 macOS 和 Linux。macOS 使用官方桌面应用，Web 后端和私有代理是 Linux 用户服务。
-- Tailscale 的 `enable`、`incoming.enable` 和 `ssh.enable` 适用于 macOS 和 Linux；`outboundProxy` 与 `serve` 选项适用于 Linux。
+- Tailscale 的 `outboundProxy` 仅适用于 Linux。其余选项适用于 macOS 和 Linux。
 
 共享启用开关和服务连接关系在平台 profile 中修改，软件包选择放在 [flake.nix](../flake.nix)。macOS 的 Tailscale 在[系统 profile](../profiles/system/darwin/default.nix) 中配置，Harness 策略在 [Home Manager profile](../profiles/home/darwin.nix) 中配置。
 
@@ -638,7 +639,7 @@ true
 
 ## modules\.tailscale\.serve\.enable
 
-是否在 Linux 启用仅限 tailnet 的 HTTPS 反向代理。要求启用 `incoming.enable`、MagicDNS 和 tailnet HTTPS 证书，并允许访问所选 HTTPS 端口。启用 Serve 会解锁原生 daemon 偏好，让前台 CLI 管理映射；daemon 启动时，Nix 会重新应用偏好。
+是否启用仅限 tailnet 的 HTTPS 反向代理。要求启用 `incoming.enable`、MagicDNS 和 tailnet HTTPS 证书，并允许访问所选 HTTPS 端口。启用 Serve 会解锁 daemon 偏好，让前台 CLI 管理映射。daemon 启动时，Nix 会重新应用偏好。
 
 *类型：*
 boolean
@@ -657,7 +658,7 @@ true
 
 *声明来源：*
 
-- [modules/tailscale/home-manager\.nix](../modules/tailscale/home-manager.nix)
+- [modules/tailscale/options\.nix](../modules/tailscale/options.nix)
 
 ## modules\.tailscale\.serve\.httpsPort
 
@@ -680,11 +681,11 @@ integer between 1 and 65535 (both inclusive)
 
 *声明来源：*
 
-- [modules/tailscale/home-manager\.nix](../modules/tailscale/home-manager.nix)
+- [modules/tailscale/options\.nix](../modules/tailscale/options.nix)
 
 ## modules\.tailscale\.serve\.target
 
-回环 HTTP 后端，启用 Serve 时必须提供。Linux profile 根据 Harness 代理端口派生该 URL。映射仅在 systemd 服务存活期间存在，不启用 Funnel。
+回环 HTTP 后端，启用 Serve 时必须提供。映射随前台 Serve 进程启停。
 
 *类型：*
 string matching the pattern http://127\[\.]0\[\.]0\[\.]1:\[0-9]+
@@ -697,7 +698,7 @@ string matching the pattern http://127\[\.]0\[\.]0\[\.]1:\[0-9]+
 
 *声明来源：*
 
-- [modules/tailscale/home-manager\.nix](../modules/tailscale/home-manager.nix)
+- [modules/tailscale/options\.nix](../modules/tailscale/options.nix)
 
 ## modules\.tailscale\.ssh\.enable
 

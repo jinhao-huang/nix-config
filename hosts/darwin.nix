@@ -22,6 +22,10 @@ in
     pi = { };
   };
   desktop = common // {
+    hermesServe = {
+      host = (import ../modules/ssh/inventory.nix).mac-mini.settings.HostName;
+      passwordRef = "pass://Dev/Hermes Dashboard/password";
+    };
     hermes = common.hermes // {
       enable = true;
       backend.mode = "dashboard";
