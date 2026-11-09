@@ -60,9 +60,16 @@ files. Prepare model settings and allowed user IDs before switching an enabled h
 
 ## Secrets and activation
 
-Keep the secret file at `~/.config/hermes/secrets.env`, outside Git, and declare
-its absolute path in `hermes.environmentFiles`. Create the user-owned file with
-mode `0600` or `0400` and its parent with mode `0700`:
+The `desktop` host declares its Proton Pass field references in
+[`hermesProtonPass`](../../hosts/darwin.nix). On `switch`, Home Manager resolves
+and validates those references before applying Hermes settings. Sign in to
+Proton Pass on the target Mac before switching. After replacing a key in the
+same Proton Pass field, switch again. Failed injection preserves the previous
+configuration and credentials. Hermes starts with `~/.hermes/.env`.
+
+For a host with an externally managed secret file, declare its absolute path
+in `hermes.environmentFiles`. Keep it outside Git, with file mode `0600` or
+`0400` and parent mode `0700`:
 
 ```dotenv
 OPENAI_API_KEY=replace-on-the-server
@@ -70,7 +77,11 @@ TELEGRAM_BOT_TOKEN=replace-on-the-server
 ```
 
 Use the credential variable required by your model provider. A CLI-only Mac
-does not need a Telegram token. Activation rejects missing model settings,
+does not need a Telegram token.
+
+### Activation
+
+Activation rejects missing model settings,
 unreadable or non-private secret files, missing Telegram tokens, invalid user
 IDs, and public Telegram access. Builds do not require runtime secrets. These
 checks do not test external authentication.
@@ -84,9 +95,9 @@ flow. Activation:
 2. Creates or repairs the Hermes state root and managed state subdirectories
    with mode `0700`. New state files use a private umask.
 3. Replaces the complete `config.yaml` and atomically replaces `.env` with mode
-   `0600`. Public values come first, followed by private files in order; later
-   values win. Empty environment declarations produce an empty `.env`, removing
-   previously installed values.
+   `0600`. Public values come first, followed by private files in order and
+   resolved Proton Pass values. Later values win. Empty environment
+   declarations produce an empty `.env`, removing previously installed values.
 4. Restarts active systemd services or loaded launchd agents when configuration
    or environment changes, after native service setup. An unchanged activation
    does not request an extra restart. Failed restarts remain pending for the
@@ -106,14 +117,16 @@ nix build --no-link .#checks.aarch64-darwin.hermes-runtime
 
 ## Maintenance
 
-To enable Hermes after initial setup, prepare the configuration and secret file
+To enable Hermes after initial setup, prepare the configuration and credentials
 above, then use the [routine rebuild flow](../../README.md#build-and-switch).
 Open a new CLI session after switching; check the gateway only if it is enabled.
 
-Upgrade the `hermes-agent` flake input and switch; avoid `hermes update`. Back up
-`~/.hermes` first: Home Manager rollback does not restore application state.
-`hermes --version` may show `v0.0.0`; identify the build by its printed commit and
-`flake.lock`. Nix is an upstream
+Back up `~/.hermes` before upgrading because Home Manager rollback does not
+restore application state. Update `llm-agents` for the default macOS package,
+which uses its published Python dependencies. The `hermes-agent` input supplies
+the Linux package and the Home Manager module on both platforms. Apply input
+updates by switching. If `hermes --version` shows `v0.0.0`, identify the build by
+its printed commit and `flake.lock`. Nix is an upstream
 [Tier 2 platform](https://hermes-agent.nousresearch.com/docs/getting-started/platform-support/).
 
 ## Configuration ownership and isolation

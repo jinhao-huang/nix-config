@@ -40,20 +40,26 @@ Linux 和 macOS 均使用官方 Home Manager 模块。Nix 管理程序、服务�
 
 ## 秘密文件与激活
 
-将秘密文件放在 Git 之外的 `~/.config/hermes/secrets.env`，并在 `hermes.environmentFiles` 中声明其绝对路径。文件应归当前用户所有，权限使用 `0600` 或 `0400`，父目录使用 `0700`：
+`desktop` 在 [`hermesProtonPass`](../../hosts/darwin.nix) 中声明 Proton Pass 的字段引用。执行 `switch` 时，Home Manager 先解析并校验引用，再应用 Hermes 配置。切换前先在目标 Mac 登录 Proton Pass。轮换时更新同一个字段，再执行一次 `switch`。注入失败会保留原有配置和凭据。Hermes 启动时读取 `~/.hermes/.env`。
+
+如果秘密文件由其他方式管理，在 `hermes.environmentFiles` 中声明其绝对路径。文件放在 Git 之外，权限使用 `0600` 或 `0400`，父目录使用 `0700`：
 
 ```dotenv
 OPENAI_API_KEY=replace-on-the-server
 TELEGRAM_BOT_TOKEN=replace-on-the-server
 ```
 
-模型凭据变量应与实际提供商匹配。只使用 CLI 的 Mac 不需要 Telegram token。激活会拒绝缺少模型设置、秘密文件不可读或权限过宽、缺少 Telegram token、用户 ID 无效，以及允许 Telegram 公开访问等情况。构建不需要运行时秘密文件；这些校验也不验证外部认证是否成功。
+模型凭据变量应与实际提供商匹配。只使用 CLI 的 Mac 不需要 Telegram token。
+
+### 激活
+
+激活会拒绝缺少模型设置、秘密文件不可读或权限过宽、缺少 Telegram token、用户 ID 无效，以及允许 Telegram 公开访问等情况。构建不需要运行时秘密文件，这些校验也不验证外部认证是否成功。
 
 在平台指南的首次激活前准备好这些输入。之后修改设置或秘密文件时，使用仓库统一的日常构建与激活流程。激活流程会：
 
 1. 在 Home Manager 写入边界之前校验输入，并在应用状态前再次校验。
 2. 创建或修复 Hermes 状态根目录及受管理状态子目录，将权限设为 `0700`。新状态文件使用私有 umask。
-3. 替换完整的 `config.yaml`，并以 `0600` 权限原子替换 `.env`。公开值在前，私有文件按顺序追加，后面的值覆盖前面的值。环境声明全部清空时，生成空 `.env`，撤销此前安装的值。
+3. 替换完整的 `config.yaml`，并以 `0600` 权限原子替换 `.env`。依次写入公开值、私有文件和从 Proton Pass 解析的值，后面的值覆盖前面的值。环境声明全部清空时，生成空 `.env`，撤销此前安装的值。
 4. 在原生服务安装完成后，为配置或环境变化重启活跃的 systemd 服务或已加载的 launchd agent。配置和环境内容未变时，不额外请求重启；重启失败则保留待处理标记，在下次切换时重试。
 
 软件包和服务定义的变化仍由原生服务管理器处理。只使用 CLI 时没有后台服务需要重启，切换后打开新的 CLI 会话。两个平台的服务管理器均使用 `0077` umask 启动 Hermes。Dry run 不写状态，也不重启服务。状态准备复用上游文档复制、认证初始值和插件处理逻辑；渲染和状态准备依赖上游 `moduleCommon.nix`，更新输入时应检查该接口。回归检查命令：
@@ -66,9 +72,9 @@ nix build --no-link .#checks.aarch64-darwin.hermes-runtime
 
 ## 维护
 
-首次安装后再启用 Hermes 时，先准备上面的配置和秘密文件，再使用[日常重新构建流程](../../README.zh-CN.md#构建与激活)。切换后打开新的 CLI 会话，仅在启用 gateway 时检查其服务。
+首次安装后再启用 Hermes 时，先准备上面的配置和凭据，再使用[日常重新构建流程](../../README.zh-CN.md#构建与激活)。切换后打开新的 CLI 会话，仅在启用 gateway 时检查其服务。
 
-升级时更新 `hermes-agent` flake 输入并切换，不运行 `hermes update`。先备份 `~/.hermes`：Home Manager 回滚不会恢复应用状态。`hermes --version` 可能显示 `v0.0.0`，应结合输出的 commit 和 `flake.lock` 识别版本。Nix 属于上游的 [Tier 2 平台](https://hermes-agent.nousresearch.com/docs/getting-started/platform-support/)。
+升级前备份 `~/.hermes`，因为 Home Manager 回滚不会恢复应用状态。macOS 的默认包及其 Python 依赖随 `llm-agents` 更新。`hermes-agent` 输入提供 Linux 软件包和两个平台的 Home Manager 模块。更新输入后执行切换。如果 `hermes --version` 显示 `v0.0.0`，结合输出的 commit 和 `flake.lock` 识别版本。Nix 属于上游的 [Tier 2 平台](https://hermes-agent.nousresearch.com/docs/getting-started/platform-support/)。
 
 ## 配置归属与隔离
 

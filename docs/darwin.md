@@ -15,9 +15,9 @@ Set this variable again in each new shell.
 
 Nix and Git must already be installed. Check `username`, `homeDirectory`,
 `authorizedKeyFiles`, and the application choices in
-[hosts/darwin.nix](../hosts/darwin.nix) for the selected role. If enabling
-Hermes, prepare its [model settings and secret file](../modules/hermes/README.md)
-now; otherwise leave it disabled for this activation.
+[hosts/darwin.nix](../hosts/darwin.nix) for the selected role. If Hermes is
+enabled, check its [credential source](../modules/hermes/README.md#secrets-and-activation)
+before activation.
 
 If the build needs transparent proxying, place
 the official Surge Mac release at `/Applications/Surge.app`, open it, and enable
@@ -63,8 +63,8 @@ store for headless automation.
 
 ## Hermes
 
-Hermes is optional and disabled on `laptop` and `desktop` by default. If you
-enabled it before activation, open the CLI/TUI:
+The [desktop role](../hosts/darwin.nix) enables Hermes and its local Dashboard.
+After activation, open [Chat](http://127.0.0.1:9119/chat) on that Mac or run:
 
 ```sh
 hermes --tui

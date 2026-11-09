@@ -125,11 +125,20 @@ rec {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.users.${darwinHost.username} =
-                { pkgs, ... }:
+                {
+                  config,
+                  lib,
+                  pkgs,
+                  ...
+                }:
                 let
                   system = pkgs.stdenv.hostPlatform.system;
                   selectedPackages = self.packages.${system};
                   agentPackages = llm-agents.packages.${system};
+                  hermes = config.services.hermes-agent;
+                  hermesPackage = agentPackages.hermes-agent;
+                  hermesPython = llm-agents.inputs.nixpkgs.legacyPackages.${system}.python3;
+                  hermesPythonEnv = hermesPython.withPackages (_: hermesPackage.dependencies);
                 in
                 {
                   imports = [ ./profiles/home/darwin.nix ];
@@ -137,7 +146,24 @@ rec {
                   modules.proton-pass.package = selectedPackages.proton-pass-cli;
                   modules.typst.package = selectedPackages.typst;
                   modules.pi.defaults = darwinHost.pi;
-                  services.hermes-agent = darwinHost.hermes;
+                  modules.hermes.protonPassReferences = darwinHost.hermesProtonPass or { };
+                  services.hermes-agent = lib.mkMerge [
+                    darwinHost.hermes
+                    {
+                      package = lib.mkDefault (
+                        assert lib.assertMsg (hermes.extraDependencyGroups == [ ] && hermes.extraPythonPackages == [ ])
+                          "The cached macOS Hermes package uses its published Python dependencies. Remove extraDependencyGroups and extraPythonPackages or select a cached package with the required dependencies.";
+                        hermesPackage
+                        // {
+                          # The upstream module imports Hermes through this interpreter.
+                          hermesVenv = pkgs.writeShellScriptBin "python3" ''
+                            export PYTHONPATH=${lib.escapeShellArg "${hermesPackage}/${hermesPython.sitePackages}"}
+                            exec ${hermesPythonEnv}/bin/python3 "$@"
+                          '';
+                        }
+                      );
+                    }
+                  ];
                   programs = {
                     mise.package = selectedPackages.mise;
                     claude-code.package = agentPackages.claude-code;

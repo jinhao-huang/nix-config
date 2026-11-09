@@ -12,7 +12,7 @@ deploy_host=laptop # Use desktop on the desktop Mac.
 
 ## 首次激活前
 
-开始前需要已安装 Nix 和 Git。检查 [hosts/darwin.nix](../hosts/darwin.nix) 中所选角色的 `username`、`homeDirectory`、`authorizedKeyFiles` 和应用选择。若启用 Hermes，现在就准备[模型设置和秘密文件](../modules/hermes/README.zh-CN.md)；否则本次激活保持关闭。
+开始前需要已安装 Nix 和 Git。检查 [hosts/darwin.nix](../hosts/darwin.nix) 中所选角色的 `username`、`homeDirectory`、`authorizedKeyFiles` 和应用选择。若已启用 Hermes，请在激活前核对[凭据来源](../modules/hermes/README.zh-CN.md#秘密文件与激活)。
 
 如果构建需要透明代理，先将 Surge Mac 官方版本放到 `/Applications/Surge.app`，打开应用并启用增强模式（Enhanced Mode）。激活时，Homebrew Bundle 会接管已有应用，将其纳入 `surge` cask 管理。
 
@@ -49,7 +49,7 @@ gh auth status
 
 ## Hermes
 
-Hermes 是可选功能，`laptop` 和 `desktop` 默认关闭。若已在激活前启用，现在可以打开 CLI/TUI：
+[桌面机角色](../hosts/darwin.nix)启用了 Hermes 和本机 Dashboard。激活后，在该 Mac 上打开 [Chat](http://127.0.0.1:9119/chat)，或在终端运行：
 
 ```sh
 hermes --tui

@@ -11,7 +11,7 @@ from dotenv import dotenv_values
 from hermes_yaml import safe_load
 
 
-def validate(policy):
+def validate(policy, injected=None):
     config = Path(policy["configFile"]).read_bytes()
     settings = safe_load(config) or {}
     model = settings.get("model", {})
@@ -31,7 +31,18 @@ def validate(policy):
         if not stat.S_ISREG(metadata.st_mode) or stat.S_IMODE(metadata.st_mode) & 0o077:
             raise ValueError(f"Environment file must be a private regular file (0600 or 0400): {path}")
         content += "\n" + path.read_text()
-    # Match upstream: public environment first, then private files in order.
+
+    if keys := policy.get("protonPassKeys"):
+        if injected is None:
+            injected = sys.stdin.read()
+        resolved = dotenv_values(stream=StringIO(injected), interpolate=False)
+        for key in keys:
+            value = resolved.get(key) or ""
+            if not value.strip() or re.search(r"\{\{\s*pass://", value):
+                raise ValueError(f"Proton Pass did not resolve a value for {key}.")
+        content += "\n" + injected
+
+    # Public environment first, then private files in order, then injected values.
     environment = dotenv_values(stream=StringIO(content), interpolate=False)
 
     if settings.get("platforms", {}).get("telegram", {}).get("enabled", False):

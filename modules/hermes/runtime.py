@@ -24,9 +24,9 @@ def read_existing(path):
     return path.read_bytes() if path.exists() else None
 
 
-def apply(policy):
+def apply(policy, injected=None):
     # Read and validate all external inputs before changing usable state.
-    config, environment = validate(policy)
+    config, environment = validate(policy, injected)
     home = Path(policy["hermesHome"])
     config_path, env_path = home / "config.yaml", home / ".env"
     previous_config, previous_env = read_existing(config_path), read_existing(env_path)

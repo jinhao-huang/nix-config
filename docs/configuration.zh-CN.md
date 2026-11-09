@@ -32,7 +32,8 @@
 | `authorizedKeyFiles` | 公钥文件路径，传给 nix-darwin 的 `users.users.<name>.openssh.authorizedKeys.keyFiles`。 |
 | `homebrew.casks` | 添加到 [Homebrew profile](../profiles/system/darwin/homebrew.nix) 共享应用列表的主机专属 cask；没有时使用 `[]`。 |
 | `pi` | 可选 Pi 启动默认值，传给 `modules.pi.defaults`；见 [schema](../modules/pi/startup-defaults-type.nix)。 |
-| `hermes` | 传给官方 `services.hermes-agent` 的属性集，两台 Mac 默认关闭。见 [Hermes 配置](../modules/hermes/README.zh-CN.md)。 |
+| `hermes` | 传给官方 `services.hermes-agent` 模块的属性集。见 [Hermes 配置](../modules/hermes/README.zh-CN.md)。 |
+| `hermesProtonPass` | 可选的 Hermes 环境变量名与 Proton Pass 字段引用映射。见[凭据准备](../modules/hermes/README.zh-CN.md#秘密文件与激活)。 |
 
 ## Linux 主机字段
 
@@ -82,7 +83,7 @@ singBox = {
 
 - sing-box 作为 Linux systemd 用户服务运行。
 - GHCR 认证按主机启用，helper 使用主机提供的 Docker daemon 和 Compose。
-- Hermes 支持 Linux 用户服务和 macOS launchd agent，两台 Mac 默认关闭。见[配置指南](../modules/hermes/README.zh-CN.md)。
+- Hermes 支持 Linux 用户服务和 macOS launchd agent。见[配置指南](../modules/hermes/README.zh-CN.md)。
 - Harness 策略同时适用于 macOS 和 Linux。macOS 使用官方桌面应用，Web 后端和私有代理是 Linux 用户服务。
 - Tailscale 的 `enable`、`incoming.enable` 和 `ssh.enable` 适用于 macOS 和 Linux；`outboundProxy` 与 `serve` 选项适用于 Linux。
 

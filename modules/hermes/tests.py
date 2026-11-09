@@ -122,6 +122,17 @@ class RuntimeTests(unittest.TestCase):
             self.assertEqual((self.home / name).read_bytes(), content)
         self.assertFalse((self.home / ".restart-needed").exists())
 
+    def test_empty_or_unresolved_proton_pass_fields_keep_the_active_key(self):
+        self.policy["protonPassKeys"] = ["DEEPSEEK_API_KEY"]
+        runtime.apply(self.policy, "DEEPSEEK_API_KEY=previous\n")
+        path = self.home / ".env"
+        previous = path.read_bytes()
+        for value in ["", "{{ pass://Vault/DeepSeek/API Key }}"]:
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                runtime.apply(self.policy, f"DEEPSEEK_API_KEY={value}\n")
+            self.assertEqual(path.read_bytes(), previous)
+        self.assertFalse((self.home / ".restart-needed").exists())
+
     def test_setup_failure_restores_config_and_keeps_environment(self):
         self.apply()
         before = (self.home / "config.yaml").read_bytes()

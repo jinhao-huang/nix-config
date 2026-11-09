@@ -44,7 +44,8 @@ Edit [hosts/darwin.nix](../hosts/darwin.nix). Each top-level attribute names a
 | `authorizedKeyFiles` | Public key paths passed to nix-darwin's `users.users.<name>.openssh.authorizedKeys.keyFiles`. |
 | `homebrew.casks` | Machine-specific casks added to the shared application list in the [Homebrew profile](../profiles/system/darwin/homebrew.nix); use `[]` for none. |
 | `pi` | Optional Pi startup defaults passed to `modules.pi.defaults`; see [the schema](../modules/pi/startup-defaults-type.nix). |
-| `hermes` | Attribute set passed to official `services.hermes-agent`; disabled on both Macs by default. See [Hermes configuration](../modules/hermes/README.md). |
+| `hermes` | Attribute set passed to the official `services.hermes-agent` module. See [Hermes configuration](../modules/hermes/README.md). |
+| `hermesProtonPass` | Optional mapping from Hermes environment variable names to Proton Pass field references. See [credential preparation](../modules/hermes/README.md#secrets-and-activation). |
 
 ## Linux host fields
 
@@ -118,8 +119,8 @@ never add private keys. Tailscale SSH uses its own authorization policy.
 - sing-box runs as a Linux systemd user service.
 - GHCR authentication is enabled per host; the helper uses the host-provided
   Docker daemon and Compose.
-- Hermes supports Linux user services and macOS launchd agents; both Macs default
-  to disabled. See its [configuration guide](../modules/hermes/README.md).
+- Hermes supports Linux user services and macOS launchd agents. See its
+  [configuration guide](../modules/hermes/README.md).
 - Harness policy applies on macOS and Linux. macOS uses the official desktop
   application; the Web backend and private proxy are Linux user services.
 - Tailscale's `enable`, `incoming.enable`, and `ssh.enable` options apply to

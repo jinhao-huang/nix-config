@@ -22,6 +22,15 @@ in
     pi = { };
   };
   desktop = common // {
+    hermes = common.hermes // {
+      enable = true;
+      backend.mode = "dashboard";
+      settings.model = {
+        provider = "deepseek";
+        default = "deepseek-flash";
+      };
+    };
+    hermesProtonPass.DEEPSEEK_API_KEY = "pass://Dev/DeepSeek/API Key";
     homebrew.casks = [
       "airbuddy"
       "betterdisplay"
