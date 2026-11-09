@@ -132,7 +132,7 @@ in
     enable = true;
     incoming.enable = true;
     outboundProxy.enable = false;
-    ssh.enable = true;
+    ssh.enable = false;
     serve = {
       enable = true;
       target = "http://127.0.0.1:${toString config.modules.deepseek-harness.service.proxyPort}";

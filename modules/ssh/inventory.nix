@@ -58,7 +58,7 @@ in
     identity = identities.cas;
 
     settings = {
-      HostName = "iscas-r750xa.internal";
+      HostName = "iscas-r750xa.bison-agama.ts.net";
       User = "huangjh";
       Port = 22;
     };

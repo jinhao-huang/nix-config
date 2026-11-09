@@ -78,7 +78,7 @@ Put local SSH overrides in `~/.ssh/config.local`.
 The Linux profile sets `XDG_RUNTIME_DIR` to `/run/user/<UID>` when it is unset
 or empty, preserving an existing value. Bash login, interactive, and SSH command
 sessions load Home Manager's session variables; Zsh loads them from `.zshenv`.
-This lets Tailscale SSH sessions use `systemctl --user`, `tailscale-user`, and
+This lets SSH sessions use `systemctl --user`, `tailscale-user`, and
 `with-proxy` directly. Reconnect after activation to load the new environment.
 The host's systemd-logind and linger manage the runtime directory and user
 manager; shell startup does not create or start them.
@@ -91,9 +91,9 @@ is required because `home.file` creates Nix store symlinks, and a group-writable
 store directory fails OpenSSH's `StrictModes` checks. The step respects dry-run
 and preserves the existing file if copying fails.
 
-The system SSH daemon must read that path. Keep the current session open and
-test a new ordinary SSH connection after switching. Tailscale SSH stays enabled
-with its own authorization policy.
+The system SSH daemon must read that path and listen on `127.0.0.1:22`. Switch
+from an existing system SSH connection, then test a fresh public-key login
+using the tailnet hostname before closing the original session.
 
 ## Tailscale
 
@@ -107,9 +107,10 @@ tailscale-user status --json
 
 If `AuthURL` is empty, retry status after a few seconds. Open the URL to approve
 the device; `tailscale-user ip -4` gives its address.
-For shared servers, use a dedicated tag, allow the required SSH port and managed
-Linux account, and remove access to other devices in the
-[tailnet policy](https://tailscale.com/docs/reference/syntax/grants).
+The userspace daemon forwards tailnet TCP 22 to system OpenSSH on loopback.
+OpenSSH authenticates the Linux account. On shared servers, use a dedicated
+tag, grant TCP 22 only to intended clients, and remove access to other devices
+in the [tailnet policy](https://tailscale.com/docs/reference/syntax/grants).
 Disabling the outbound proxy alone does not restrict access.
 Logs: `journalctl --user -u tailscaled`.
 

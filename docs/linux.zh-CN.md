@@ -46,11 +46,11 @@ nix --extra-experimental-features "nix-command flakes" \
 
 Home Manager 不修改账号的登录 shell，需要时显式启动 `zsh` 或 tmux。若需要 Git 签名，使用 `ssh -A <ssh-host>` 连接，将占位符替换为目标主机的 SSH 别名，并转发包含签名密钥的 agent。本地 SSH 覆盖配置写入 `~/.ssh/config.local`。
 
-Linux profile 在 `XDG_RUNTIME_DIR` 未设置或为空时使用 `/run/user/<UID>`，保留已有值。Bash 登录、交互和 SSH 命令会话都会加载 Home Manager 会话变量；Zsh 从 `.zshenv` 加载。因此，通过 Tailscale SSH 登录后可以直接使用 `systemctl --user`、`tailscale-user` 和 `with-proxy`。激活后重新连接以加载新环境。运行目录和用户管理器由主机的 systemd-logind 与 linger 管理，shell 启动过程不会创建目录或启动管理器。
+Linux profile 在 `XDG_RUNTIME_DIR` 未设置或为空时使用 `/run/user/<UID>`，保留已有值。Bash 登录、交互和 SSH 命令会话都会加载 Home Manager 会话变量；Zsh 从 `.zshenv` 加载。因此，SSH 登录后可以直接使用 `systemctl --user`、`tailscale-user` 和 `with-proxy`。激活后重新连接以加载新环境。运行目录和用户管理器由主机的 systemd-logind 与 linger 管理，shell 启动过程不会创建目录或启动管理器。
 
 Home Manager 激活时合并主机 `authorizedKeyFiles` 列表中的公钥，在权限为 `0700` 的 `.ssh` 目录中生成当前用户所有、权限为 `0600` 的普通文件 `~/.ssh/authorized_keys`。每次激活都会原子替换该文件，因此应修改主机的公钥列表。这里需要自定义激活步骤，因为 `home.file` 会创建指向 Nix store 的符号链接，而允许组写入的 store 目录无法通过 OpenSSH 的 `StrictModes` 检查。该步骤遵守 dry-run，复制失败时保留原文件。
 
-系统 SSH daemon 必须读取该路径。切换后保留当前会话，并另开一次普通 SSH 连接验证。Tailscale SSH 保持启用，使用独立的授权策略。
+系统 SSH 服务必须读取该路径，并监听 `127.0.0.1:22`。通过现有的系统 SSH 连接激活配置，再用 tailnet 主机名新建连接，验证公钥登录后关闭原会话。
 
 ## Tailscale
 
@@ -61,7 +61,9 @@ tailscale-user debug localapi POST login-interactive
 tailscale-user status --json
 ```
 
-若 `AuthURL` 为空，等几秒后再次查询状态。在浏览器打开该 URL，批准设备接入。通过 `tailscale-user ip -4` 查看地址。共享服务器应使用专用 tag，在 [tailnet 策略](https://tailscale.com/docs/reference/syntax/grants)中允许所需的 SSH 端口和受管理 Linux 账号，并移除访问其他设备的权限。仅关闭出站代理不能限制访问。
+若 `AuthURL` 为空，等几秒后再次查询状态。在浏览器打开该 URL，批准设备接入。通过 `tailscale-user ip -4` 查看地址。
+
+用户态 Tailscale 将 tailnet 的 TCP 22 转发给本机 OpenSSH，由 OpenSSH 验证 Linux 账号。共享服务器应使用专用 tag，在 [tailnet 策略](https://tailscale.com/docs/reference/syntax/grants)中只允许指定客户端访问 TCP 22，并移除服务器访问其他设备的权限。仅关闭出站代理不能限制访问。
 
 查看日志：`journalctl --user -u tailscaled`。
 
