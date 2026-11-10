@@ -33,6 +33,7 @@ in
         provider = "minimax-cn";
         default = "MiniMax-M3.1-Flash";
       };
+      settings.providers.minimax-cn.models."MiniMax-M3.1-Flash".supports_vision = true;
     };
     hermesProtonPass = {
       DEEPSEEK_API_KEY = "pass://Dev/DeepSeek/API Key";

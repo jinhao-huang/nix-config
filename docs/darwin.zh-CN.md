@@ -51,6 +51,8 @@ gh auth status
 
 [桌面机角色](../hosts/darwin.nix)启用了 Hermes 和 Dashboard。切换前，将 MiniMax 中国区订阅 Key 存入主机清单中 `MINIMAX_CN_API_KEY` 引用的 Proton Pass 字段。新聊天默认使用 MiniMax。要在当前聊天中改用 DeepSeek，输入 `/model deepseek-flash --provider deepseek --session`。
 
+在使用 MiniMax 的 Dashboard 聊天中上传图片，模型会直接读取图片内容。
+
 要用浏览器访问，先完成 [HTTPS 设置](../modules/tailscale/README.zh-CN.md#hermes-over-https)。激活后也可以在终端运行：
 
 ```sh

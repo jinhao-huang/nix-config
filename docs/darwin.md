@@ -69,6 +69,9 @@ referenced by `MINIMAX_CN_API_KEY` in the desktop inventory. New chats default
 to MiniMax. To use DeepSeek for the current chat, enter
 `/model deepseek-flash --provider deepseek --session`.
 
+In Dashboard chats using MiniMax, attach an image to let the model inspect it
+directly.
+
 Follow the [HTTPS setup](../modules/tailscale/README.md#hermes-over-https) for
 browser access. To chat in the terminal after activation, run:
 
