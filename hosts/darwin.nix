@@ -30,11 +30,14 @@ in
       enable = true;
       backend.mode = "dashboard";
       settings.model = {
-        provider = "deepseek";
-        default = "deepseek-flash";
+        provider = "minimax-cn";
+        default = "MiniMax-M3.1-Flash";
       };
     };
-    hermesProtonPass.DEEPSEEK_API_KEY = "pass://Dev/DeepSeek/API Key";
+    hermesProtonPass = {
+      DEEPSEEK_API_KEY = "pass://Dev/DeepSeek/API Key";
+      MINIMAX_CN_API_KEY = "pass://Dev/MiniMax CN/Subscription Key";
+    };
     homebrew.casks = [
       "airbuddy"
       "betterdisplay"
