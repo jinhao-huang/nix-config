@@ -75,7 +75,7 @@ def restart(policy):
             target = f"gui/{os.getuid()}/org.nix-community.home.{service}"
             probe = [manager, "print", target]
             command = [manager, "kickstart", "-k", target]
-            inactive_codes = (113,)  # launchd: service not found
+            inactive_codes = (112, 113)  # launchd: domain or service not found
         else:
             probe = [manager, "--user", "is-active", "--quiet", f"{service}.service"]
             command = [manager, "--user", "restart", f"{service}.service"]

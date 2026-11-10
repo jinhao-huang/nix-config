@@ -99,9 +99,10 @@ flow. Activation:
    resolved Proton Pass values. Later values win. Empty environment
    declarations produce an empty `.env`, removing previously installed values.
 4. Restarts active systemd services or loaded launchd agents when configuration
-   or environment changes, after native service setup. An unchanged activation
-   does not request an extra restart. Failed restarts remain pending for the
-   next switch.
+   or environment changes, after native service setup. Without a macOS graphical
+   session, Hermes uses the updated configuration at the next graphical login.
+   An unchanged activation does not request an extra restart. Failed restarts
+   remain pending for the next switch.
 
 The native service manager also handles package and unit changes. CLI-only use
 has no background service to restart; open a new CLI session after switching.

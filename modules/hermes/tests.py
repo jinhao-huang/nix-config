@@ -41,7 +41,8 @@ class RuntimeTests(unittest.TestCase):
             " output.write(' '.join(sys.argv[1:]) + '\\n')\n"
             "probe = 'is-active' in sys.argv or 'print' in sys.argv\n"
             f"status = 0 if Path({str(self.active)!r}).exists() else (113 if 'print' in sys.argv else 3)\n"
-            f"if Path({str(self.probe_failure)!r}).exists(): status = 1\n"
+            f"probe_failure = Path({str(self.probe_failure)!r})\n"
+            "if probe_failure.exists(): status = int(probe_failure.read_text())\n"
             "sys.exit(status if probe "
             f"else (1 if Path({str(self.failure)!r}).exists() else 0))\n"
         )
@@ -182,7 +183,7 @@ class RuntimeTests(unittest.TestCase):
                 self.policy["platform"] = platform
                 self.policy["environment"] = {"VALUE": platform}
                 self.apply()
-                self.probe_failure.touch()
+                self.probe_failure.write_text("1")
                 with self.assertRaises(subprocess.CalledProcessError):
                     runtime.restart(self.policy)
                 self.assertTrue((self.home / ".restart-needed").exists())
@@ -204,6 +205,16 @@ class RuntimeTests(unittest.TestCase):
         self.apply()
         runtime.restart(self.policy)
         self.assertEqual(self.calls.read_text().count("kickstart"), 2)
+
+    def test_darwin_skips_restart_without_graphical_login(self):
+        self.policy["platform"] = "darwin"
+        self.apply()
+        self.policy["environment"] = {"VALUE": "changed"}
+        self.apply()
+        self.probe_failure.write_text("112")  # launchd: domain not found
+        runtime.restart(self.policy)
+        self.assertNotIn("kickstart", self.calls.read_text())
+        self.assertFalse((self.home / ".restart-needed").exists())
 
 
 if __name__ == "__main__":

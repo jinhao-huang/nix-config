@@ -10,12 +10,6 @@
     NSGlobalDomain."com.apple.springing.enabled" = true;
 
     CustomUserPreferences = {
-      "com.hezongyidev.Bob".AppleLanguages = [
-        "zh-Hans-US"
-        "en"
-        "en-US"
-      ];
-
       # Disable Spotlight's Cmd-Space (AppleSymbolicHotKeys 64) so Raycast can claim it.
       "com.apple.symbolichotkeys" = {
         AppleSymbolicHotKeys."64" = {
