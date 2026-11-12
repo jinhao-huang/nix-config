@@ -76,6 +76,23 @@ Choose the language by the artifact's audience and lifecycle, not by whether it 
 
 - Apply machine-specific guidance where the command actually executes. For SSH, containers, remote builders, or cloud tools, use that execution environment's networking and service configuration.
 
+### Long-running Jobs
+
+- For long-running experiments and batch jobs, prefer high sustainable concurrency
+  for independent work within available resources, service limits, approved
+  spending and experimental validity. Before launch, tell the user the chosen
+  concurrency and what limits it.
+- Launch authorized work in batches using an existing runner that survives the
+  chat ending. Preserve logs, results and exit status for later inspection.
+  Confirm successful startup and durable logging, then end the turn with the run
+  identifier, output location and current status. Distinguish launch from completion.
+- Let the user return to request progress or result analysis. Do not keep the chat
+  active solely to poll, sleep or reread logs. On return, inspect the existing run
+  before taking action; preserve completed work and avoid duplicate execution.
+- Respect stage gates: when smoke results require judgement before a larger run,
+  launch smoke and hand off at that boundary. Monitor through completion when the
+  user explicitly requests it, checking only as often as actionable decisions need.
+
 ## Finished Prose
 
 - Write documents, coursework, reports, and other prose deliverables directly in the author's voice for their intended reader. Match the requested genre, template, and language.
