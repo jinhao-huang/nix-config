@@ -6,6 +6,9 @@
     programs.vim = {
       enable = true;
       defaultEditor = true;
+      # Use Vim's built-in defaults without Home Manager's vim-sensible dependency.
+      plugins = lib.mkForce [ ];
+      extraConfig = "source $VIMRUNTIME/defaults.vim";
     };
   };
 }
