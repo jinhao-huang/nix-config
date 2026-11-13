@@ -1,0 +1,17 @@
+{
+  "kind": "upstream",
+  "repository": "https://github.com/humanlayer/skills",
+  "revision": "4d69d20f6e9b57b4fcf0d501ccfb1be961f0f329",
+  "reviewed_on": "2026-11-13",
+  "license": "skill-sources/humanlayer-skills.LICENSE",
+  "skills": {
+    "show-me": {
+      "upstream_path": "plugins/show-me/skills/show-me",
+      "local_path": "skills/show-me",
+      "adaptations": [
+        "Use temporary HTML files and client previews, with an absolute file path when no preview is available.",
+        "Preserve manual invocation in Codex through its invocation policy."
+      ]
+    }
+  }
+}
