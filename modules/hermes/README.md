@@ -15,13 +15,15 @@ Enable Hermes and its gateway separately per host.
 `hermes.enable = true` installs the CLI and manages its
 configuration. `hermes.gateway.enable = true` additionally runs a systemd user
 service on Linux or a launchd agent on macOS. Leave the gateway disabled for
-CLI/TUI use only. The optional web backend remains disabled by default.
+CLI/TUI use only. The `desktop` and Linux inventories enable the Dashboard
+with `hermes.backend.mode = "dashboard"`.
 
 [Shared policy](../../profiles/home/hermes.nix) disables update checks, automatic
 borrowing of Codex/Claude logins (`auth.adopt_external_logins`), and on-demand
-dependency installation (`security.allow_lazy_installs`). Declare dependencies
-through `extraPackages`, `extraDependencyGroups`, or `extraPythonPackages` when
-needed. Platform profiles own environment hints and proxy integration.
+dependency installation (`security.allow_lazy_installs`). Use `extraPackages`
+for command-line tools. Changing Python dependencies requires selecting a
+cached Hermes package that already includes them. Platform profiles own
+environment hints and proxy integration.
 
 ### Local overrides
 
@@ -41,13 +43,13 @@ Replace the model values and secret-file path to enable CLI/TUI use on a Mac:
       base_url = "https://llm.example.internal/v1";
       api_mode = "chat_completions";
     };
-    environmentFiles = [ "/Users/example/.config/hermes/secrets.env" ];
+    environmentFiles = [ "/Users/example/.config/nix-config/hermes.env" ];
   };
 }
 ```
 
 Replace `/Users/example` with the managed user's absolute home directory;
-keep `.config/hermes/secrets.env` as the secret-file location. Use the target
+choose a private secret-file path. Use the target
 inventory key for other hosts. Local validation requires both
 `settings.model.provider` and `settings.model.default`. A custom endpoint also
 needs the correct `base_url` and API protocol. For Telegram, supply
@@ -60,12 +62,14 @@ files. Prepare model settings and allowed user IDs before switching an enabled h
 
 ## Secrets and activation
 
-The `desktop` host declares its Proton Pass field references in
-[`hermesProtonPass`](../../hosts/darwin.nix). On `switch`, Home Manager resolves
-and validates those references before applying Hermes settings. Sign in to
-Proton Pass on the target Mac before switching. After replacing a key in the
-same Proton Pass field, switch again. Failed injection preserves the previous
-configuration and credentials. Hermes starts with `~/.hermes/.env`.
+The macOS and Linux Dashboards use the same [Proton Pass references](../../hosts/default.nix)
+for their login and model keys. On macOS, sign in to Proton Pass before `switch`.
+Home Manager resolves and validates the references before applying Hermes
+settings. After rotating a credential, switch again. Failed injection preserves
+the previous configuration and credentials. Hermes starts with `~/.hermes/.env`.
+
+For Linux, see [publishing Dashboard credentials](../../docs/linux.md#hermes)
+before the first switch and after credential rotation.
 
 For a host with an externally managed secret file, declare its absolute path
 in `hermes.environmentFiles`. Keep it outside Git, with file mode `0600` or
@@ -123,9 +127,8 @@ above, then use the [routine rebuild flow](../../README.md#build-and-switch).
 Open a new CLI session after switching; check the gateway only if it is enabled.
 
 Back up `~/.hermes` before upgrading because Home Manager rollback does not
-restore application state. Update `llm-agents` for the default macOS package,
-which uses its published Python dependencies. The `hermes-agent` input supplies
-the Linux package and the Home Manager module on both platforms. Apply input
+restore application state. Both platforms use the cached package from `llm-agents` and the Home Manager
+module from `hermes-agent`. Apply input
 updates by switching. If `hermes --version` shows `v0.0.0`, identify the build by
 its printed commit and `flake.lock`. Nix is an upstream
 [Tier 2 platform](https://hermes-agent.nousresearch.com/docs/getting-started/platform-support/).
@@ -154,7 +157,7 @@ Codex/Claude logins; it does not restrict shell access to those files.
 | --- | --- | --- |
 | State root (`hermesHome`) | `~/.hermes` | `~/.hermes` |
 | Workspace (`workingDirectory`) | `~/hermes-workspace` | `~/hermes-workspace` |
-| Secret source (`environmentFiles`) | `~/.config/hermes/secrets.env` | `~/.config/hermes/secrets.env` |
+| Credential source | Published `~/.config/nix-config/hermes.env` | Proton Pass on `desktop` |
 | Service logs | User journal for `hermes-agent` / `hermes-backend` | `~/Library/Logs/hermes-agent.log`, `hermes-agent.err.log`; corresponding `hermes-backend` files if enabled |
 
 Here `~` denotes the managed user's home directory.

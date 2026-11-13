@@ -8,9 +8,9 @@ Linux 和 macOS 均使用官方 Home Manager 模块。Nix 管理程序、服务�
 
 ## 每台主机的配置
 
-在 [hosts/linux.nix](../../hosts/linux.nix) 或 [hosts/darwin.nix](../../hosts/darwin.nix) 中设置 `hermes`，字段对应官方 [`services.hermes-agent` 选项](https://hermes-agent.nousresearch.com/docs/getting-started/nix-setup#home-manager-module)。Hermes 与消息 gateway 按主机分别启用。`hermes.enable = true` 安装 CLI 并管理配置；再设置 `hermes.gateway.enable = true`，就会在 Linux 运行 systemd 用户服务，在 macOS 运行 launchd agent。只使用 CLI/TUI 时保持 gateway 关闭。可选 Web 后端默认关闭。
+在 [hosts/linux.nix](../../hosts/linux.nix) 或 [hosts/darwin.nix](../../hosts/darwin.nix) 中设置 `hermes`，字段对应官方 [`services.hermes-agent` 选项](https://hermes-agent.nousresearch.com/docs/getting-started/nix-setup#home-manager-module)。Hermes 与消息 gateway 按主机分别启用。`hermes.enable = true` 安装 CLI 并管理配置。再设置 `hermes.gateway.enable = true`，就会在 Linux 运行 systemd 用户服务，在 macOS 运行 launchd agent。只使用 CLI/TUI 时保持 gateway 关闭。`desktop` 和 Linux 主机清单通过 `hermes.backend.mode = "dashboard"` 启用 Dashboard。
 
-[共享策略](../../profiles/home/hermes.nix) 关闭更新检查、自动借用 Codex／Claude 登录（`auth.adopt_external_logins`）和按需安装依赖（`security.allow_lazy_installs`）。需要额外依赖时，通过 `extraPackages`、`extraDependencyGroups` 或 `extraPythonPackages` 声明。平台 profile 负责环境提示和代理接线。
+[共享策略](../../profiles/home/hermes.nix) 关闭更新检查、自动借用 Codex／Claude 登录（`auth.adopt_external_logins`）和按需安装依赖（`security.allow_lazy_installs`）。通过 `extraPackages` 添加命令行工具。如需更改 Python 依赖，选择已包含所需依赖且有缓存的 Hermes 包。各平台 profile 负责环境提示和代理配置。
 
 <a id="local-overrides"></a>
 
@@ -29,18 +29,20 @@ Linux 和 macOS 均使用官方 Home Manager 模块。Nix 管理程序、服务�
       base_url = "https://llm.example.internal/v1";
       api_mode = "chat_completions";
     };
-    environmentFiles = [ "/Users/example/.config/hermes/secrets.env" ];
+    environmentFiles = [ "/Users/example/.config/nix-config/hermes.env" ];
   };
 }
 ```
 
-将 `/Users/example` 替换为受管理用户的 home 目录绝对路径，保留 `.config/hermes/secrets.env` 这一秘密文件位置。其他主机使用对应清单的键名。本地校验要求同时设置 `settings.model.provider` 和 `settings.model.default`；自定义端点还需正确的 `base_url` 和 API 协议。Telegram 需要 `environment.TELEGRAM_ALLOWED_USERS`，值为逗号分隔的数字用户 ID。如果要接收主动消息或 cron 结果，还需设置 `environment.TELEGRAM_HOME_CHANNEL`。
+将 `/Users/example` 替换为受管理用户的 home 目录绝对路径，并选择私有秘密文件的路径。其他主机使用对应清单的键名。本地校验要求同时设置 `settings.model.provider` 和 `settings.model.default`；自定义端点还需正确的 `base_url` 和 API 协议。Telegram 需要 `environment.TELEGRAM_ALLOWED_USERS`，值为逗号分隔的数字用户 ID。如果要接收主动消息或 cron 结果，还需设置 `environment.TELEGRAM_HOME_CHANNEL`。
 
 本地 Nix 值仍会进入 Nix store，密钥和令牌应保存在私有运行时文件中。为已启用的主机切换配置前，先准备模型设置和允许访问的用户 ID。
 
 ## 秘密文件与激活
 
-`desktop` 在 [`hermesProtonPass`](../../hosts/darwin.nix) 中声明 Proton Pass 的字段引用。执行 `switch` 时，Home Manager 先解析并校验引用，再应用 Hermes 配置。切换前先在目标 Mac 登录 Proton Pass。轮换时更新同一个字段，再执行一次 `switch`。注入失败会保留原有配置和凭据。Hermes 启动时读取 `~/.hermes/.env`。
+macOS 和 Linux 的 Dashboard 共用一组 [Proton Pass 引用](../../hosts/default.nix)，包括登录凭据和模型密钥。在 Mac 上执行 `switch` 前，先登录 Proton Pass。Home Manager 会解析并校验引用，再应用 Hermes 配置。轮换凭据后再次执行 `switch`。注入失败会保留原有配置和凭据。Hermes 启动时读取 `~/.hermes/.env`。
+
+Linux 首次切换前和轮换密钥后，按[发布 Dashboard 凭据](../../docs/linux.zh-CN.md#hermes)操作。
 
 如果秘密文件由其他方式管理，在 `hermes.environmentFiles` 中声明其绝对路径。文件放在 Git 之外，权限使用 `0600` 或 `0400`，父目录使用 `0700`：
 
@@ -74,7 +76,7 @@ nix build --no-link .#checks.aarch64-darwin.hermes-runtime
 
 首次安装后再启用 Hermes 时，先准备上面的配置和凭据，再使用[日常重新构建流程](../../README.zh-CN.md#构建与激活)。切换后打开新的 CLI 会话，仅在启用 gateway 时检查其服务。
 
-升级前备份 `~/.hermes`，因为 Home Manager 回滚不会恢复应用状态。macOS 的默认包及其 Python 依赖随 `llm-agents` 更新。`hermes-agent` 输入提供 Linux 软件包和两个平台的 Home Manager 模块。更新输入后执行切换。如果 `hermes --version` 显示 `v0.0.0`，结合输出的 commit 和 `flake.lock` 识别版本。Nix 属于上游的 [Tier 2 平台](https://hermes-agent.nousresearch.com/docs/getting-started/platform-support/)。
+升级前备份 `~/.hermes`，因为 Home Manager 回滚不会恢复应用状态。两平台使用 `llm-agents` 提供的缓存包，Home Manager 模块来自 `hermes-agent` 输入。更新输入后执行切换。如果 `hermes --version` 显示 `v0.0.0`，结合输出的 commit 和 `flake.lock` 识别版本。Nix 属于上游的 [Tier 2 平台](https://hermes-agent.nousresearch.com/docs/getting-started/platform-support/)。
 
 ## 配置归属与隔离
 
@@ -90,7 +92,7 @@ nix build --no-link .#checks.aarch64-darwin.hermes-runtime
 | --- | --- | --- |
 | 状态根目录（`hermesHome`） | `~/.hermes` | `~/.hermes` |
 | 工作目录（`workingDirectory`） | `~/hermes-workspace` | `~/hermes-workspace` |
-| 秘密源文件（`environmentFiles`） | `~/.config/hermes/secrets.env` | `~/.config/hermes/secrets.env` |
+| 凭据来源 | 发布到 `~/.config/nix-config/hermes.env` | `desktop` 从 Proton Pass 取值 |
 | 服务日志 | `hermes-agent`／`hermes-backend` 的用户 journal | `~/Library/Logs/hermes-agent.log`、`hermes-agent.err.log`；启用后端时还有对应的 `hermes-backend` 文件 |
 
 这里的 `~` 表示受管理用户的 home 目录。状态根目录包含 `config.yaml`、凭据副本 `.env`、`.managed`、可能产生的 `auth.json` 和 MCP tokens，以及 `state.db`、会话、记忆、cron 任务及输出、技能、插件、缓存和应用日志。`.restart-needed` 是私有的空文件，用于标记待处理的服务重启。路径可以按主机覆盖，删除前应核对实际配置。

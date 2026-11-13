@@ -1,10 +1,28 @@
 {
   config,
+  hermesAgent,
+  linuxHost,
   lib,
   pkgs,
   ...
 }:
 let
+  hermes = config.services.hermes-agent;
+  hermesModule = import "${hermesAgent}/nix/moduleCommon.nix" { inherit lib; };
+  inherit (linuxHost) hermesDashboard;
+  serveHermes = linuxHost ? hermesDashboard;
+  hermesTarget = "http://127.0.0.1:${toString hermes.backend.port}";
+  hermesServeUnit = import ../../modules/tailscale/serve-unit.nix {
+    inherit lib;
+    inherit (config.modules.tailscale) package;
+    inherit (hermesDashboard) httpsPort;
+    target = hermesTarget;
+    guard = import ../../modules/hermes/serve-guard.nix {
+      inherit lib pkgs;
+      inherit (hermesDashboard) url;
+      target = hermesTarget;
+    };
+  };
   ensureLinger = pkgs.writeShellApplication {
     name = "ensure-user-linger";
     runtimeInputs = [
@@ -13,7 +31,7 @@ let
     ];
     text = builtins.readFile ./ensure-linger.sh;
   };
-  loopbackPorts =
+  servicePorts =
     lib.optional config.modules.sing-box.enable config.modules.sing-box.listenPort
     ++
       lib.optionals
@@ -21,7 +39,10 @@ let
         [
           config.modules.deepseek-harness.service.port
           config.modules.deepseek-harness.service.proxyPort
-        ];
+          config.modules.deepseek-harness.service.publicPort
+        ]
+    ++ lib.optional (hermes.enable && hermes.backend.mode != "none") hermes.backend.port
+    ++ lib.optional serveHermes hermesDashboard.httpsPort;
 in
 {
   imports = [
@@ -46,31 +67,34 @@ in
   modules.mise.enable = true;
   modules.pi.enable = true;
   services.hermes-agent = {
-    settings = lib.mkBefore {
-      agent = {
-        environment_hint = ''
-          Respond in Chinese unless the user requests another language.
-          Home Manager manages this Linux user environment. Use systemctl --user
-          for user services; the host OS and Nix daemon are administrator-owned.
-        ''
-        + lib.optionalString config.modules.sing-box.enable ''
-          For external HTTP/SOCKS access, run commands that support proxy environment
-          variables through with-proxy COMMAND [ARGUMENT ...], for example:
-          with-proxy curl -I https://github.com
-          Run local-only commands normally. The wrapper requires the sing-box user
-          service; if unavailable, inspect systemctl --user status sing-box and
-          journalctl --user -u sing-box -n 50 --no-pager before retrying.
-          SSH transports and tools that ignore proxy variables need their own routing.
-          Keep proxy credentials and subscription data out of messages and logs.
-        '';
-      };
-    };
+    settings = lib.mkMerge [
+      (lib.mkBefore {
+        agent = {
+          environment_hint = ''
+            Respond in Chinese unless the user requests another language.
+            Home Manager manages this Linux user environment. Use systemctl --user
+            for user services; the host OS and Nix daemon are administrator-owned.
+          ''
+          + lib.optionalString config.modules.sing-box.enable ''
+            For external HTTP/SOCKS access, run commands that support proxy environment
+            variables through with-proxy COMMAND [ARGUMENT ...], for example:
+            with-proxy curl -I https://github.com
+            Run local-only commands normally. The wrapper requires the sing-box user
+            service; if unavailable, inspect systemctl --user status sing-box and
+            journalctl --user -u sing-box -n 50 --no-pager before retrying.
+            SSH transports and tools that ignore proxy variables need their own routing.
+            Keep proxy credentials and subscription data out of messages and logs.
+          '';
+        };
+      })
+      (lib.mkIf serveHermes { dashboard.public_url = hermesDashboard.url; })
+    ];
   };
   modules.deepseek-harness = {
     enable = true;
     service = {
       enable = true;
-      publicPort = config.modules.tailscale.serve.httpsPort;
+      publicHost = linuxHost.tailnetHost;
     };
   };
   modules.ai-agents = {
@@ -91,43 +115,87 @@ in
     '';
   };
   modules.sing-box.enable = lib.mkDefault true;
-  home.activation.restartHermes = lib.mkIf config.services.hermes-agent.enable (
+  home.activation.restartHermes = lib.mkIf hermes.enable (
     lib.hm.dag.entryAfter [ "applySingBox" ] (lib.mkDefault "")
   );
-  systemd.user.services.hermes-agent =
-    lib.mkIf
-      (
-        config.services.hermes-agent.enable
-        && config.services.hermes-agent.gateway.enable
-        && config.modules.sing-box.enable
-      )
-      {
+  # Both upstream units can use the same proxy integration.
+  systemd.user.services = lib.mkMerge [
+    (lib.mkIf (hermes.enable && hermes.backend.mode != "none") {
+      hermes-backend.Service.Environment = [ "TERMINFO_DIRS=${pkgs.ncurses}/share/terminfo" ];
+    })
+    (lib.mkIf (hermes.enable && config.modules.sing-box.enable) (
+      lib.genAttrs
+        (
+          lib.optional hermes.gateway.enable "hermes-agent"
+          ++ lib.optional (hermes.backend.mode != "none") "hermes-backend"
+        )
+        (name: {
+          Unit = {
+            After = [ "sing-box.service" ];
+            Requires = [ "sing-box.service" ];
+            PartOf = [ "sing-box.service" ];
+          };
+          # Keep the upstream default.target link so sd-switch starts new units.
+          Install.WantedBy = [ "sing-box.service" ];
+          Service.Environment = lib.mkAfter [
+            "PATH=${
+              lib.makeBinPath (
+                hermesModule.processPath {
+                  inherit pkgs;
+                  cfg = hermes;
+                }
+              )
+            }:${config.home.path}/bin"
+          ];
+          Service.ExecStart = lib.mkForce (
+            lib.escapeShellArgs (
+              [ "${config.home.path}/bin/with-proxy" ]
+              ++ (
+                if name == "hermes-agent" then
+                  hermesModule.gatewayArgv hermes
+                else
+                  hermesModule.backendArgv {
+                    inherit pkgs;
+                    cfg = hermes;
+                  }
+              )
+            )
+          );
+        })
+    ))
+    {
+      tailscale-serve-hermes = lib.mkIf serveHermes (
+        lib.mkMerge [
+          hermesServeUnit
+          {
+            Unit = {
+              After = [
+                "default.target"
+                "hermes-backend.service"
+              ];
+              Requires = [ "hermes-backend.service" ];
+              PartOf = [ "hermes-backend.service" ];
+            };
+            # sd-switch starts newly installed units through active targets.
+            Install.WantedBy = [
+              "default.target"
+              "hermes-backend.service"
+            ];
+          }
+        ]
+      );
+    }
+    {
+      tailscale-serve = {
         Unit = {
-          After = [ "sing-box.service" ];
-          Requires = [ "sing-box.service" ];
-          PartOf = [ "sing-box.service" ];
+          After = [ "deepseek-harness-proxy.service" ];
+          Requires = [ "deepseek-harness-proxy.service" ];
+          PartOf = [ "deepseek-harness-proxy.service" ];
         };
-        Install.WantedBy = lib.mkForce [ "sing-box.service" ];
-        Service.ExecStart = lib.mkForce (
-          lib.escapeShellArgs (
-            [
-              "${config.home.path}/bin/with-proxy"
-              "${config.programs.hermes-agent.package}/bin/hermes"
-              "gateway"
-            ]
-            ++ config.services.hermes-agent.extraArgs
-          )
-        );
-        Service.Environment = lib.mkAfter [
-          "PATH=${config.home.profileDirectory}/bin:${
-            lib.makeBinPath [
-              pkgs.bash
-              pkgs.coreutils
-              pkgs.git
-            ]
-          }"
-        ];
+        Install.WantedBy = [ "deepseek-harness-proxy.service" ];
       };
+    }
+  ];
   modules.tailscale = {
     enable = true;
     incoming.enable = true;
@@ -135,23 +203,22 @@ in
     ssh.enable = false;
     serve = {
       enable = true;
+      httpsPort = config.modules.deepseek-harness.service.publicPort;
       target = "http://127.0.0.1:${toString config.modules.deepseek-harness.service.proxyPort}";
     };
   };
 
-  systemd.user.services.tailscale-serve.Unit = {
-    After = [ "deepseek-harness-proxy.service" ];
-    Requires = [ "deepseek-harness-proxy.service" ];
-    PartOf = [ "deepseek-harness-proxy.service" ];
-  };
-  systemd.user.services.tailscale-serve.Install.WantedBy = [ "deepseek-harness-proxy.service" ];
-
   assertions = [
     {
-      assertion = lib.length (lib.unique loopbackPorts) == lib.length loopbackPorts;
-      message = "sing-box, DeepSeek Harness, and its proxy must use distinct loopback ports.";
+      assertion = lib.length (lib.unique servicePorts) == lib.length servicePorts;
+      message = "Linux service ports must be distinct, including the tailnet HTTPS ports.";
     }
-  ];
+  ]
+  ++ lib.optional serveHermes {
+    assertion =
+      hermes.backend.host == "127.0.0.1" && hermes.settings.dashboard.public_url == hermesDashboard.url;
+    message = "Hermes Serve requires a loopback bind and the configured tailnet URL.";
+  };
 
   home.activation.ensureUserLinger =
     lib.hm.dag.entryBetween [ "prepareSingBox" "linkGeneration" "installPackages" ] [ "writeBoundary" ]

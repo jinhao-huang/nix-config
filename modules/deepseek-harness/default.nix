@@ -48,24 +48,23 @@ in
         example = "server.example.ts.net";
         description = ''
           Tailnet HTTPS hostname, without a scheme or port, required when the Web
-          service is enabled. The Linux inventory supplies deepseekHarness.publicHost.
+          service is enabled. The Linux profile uses the inventory's tailnetHost.
         '';
       };
       publicPort = lib.mkOption {
         type = lib.types.ints.between 1 65535;
-        default = 443;
+        default = 3080;
         example = 8443;
         description = ''
-          Public HTTPS port advertised by the Web service. The Linux profile
-          derives it from modules.tailscale.serve.httpsPort. Port 443 is omitted
-          from the launch URL; other ports enter both the URL and trusted host.
+          Tailnet HTTPS port used by Serve and advertised by the Web service.
+          Port 443 is omitted from the launch URL; other ports enter both the
+          URL and trusted host.
         '';
       };
       port = lib.mkOption {
         type = lib.types.ints.between 1 65535;
-        default = 3080;
-        example = 13080;
-        description = "Loopback port for the Harness backend; it must differ from the proxy port.";
+        default = 13080;
+        description = "Loopback HTTP port for the Harness backend.";
       };
       proxyPort = lib.mkOption {
         type = lib.types.ints.between 1 65535;
@@ -87,8 +86,13 @@ in
         message = "The DeepSeek Harness systemd user service requires Linux.";
       }
       {
-        assertion = serviceCfg.enable -> serviceCfg.port != serviceCfg.proxyPort;
-        message = "DeepSeek Harness backend and proxy ports must differ.";
+        assertion =
+          serviceCfg.enable
+          ->
+            serviceCfg.port != serviceCfg.proxyPort
+            && serviceCfg.port != serviceCfg.publicPort
+            && serviceCfg.proxyPort != serviceCfg.publicPort;
+        message = "DeepSeek Harness backend, proxy, and HTTPS ports must be distinct.";
       }
     ];
 

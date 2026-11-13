@@ -22,22 +22,10 @@ in
     pi = { };
   };
   desktop = common // {
-    hermesServe = {
-      host = (import ../modules/ssh/inventory.nix).mac-mini.settings.HostName;
-      loginRef = "pass://Dev/Hermes Dashboard";
-    };
+    tailnetHost = (import ../modules/ssh/inventory.nix).mac-mini.settings.HostName;
     hermes = common.hermes // {
       enable = true;
       backend.mode = "dashboard";
-      settings.model = {
-        provider = "minimax-cn";
-        default = "MiniMax-M3.1-Flash";
-      };
-      settings.providers.minimax-cn.models."MiniMax-M3.1-Flash".supports_vision = true;
-    };
-    hermesProtonPass = {
-      DEEPSEEK_API_KEY = "pass://Dev/DeepSeek/API Key";
-      MINIMAX_CN_API_KEY = "pass://Dev/MiniMax CN/Subscription Key";
     };
     homebrew.casks = [
       "airbuddy"

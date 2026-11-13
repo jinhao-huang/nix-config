@@ -38,24 +38,24 @@ LAN; tailnet rules must allow TCP 22.
 
 ## Hermes over HTTPS
 
-The `desktop` host's [`hermesServe`](../../hosts/darwin.nix) exposes the
-[Hermes Dashboard](../hermes/README.md) through tailnet HTTPS. Before switching:
+The `desktop` host exposes the [Hermes Dashboard](../hermes/README.md) through
+tailnet HTTPS. Before switching:
 
-- Check that the Proton Pass Login item referenced by `loginRef` has a username
-  and password. Use a plain username without spaces, or an email address. For a
-  new password, generate 32 random letters and digits.
+- Check that the [shared Dashboard login](../hermes/README.md#secrets-and-activation)
+  has a username and password. Use a plain username without spaces, or an email
+  address. For a new password, generate 32 random letters and digits.
 - Enable [MagicDNS and HTTPS certificates](https://tailscale.com/docs/how-to/set-up-https-certificates)
   in the tailnet. Confirm that `sudo tailscale status --json` reports the
   configured hostname in `Self.DNSName` (with a trailing dot).
-- [Allow access](https://tailscale.com/docs/reference/examples/grants) to TCP
-  `443` on that node for your own identity. Remove grants that also allow direct
-  access to the Dashboard's backend port. Preserve the existing SSH access.
 
 After [switching](../../README.md#build-and-switch), keep the macOS user logged
 in so its Hermes LaunchAgent can run. Serve waits for the password-protected
-Dashboard before publishing the endpoint. Open `/chat` on the node's HTTPS
-URL from a device on the tailnet, sign in, and send a message. If Serve is
-not available, check `sudo tailscale serve status` and `/var/log/tailscale-serve.log`.
+Dashboard before publishing the endpoint. Confirm the mapping with
+`sudo tailscale serve status`, then [allow access](https://tailscale.com/docs/reference/examples/grants)
+to TCP `9119` for your identity. Restrict direct access to the backend port and
+preserve SSH access. Open `https://<node>.ts.net:9119/chat` from a device on the
+tailnet, sign in, and send a message. If Serve is unavailable, check
+`/var/log/tailscale-serve.log`.
 
 ## Zed remote development
 

@@ -29,13 +29,12 @@ sudo tailscale status --json
 
 ## 通过 HTTPS 访问 Hermes
 
-`desktop` 的 [`hermesServe`](../../hosts/darwin.nix) 通过 tailnet HTTPS 提供 [Hermes Dashboard](../hermes/README.zh-CN.md)。切换前完成以下准备。
+`desktop` 通过 tailnet HTTPS 提供 [Hermes Dashboard](../hermes/README.zh-CN.md)。切换前完成以下准备。
 
-- 确认 `loginRef` 指向的 Proton Pass 登录条目已填写用户名和密码。用户名使用不带空格的普通用户名或邮箱。新建密码时，生成一个由字母和数字组成的 32 位随机密码。
+- 确认[共用的 Dashboard 登录条目](../hermes/README.zh-CN.md#秘密文件与激活)已填写用户名和密码。用户名使用不带空格的普通用户名或邮箱。新建密码时，生成一个由字母和数字组成的 32 位随机密码。
 - 在 tailnet 开启 [MagicDNS 和 HTTPS 证书](https://tailscale.com/docs/how-to/set-up-https-certificates)。执行 `sudo tailscale status --json`，确认 `Self.DNSName` 是配置的主机名，末尾带点。
-- [只向自己的身份放行](https://tailscale.com/docs/reference/examples/grants)该节点的 TCP `443`，收窄会放行 Dashboard 后端端口的规则，并保留现有 SSH 权限。
 
-[切换](../../README.zh-CN.md#构建与激活)后，保持 macOS 用户登录，让 Hermes LaunchAgent 运行。Serve 会等 Dashboard 启用密码认证后再开放访问。从 tailnet 内的设备打开该节点 HTTPS 网址的 `/chat`，登录并发送一条消息。如果 Serve 不可用，检查 `sudo tailscale serve status` 和 `/var/log/tailscale-serve.log`。
+[切换](../../README.zh-CN.md#构建与激活)后，保持 macOS 用户登录，让 Hermes LaunchAgent 运行。Serve 会等 Dashboard 启用密码认证后再开放访问。用 `sudo tailscale serve status` 确认映射后，[只向自己的身份放行](https://tailscale.com/docs/reference/examples/grants)该节点的 TCP `9119`，限制对后端端口的直接访问，并保留 SSH 权限。从 tailnet 内的设备打开 `https://<node>.ts.net:9119/chat`，登录并发送一条消息。如果 Serve 不可用，检查 `/var/log/tailscale-serve.log`。
 
 ## Zed 远程开发
 

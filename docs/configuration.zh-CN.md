@@ -33,8 +33,7 @@
 | `homebrew.casks` | 添加到 [Homebrew profile](../profiles/system/darwin/homebrew.nix) 共享应用列表的主机专属 cask；没有时使用 `[]`。 |
 | `pi` | 可选 Pi 启动默认值，传给 `modules.pi.defaults`；见 [schema](../modules/pi/startup-defaults-type.nix)。 |
 | `hermes` | 传给官方 `services.hermes-agent` 模块的属性集。见 [Hermes 配置](../modules/hermes/README.zh-CN.md)。 |
-| `hermesProtonPass` | 可选的 Hermes 环境变量名与 Proton Pass 字段引用映射。见[凭据准备](../modules/hermes/README.zh-CN.md#秘密文件与激活)。 |
-| `hermesServe` | 为已启用的 Hermes Dashboard 配置远程访问，可选。包含 `host`（节点的 MagicDNS 主机名）和 `loginRef`（Proton Pass 登录条目引用）。见[远程访问](../modules/tailscale/README.zh-CN.md#hermes-over-https)。 |
+| `tailnetHost` | 已启用的 [Hermes Dashboard](../modules/tailscale/README.zh-CN.md#hermes-over-https) 使用的 MagicDNS 主机名。 |
 
 ## Linux 主机字段
 
@@ -47,22 +46,14 @@
 | `homeDirectory` | 绝对路径 `home.homeDirectory`。 |
 | `authorizedKeyFiles` | 公钥文件路径，内容合并到 Home Manager 管理的 `~/.ssh/authorized_keys`。 |
 | `pi` | 可选 Pi 启动默认值，传给 `modules.pi.defaults`；见 [schema](../modules/pi/startup-defaults-type.nix)。 |
-| `deepseekHarness.publicHost` | `modules.deepseek-harness.service.publicHost`，使用节点实际的 MagicDNS 主机名。 |
+| `tailnetHost` | DeepSeek Harness 和 Hermes Dashboard 使用的 MagicDNS 主机名。 |
 | `dockerGhcr` | 可选属性集，传给 `modules.docker-ghcr`；通过指定的 GitHub CLI 账号认证 GHCR。见[安装与登录](../modules/docker-ghcr/README.zh-CN.md)。 |
-| `deepseekHarness.port` | `modules.deepseek-harness.service.port`。 |
-| `deepseekHarness.proxyPort` | `modules.deepseek-harness.service.proxyPort`。 |
-| `deepseekHarness.httpsPort` | `modules.tailscale.serve.httpsPort`，Harness 公开端口随之设置。 |
 | `singBox` | 传给 `modules.sing-box` 的属性集，提供 `listenPort` 和至少一个节点来源。 |
 | `hermes` | 传给官方 `services.hermes-agent` 的属性集，包含模型、状态路径、私有环境文件路径和消息平台设置。 |
 
 例如，主机中可以包含：
 
 ```nix
-deepseekHarness = {
-  port = 3080;
-  proxyPort = 3081;
-  httpsPort = 8443;
-};
 singBox = {
   listenPort = 21009;
   subscription.requestFile = "/home/alice/.config/sing-box/subscription.curl";
@@ -74,7 +65,7 @@ singBox = {
 
 必须配置 `singBox.subscription.requestFile`、`singBox.nodesFile` 或两者。两项默认均为 `null`，只使用本地输入时不会下载订阅。订阅请求、节点定义和代理凭据保存在私有运行时文件中，主机清单只需存放文件路径。
 
-[Linux profile](../profiles/home/linux.nix) 启用功能并将 Serve 连接到私有 Harness 代理。公开 URL 与可信 authority 根据主机名和 HTTPS 端口派生：443 不写入 URL，其他 HTTPS 端口会写入。sing-box、Harness 后端和 Harness 代理必须使用不同的回环端口。Serve 的 HTTPS 端口属于 tailnet 监听端口，不参与这项回环端口冲突检查。
+[Linux profile](../profiles/home/linux.nix) 将 Serve 连接到 Hermes 和私有 Harness 代理。本机服务端口和 tailnet HTTPS 端口必须互不冲突，以免 Serve 映射缺失时，用户态 Tailscale 将 HTTPS 端口的连接直接转发到同端口的回环服务。
 
 ## 平台与配置范围
 
@@ -191,18 +182,12 @@ true
 
 ## modules\.deepseek-harness\.service\.port
 
-Harness 后端的回环端口，必须与代理端口不同。
+Harness HTTP 后端的回环端口。
 
 *类型：*
 integer between 1 and 65535 (both inclusive)
 
 *默认值：*
-
-```nix
-3080
-```
-
-*示例：*
 
 ```nix
 13080
@@ -237,7 +222,7 @@ integer between 1 and 65535 (both inclusive)
 
 ## modules\.deepseek-harness\.service\.publicHost
 
-tailnet HTTPS 主机名，不含协议或端口。启用 Web 服务时必须提供，由 Linux 主机清单中的 `deepseekHarness.publicHost` 设置。
+tailnet HTTPS 主机名，不含协议或端口。启用 Web 服务时必须提供，Linux profile 使用主机清单中的 `tailnetHost`。
 
 *类型：*
 string matching the pattern \[a-zA-Z0-9]\[a-zA-Z0-9\.-]\*
@@ -254,7 +239,7 @@ string matching the pattern \[a-zA-Z0-9]\[a-zA-Z0-9\.-]\*
 
 ## modules\.deepseek-harness\.service\.publicPort
 
-Web 服务对外公布的 HTTPS 端口。Linux profile 从 `modules.tailscale.serve.httpsPort` 派生该值。443 不出现在启动 URL 中；其他端口会同时进入 URL 和可信主机设置。
+Serve 使用并由 Web 服务公布的 tailnet HTTPS 端口。443 会从启动 URL 中省略，其他端口会同时写入 URL 和可信主机设置。
 
 *类型：*
 integer between 1 and 65535 (both inclusive)
@@ -262,7 +247,7 @@ integer between 1 and 65535 (both inclusive)
 *默认值：*
 
 ```nix
-443
+3080
 ```
 
 *示例：*

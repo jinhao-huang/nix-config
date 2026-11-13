@@ -5,6 +5,12 @@
 let
   piStartupDefaultsType = import ../modules/pi/startup-defaults-type.nix { inherit lib; };
   sshKeys = import ../modules/ssh/public-keys;
+  hermesHttpsPort = 9119;
+  dashboardLoginRef = "pass://Dev/Hermes Dashboard";
+  modelKeyReferences = {
+    DEEPSEEK_API_KEY = "pass://Dev/DeepSeek/API Key";
+    MINIMAX_CN_API_KEY = "pass://Dev/MiniMax CN/Subscription Key";
+  };
   inventories = {
     darwin = import ./darwin.nix { inherit sshKeys; };
     linux = import ./linux.nix { inherit sshKeys; };
@@ -32,8 +38,14 @@ let
     _: inventory:
     lib.mapAttrs (
       name: host:
+      let
+        hermes = lib.recursiveUpdate (host.hermes or { }) (overrides.${name}.hermes or { });
+        managedHermes = host ? tailnetHost && (hermes.enable or false);
+        dashboard = managedHermes && (hermes.backend.mode or "none") == "dashboard";
+      in
       host
       // {
+        inherit hermes;
         pi =
           (lib.evalModules {
             modules = [
@@ -47,7 +59,20 @@ let
               }
             ];
           }).config.defaults;
-        hermes = lib.recursiveUpdate (host.hermes or { }) (overrides.${name}.hermes or { });
+      }
+      // lib.optionalAttrs managedHermes {
+        hermesProtonPass =
+          modelKeyReferences
+          // lib.optionalAttrs dashboard {
+            HERMES_DASHBOARD_BASIC_AUTH_USERNAME = "${dashboardLoginRef}/Username";
+            HERMES_DASHBOARD_BASIC_AUTH_PASSWORD = "${dashboardLoginRef}/Password";
+          };
+      }
+      // lib.optionalAttrs dashboard {
+        hermesDashboard = {
+          httpsPort = hermesHttpsPort;
+          url = "https://${host.tailnetHost}:${toString hermesHttpsPort}";
+        };
       }
     ) inventory
   ) inventories;

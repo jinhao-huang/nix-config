@@ -11,9 +11,9 @@
 切换前准备好每个已启用的功能：
 
 - sing-box：准备[下面的输入文件](#sing-box-输入文件)，或在清单中设置 `singBox.enable = false`。
-- Hermes：准备[模型设置和秘密文件](../modules/hermes/README.zh-CN.md)。若模型尚未准备好，本次激活设置 `hermes.enable = false`。启用 Telegram 时，还需提前准备 bot token 和允许访问的用户 ID。
+- Hermes：切换前先[发布 Dashboard 凭据](#hermes)。
 - GHCR：需要时在清单中设置 `dockerGhcr`。认证在激活后完成；拉取镜像所需的 Docker 和 Compose 由主机提供。
-- Harness 与 Tailscale Serve：检查清单中的 `deepseekHarness.publicHost` 和 HTTPS 设置，tailnet 注册在激活后完成。
+- Tailscale Serve：检查清单中的 `tailnetHost`。激活后再注册到 tailnet。
 
 激活要求 systemd 用户管理器可用，并启用用户 linger。激活时会尝试开启 linger；若权限被拒绝，需要管理员开启。主机管理员也负责 Nix daemon 和 Docker 网络。
 
@@ -79,23 +79,26 @@ tailscale-user status --json
 
 ## Hermes
 
-若已在激活前启用并准备好 Hermes，现在检查 gateway 并打开 CLI/TUI。只使用 CLI 时跳过服务检查。启用 sing-box 时按下例使用 `with-proxy`，否则直接运行 `hermes --tui`。用户 linger 使 gateway 在退出登录后继续运行：
+首次切换 Linux 前，以及每次轮换密钥后，在已登录 Proton Pass 的 Mac 上进入仓库并发布凭据。
 
 ```sh
-systemctl --user status hermes-agent
-journalctl --user -u hermes-agent -n 50 --no-pager
-with-proxy hermes --tui
+nix run .#hermes-secrets -- example-host
 ```
 
-应实际验证模型回复，启用 Telegram 时再验证消息收发。gateway 生命周期通过 `systemctl --user` 管理。启用 sing-box 时，gateway 通过 `with-proxy` 启动，并随代理重启。
+把 `example-host` 换成 Linux 清单中对应的 SSH 别名。注册到 tailnet 前，在 Mac 的 `~/.ssh/config.local` 中将该别名指向可连接的系统 SSH 地址。tailnet 主机名可用后，移除这项覆盖。命令读取[共用的 Hermes 凭据](../modules/hermes/README.zh-CN.md#秘密文件与激活)，经 SSH 替换 `~/.config/nix-config/hermes.env`。如果服务器的本地清单还有旧的 Hermes 密钥路径或 Telegram 覆盖，先移除再切换。Linux 执行 `switch` 时读取发布后的文件。
 
-修改设置或秘密文件后切换，也会重启活跃的 Hermes 服务。禁用或删除数据前，先查看[状态归属与移除步骤](../modules/hermes/README.zh-CN.md#数据路径与移除)。
+开启 MagicDNS 和 HTTPS 证书后，用以下命令确认新的 Serve 映射，再向自己的身份放行 TCP `9119`，并限制对后端端口的直接访问。打开 `https://<node>.ts.net:9119/chat`，确认未登录时会跳转到登录页，然后登录并发送一条消息。
 
-之后启用 Hermes、升级或备份状态时，按 [Hermes 维护指南](../modules/hermes/README.zh-CN.md#maintenance)操作。
+```sh
+systemctl --user status hermes-backend tailscale-serve-hermes
+tailscale-user serve status
+```
+
+验证新部署后，删除已停用的 `~/.config/hermes/secrets.env`。升级和状态管理见 [Hermes 维护指南](../modules/hermes/README.zh-CN.md#maintenance)。
 
 ## DeepSeek Harness
 
-启用 MagicDNS 和 tailnet HTTPS 证书，并允许目标设备访问 Serve 配置的 HTTPS 端口，默认是 443。连接 Tailscale 后，在以下日志中找到最新完整启动 URL，连同其中的私有令牌一起打开：
+启用 MagicDNS 和 tailnet HTTPS 证书。用 `tailscale-user serve status` 确认新的 Serve 映射后，在 tailnet 策略中向需要访问的设备放行 TCP `3080`，并限制对后端和 Cookie 代理端口的直接访问。连接 Tailscale 后，在以下日志中找到最新完整启动 URL，连同其中的私有令牌一起打开。
 
 ```sh
 journalctl --user -u deepseek-harness -b --no-pager

@@ -79,29 +79,12 @@ in
 
     # tailscaled's native config has no node Serve mapping. The foreground CLI
     # owns its mapping for the service lifetime and removes it on disconnect.
-    systemd.user.services.tailscale-serve = lib.mkIf cfg.serve.enable {
-      Unit = {
-        Description = "Tailnet HTTPS reverse proxy";
-        After = [ "tailscaled.service" ];
-        Requires = [ "tailscaled.service" ];
-        PartOf = [ "tailscaled.service" ];
-        StartLimitIntervalSec = 0;
-      };
-      Service = {
-        ExecStart = lib.escapeShellArgs [
-          (lib.getExe' cfg.package "tailscale")
-          "--socket=%t/tailscale/tailscaled.sock"
-          "serve"
-          "--yes"
-          "--https=${toString cfg.serve.httpsPort}"
-          cfg.serve.target
-        ];
-        UMask = "0077";
-        NoNewPrivileges = true;
-        Restart = "always";
-        RestartSec = 5;
-      };
-      Install.WantedBy = [ "tailscaled.service" ];
-    };
+    systemd.user.services.tailscale-serve = lib.mkIf cfg.serve.enable (
+      import ./serve-unit.nix {
+        inherit lib;
+        inherit (cfg) package;
+        inherit (cfg.serve) httpsPort target;
+      }
+    );
   };
 }

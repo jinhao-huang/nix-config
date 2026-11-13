@@ -15,7 +15,7 @@ flake 将主机数据、profile 和功能模块组合为 Darwin 系统及独立 
 | [modules](../modules) | 可独立复用的功能、功能选项和配套数据。 |
 | [packages](../packages) | 自定义 derivation，包括部署命令和配置参考生成器。 |
 
-Darwin 集成 Home Manager，并管理系统 Lix 安装。Linux 选择激活和 shell 工具，操作系统与 Nix daemon 仍归管理员维护。Linux profile 通过模块选项连接 sing-box、Harness 后端、cookie 代理和 Tailscale Serve，并检查回环端口互不冲突。
+Darwin 集成 Home Manager，并管理系统 Lix 安装。Linux 选择激活和 shell 工具，操作系统与 Nix daemon 仍归管理员维护。Linux profile 通过模块选项连接 sing-box、Harness 后端、cookie 代理和 Tailscale Serve，并检查端口是否冲突。
 
 ## 模块约定
 
@@ -72,7 +72,7 @@ nix run .#update-configuration-reference
 
 公开指南可以使用 `laptop`、`desktop` 等角色名并说明其配置。对于能定位真实机器的名称、账号、网络地址和部署路径，使用占位符或相对 home 目录的写法，实际部署细节留在主机配置中。命令里的真实选项名和输入名保持准确。
 
-泛化 home 目录时，保留其下有用的路径结构，例如 `.config/hermes/secrets.env`。统一的安装和激活流程放在平台指南中，功能文档链接到该流程，只说明自身的配置和运行步骤。
+泛化 home 目录时，保留其下有用的路径结构，例如 `.config/nix-config/hermes.env`。统一的安装和激活流程放在平台指南中，功能文档链接到该流程，只说明自身的配置和运行步骤。
 
 英文文档与简体中文版本必须在同一次变更中维护。行为、前置条件、命令、主机字段、选项名、类型、默认值、示例、验证方式或维护流程发生变化时，都要检查两种语言的文档。无论修正最初发生在哪一种语言，只要改变含义，就要同步另一种。行为以代码和 Nix 声明为准；文档冲突时，先核对实现，再修正两种版本。
 

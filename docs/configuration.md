@@ -45,8 +45,7 @@ Edit [hosts/darwin.nix](../hosts/darwin.nix). Each top-level attribute names a
 | `homebrew.casks` | Machine-specific casks added to the shared application list in the [Homebrew profile](../profiles/system/darwin/homebrew.nix); use `[]` for none. |
 | `pi` | Optional Pi startup defaults passed to `modules.pi.defaults`; see [the schema](../modules/pi/startup-defaults-type.nix). |
 | `hermes` | Attribute set passed to the official `services.hermes-agent` module. See [Hermes configuration](../modules/hermes/README.md). |
-| `hermesProtonPass` | Optional mapping from Hermes environment variable names to Proton Pass field references. See [credential preparation](../modules/hermes/README.md#secrets-and-activation). |
-| `hermesServe` | Optional `host` (the node's MagicDNS hostname) and `loginRef` (a Proton Pass Login item reference) for the enabled Hermes Dashboard. See [remote access](../modules/tailscale/README.md#hermes-over-https). |
+| `tailnetHost` | MagicDNS hostname for an enabled [Hermes Dashboard](../modules/tailscale/README.md#hermes-over-https). |
 
 ## Linux host fields
 
@@ -60,22 +59,14 @@ Edit [hosts/linux.nix](../hosts/linux.nix). Each top-level attribute names a
 | `homeDirectory` | Absolute `home.homeDirectory`. |
 | `authorizedKeyFiles` | Public key paths combined into Home Manager's `~/.ssh/authorized_keys`. |
 | `pi` | Optional Pi startup defaults passed to `modules.pi.defaults`; see [the schema](../modules/pi/startup-defaults-type.nix). |
-| `deepseekHarness.publicHost` | `modules.deepseek-harness.service.publicHost`, using the node's actual MagicDNS hostname. |
+| `tailnetHost` | MagicDNS hostname used by DeepSeek Harness and the Hermes Dashboard. |
 | `dockerGhcr` | Optional attribute set passed to `modules.docker-ghcr`; enables GHCR authentication through a named GitHub CLI account. See [setup and login](../modules/docker-ghcr/README.md). |
-| `deepseekHarness.port` | `modules.deepseek-harness.service.port`. |
-| `deepseekHarness.proxyPort` | `modules.deepseek-harness.service.proxyPort`. |
-| `deepseekHarness.httpsPort` | `modules.tailscale.serve.httpsPort`. The Harness public port follows it. |
 | `singBox` | Attribute set passed to `modules.sing-box`; supply `listenPort` and at least one node source. |
 | `hermes` | Attribute set passed to official `services.hermes-agent`; model, state paths, private env-file paths, and messaging settings. |
 
 For example, a host can include:
 
 ```nix
-deepseekHarness = {
-  port = 3080;
-  proxyPort = 3081;
-  httpsPort = 8443;
-};
 singBox = {
   listenPort = 21009;
   subscription.requestFile = "/home/alice/.config/sing-box/subscription.curl";
@@ -93,12 +84,10 @@ Both default to `null`; local-only input does not download a subscription.
 Subscription requests, node definitions, and proxy credentials remain in private
 runtime files; the inventory may contain their paths.
 
-The [Linux profile](../profiles/home/linux.nix) enables the features and connects
-Serve to the private Harness proxy. It derives the public URL and trusted
-authority from the hostname and HTTPS port. Port 443 is omitted from the URL;
-other HTTPS ports are included. The sing-box, Harness backend, and Harness
-proxy must use distinct loopback ports. Serve's HTTPS port belongs to the
-tailnet listener and is not part of that loopback conflict check.
+The [Linux profile](../profiles/home/linux.nix) connects Serve to Hermes and
+to the private Harness proxy. Local service ports and tailnet HTTPS ports
+must be distinct so userspace Tailscale cannot forward an HTTPS port directly
+to a loopback listener when its Serve mapping is absent.
 
 ## Platform and configuration scope
 
@@ -262,7 +251,7 @@ true
 
 
 
-Loopback port for the Harness backend; it must differ from the proxy port\.
+Loopback HTTP port for the Harness backend\.
 
 
 
@@ -272,14 +261,6 @@ integer between 1 and 65535 (both inclusive)
 
 
 *Default:*
-
-```nix
-3080
-```
-
-
-
-*Example:*
 
 ```nix
 13080
@@ -327,7 +308,7 @@ integer between 1 and 65535 (both inclusive)
 
 
 Tailnet HTTPS hostname, without a scheme or port, required when the Web
-service is enabled\. The Linux inventory supplies deepseekHarness\.publicHost\.
+service is enabled\. The Linux profile uses the inventory’s tailnetHost\.
 
 
 
@@ -351,9 +332,9 @@ string matching the pattern \[a-zA-Z0-9]\[a-zA-Z0-9\.-]\*
 
 
 
-Public HTTPS port advertised by the Web service\. The Linux profile
-derives it from modules\.tailscale\.serve\.httpsPort\. Port 443 is omitted
-from the launch URL; other ports enter both the URL and trusted host\.
+Tailnet HTTPS port used by Serve and advertised by the Web service\.
+Port 443 is omitted from the launch URL; other ports enter both the
+URL and trusted host\.
 
 
 
@@ -365,7 +346,7 @@ integer between 1 and 65535 (both inclusive)
 *Default:*
 
 ```nix
-443
+3080
 ```
 
 

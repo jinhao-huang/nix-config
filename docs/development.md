@@ -21,7 +21,7 @@ Darwin integrates Home Manager and owns the system Lix installation. Linux
 selects activation and shell tools; its OS and Nix daemon remain
 administrator-owned. The Linux profile connects sing-box, the Harness backend
 and cookie proxy, and Tailscale Serve through module options, with a check for
-distinct loopback ports.
+port conflicts.
 
 ## Module conventions
 
@@ -101,7 +101,7 @@ Keep those deployment details in host configuration. Preserve real option and
 input names in commands.
 
 When anonymizing a home directory, preserve the useful path beneath it, such as
-`.config/hermes/secrets.env`. Keep shared setup and activation procedures in
+`.config/nix-config/hermes.env`. Keep shared setup and activation procedures in
 the platform guides; feature guides link to that flow and document their own
 configuration and runtime steps.
 

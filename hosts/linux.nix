@@ -1,27 +1,21 @@
 { sshKeys }:
 {
-  iscas-r750xa = {
+  iscas-r750xa = rec {
     system = "x86_64-linux";
     username = "huangjh";
     homeDirectory = "/home/huangjh";
+    tailnetHost = (import ../modules/ssh/inventory.nix).iscas-r750xa.settings.HostName;
     authorizedKeyFiles = [ sshKeys.cas ];
     dockerGhcr = {
       enable = true;
       githubUser = "jinhao-huang";
     };
     pi = { };
+    hermesCredentialFile = "${homeDirectory}/.config/nix-config/hermes.env";
     hermes = {
       enable = true;
-      gateway.enable = true;
-      environmentFiles = [ "/home/huangjh/.config/hermes/secrets.env" ];
-      environment.TELEGRAM_ALLOW_ALL_USERS = "false";
-      settings.platforms.telegram.enabled = true;
-    };
-    deepseekHarness = {
-      publicHost = "iscas-r750xa.bison-agama.ts.net";
-      port = 3080;
-      proxyPort = 3081;
-      httpsPort = 443;
+      backend.mode = "dashboard";
+      environmentFiles = [ hermesCredentialFile ];
     };
     singBox = {
       listenPort = 21009;

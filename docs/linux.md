@@ -18,13 +18,11 @@ Prepare every enabled feature before switching:
 
 - sing-box: prepare the [input files below](#sing-box-inputs), or set
   `singBox.enable = false` in the inventory.
-- Hermes: prepare the [model settings and secret file](../modules/hermes/README.md).
-  If no model is ready, set `hermes.enable = false` for this activation. Enabling
-  Telegram also requires a bot token and allowed user IDs before activation.
+- Hermes: [publish Dashboard credentials](#hermes) before switching.
 - GHCR: set `dockerGhcr` in the inventory if needed. Authentication happens
   after activation; the host must provide Docker and Compose for image pulls.
-- Harness and Tailscale Serve: check `deepseekHarness.publicHost` and HTTPS
-  settings in the inventory. Tailnet enrollment happens after activation.
+- Tailscale Serve: check `tailnetHost` in the inventory. Tailnet enrollment
+  happens after activation.
 
 Activation requires a working systemd user manager and user linger. It attempts
 to enable linger; ask the administrator to enable it if permission is denied.
@@ -134,33 +132,42 @@ before pulling private images. The Docker daemon and Compose remain host-owned.
 
 ## Hermes
 
-If Hermes was enabled and prepared before activation, check the gateway and
-open the CLI/TUI. Skip the service checks for CLI-only use. With sing-box
-enabled, use `with-proxy` as below; otherwise run `hermes --tui` directly.
-User linger keeps the gateway running after logout:
+From the repository on a Mac signed in to Proton Pass, publish the Linux host's
+credentials before its first switch and after each rotation:
 
 ```sh
-systemctl --user status hermes-agent
-journalctl --user -u hermes-agent -n 50 --no-pager
-with-proxy hermes --tui
+nix run .#hermes-secrets -- example-host
 ```
 
-Verify a real model reply and, if Telegram is enabled, a message exchange.
-Use `systemctl --user` for
-gateway lifecycle commands. With sing-box enabled, the gateway starts through
-`with-proxy` and restarts with it.
-Switch also restarts active Hermes services after settings or secret-file changes.
-See [state ownership and removal](../modules/hermes/README.md#data-paths-and-removal)
-before disabling or deleting data.
+Use the Linux inventory key as the SSH alias. Before tailnet enrollment, point
+that alias at the reachable system SSH endpoint in `~/.ssh/config.local` on the
+Mac. Remove the override once the tailnet hostname works. The publisher resolves the
+[shared Hermes credentials](../modules/hermes/README.md#secrets-and-activation).
+The command replaces `~/.config/nix-config/hermes.env` over SSH. Remove old
+Hermes secret-file and Telegram overrides from the server's local inventory
+before switching. Linux reads the published file on `switch`.
 
-For enabling Hermes later, upgrades, and state backups, use the
-[Hermes maintenance guide](../modules/hermes/README.md#maintenance).
+With MagicDNS and HTTPS certificates enabled, confirm the new Serve mapping
+before granting your identity access to TCP `9119`. Restrict direct access to
+the backend port. Open `https://<node>.ts.net:9119/chat`, verify that an anonymous
+request reaches the login page, then sign in and send a message.
+
+```sh
+systemctl --user status hermes-backend tailscale-serve-hermes
+tailscale-user serve status
+```
+
+After verifying the new deployment, remove any obsolete
+`~/.config/hermes/secrets.env`. See [Hermes maintenance](../modules/hermes/README.md#maintenance)
+for upgrades and state ownership.
 
 ## DeepSeek Harness
 
-Enable MagicDNS and tailnet HTTPS certificates, and allow intended peers to
-reach the configured Serve HTTPS port (443 by default). Connect to Tailscale,
-then open the latest complete launch URL, including its private token, from:
+Enable MagicDNS and tailnet HTTPS certificates. Once `tailscale-user serve status`
+shows the new mapping, allow intended peers to reach TCP `3080` in the tailnet
+policy. Restrict direct access to the backend and cookie proxy ports. Connect to
+Tailscale, then open the latest complete launch URL, including its private token,
+from the journal.
 
 ```sh
 journalctl --user -u deepseek-harness -b --no-pager

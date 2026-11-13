@@ -101,6 +101,45 @@ rec {
         "steipete/homebrew-tap" = homebrew-steipete;
         "jinhao-huang/homebrew-tap" = homebrew-jinhao-huang;
       };
+      cachedHermes =
+        {
+          config,
+          lib,
+          pkgs,
+          ...
+        }:
+        let
+          system = pkgs.stdenv.hostPlatform.system;
+          hermes = config.services.hermes-agent;
+          hermesPackage = llm-agents.packages.${system}.hermes-agent;
+          hermesPython = llm-agents.inputs.nixpkgs.legacyPackages.${system}.python3;
+          hermesPythonEnv = hermesPython.withPackages (ps: hermesPackage.dependencies ++ [ ps.packaging ]);
+        in
+        {
+          services.hermes-agent.package = lib.mkDefault (
+            assert lib.assertMsg (hermes.extraDependencyGroups == [ ] && hermes.extraPythonPackages == [ ])
+              "The cached Hermes package has fixed Python dependencies. Remove extraDependencyGroups and extraPythonPackages or select a cached package with the required dependencies.";
+            pkgs.symlinkJoin {
+              inherit (hermesPackage) name meta;
+              paths = [ hermesPackage ];
+              nativeBuildInputs = [ pkgs.makeWrapper ];
+              # Numtide 0.23.0 omits the packaging runtime dependency.
+              postBuild = ''
+                for executable in "$out"/bin/*; do
+                  wrapProgram "$executable" --prefix PYTHONPATH : ${hermesPython.pkgs.packaging}/${hermesPython.sitePackages}
+                done
+              '';
+              passthru = {
+                inherit (hermesPackage) version;
+                # The upstream module imports Hermes through this interpreter.
+                hermesVenv = pkgs.writeShellScriptBin "python3" ''
+                  export PYTHONPATH=${lib.escapeShellArg "${hermesPackage}/${hermesPython.sitePackages}"}
+                  exec ${hermesPythonEnv}/bin/python3 "$@"
+                '';
+              };
+            }
+          );
+        };
       mkDarwinConfiguration =
         darwinHost:
         nix-darwin.lib.darwinSystem {
@@ -126,8 +165,6 @@ rec {
               home-manager.useUserPackages = true;
               home-manager.users.${darwinHost.username} =
                 {
-                  config,
-                  lib,
                   pkgs,
                   ...
                 }:
@@ -135,46 +172,18 @@ rec {
                   system = pkgs.stdenv.hostPlatform.system;
                   selectedPackages = self.packages.${system};
                   agentPackages = llm-agents.packages.${system};
-                  hermes = config.services.hermes-agent;
-                  hermesPackage = agentPackages.hermes-agent;
-                  hermesPython = llm-agents.inputs.nixpkgs.legacyPackages.${system}.python3;
-                  hermesPythonEnv = hermesPython.withPackages (ps: hermesPackage.dependencies ++ [ ps.packaging ]);
                 in
                 {
-                  imports = [ ./profiles/home/darwin.nix ];
+                  imports = [
+                    ./profiles/home/darwin.nix
+                    cachedHermes
+                  ];
 
                   modules.proton-pass.package = selectedPackages.proton-pass-cli;
                   modules.typst.package = selectedPackages.typst;
                   modules.pi.defaults = darwinHost.pi;
                   modules.hermes.protonPassReferences = darwinHost.hermesProtonPass or { };
-                  services.hermes-agent = lib.mkMerge [
-                    darwinHost.hermes
-                    {
-                      package = lib.mkDefault (
-                        assert lib.assertMsg (hermes.extraDependencyGroups == [ ] && hermes.extraPythonPackages == [ ])
-                          "The cached macOS Hermes package has fixed Python dependencies. Remove extraDependencyGroups and extraPythonPackages or select a cached package with the required dependencies.";
-                        pkgs.symlinkJoin {
-                          inherit (hermesPackage) name meta;
-                          paths = [ hermesPackage ];
-                          nativeBuildInputs = [ pkgs.makeWrapper ];
-                          # Numtide 0.23.0 omits the packaging runtime dependency.
-                          postBuild = ''
-                            for executable in "$out"/bin/*; do
-                              wrapProgram "$executable" --prefix PYTHONPATH : ${hermesPython.pkgs.packaging}/${hermesPython.sitePackages}
-                            done
-                          '';
-                          passthru = {
-                            inherit (hermesPackage) version;
-                            # The upstream module imports Hermes through this interpreter.
-                            hermesVenv = pkgs.writeShellScriptBin "python3" ''
-                              export PYTHONPATH=${lib.escapeShellArg "${hermesPackage}/${hermesPython.sitePackages}"}
-                              exec ${hermesPythonEnv}/bin/python3 "$@"
-                            '';
-                          };
-                        }
-                      );
-                    }
-                  ];
+                  services.hermes-agent = darwinHost.hermes;
                   programs = {
                     mise.package = selectedPackages.mise;
                     claude-code.package = agentPackages.claude-code;
@@ -205,6 +214,10 @@ rec {
         in
         {
           deploy = pkgs.callPackage ./packages/deploy { nix = pkgs.lixPackageSets.stable.lix; };
+          hermes-secrets = pkgs.callPackage ./packages/hermes-secrets {
+            linuxHosts = hosts.linux;
+            protonPass = self.packages.${system}.proton-pass-cli;
+          };
           mise = unstablePkgs.mise;
           proton-pass-cli = unstablePkgs.proton-pass-cli;
           tailscale = unstablePkgs.tailscale;
@@ -226,10 +239,12 @@ rec {
           extraSpecialArgs = {
             homeManagerUnstable = home-manager-unstable;
             hermesAgent = hermes-agent;
+            linuxHost = host;
             ohMyTmux = oh-my-tmux;
           };
           modules = [
             ./profiles/home/linux.nix
+            cachedHermes
             {
               home.username = host.username;
               home.homeDirectory = host.homeDirectory;
@@ -240,13 +255,7 @@ rec {
               modules.tailscale.package = self.packages.${host.system}.tailscale;
               programs.mise.package = self.packages.${host.system}.mise;
               programs.pi-coding-agent.package = llm-agents.packages.${host.system}.pi;
-              modules.deepseek-harness = {
-                package = llm-agents.packages.${host.system}.dsh;
-                service = {
-                  inherit (host.deepseekHarness) publicHost port proxyPort;
-                };
-              };
-              modules.tailscale.serve.httpsPort = host.deepseekHarness.httpsPort;
+              modules.deepseek-harness.package = llm-agents.packages.${host.system}.dsh;
               modules.sing-box = host.singBox;
             }
           ];
