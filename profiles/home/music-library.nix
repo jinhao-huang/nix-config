@@ -8,6 +8,7 @@ checkout:
 let
   skillDir = "${checkout}/skills/music-library";
   dataDir = "${config.xdg.dataHome}/metaweave";
+  telegramState = "${dataDir}/telegram";
   downloads = "${dataDir}/downloads";
   envFile = "${config.xdg.configHome}/nix-config/telegram-mcp.env";
   port = "8765";
@@ -52,7 +53,7 @@ let
         TELEGRAM_EXPOSED_TOOLS = "read-only+${lib.concatStringsSep "," writeTools}";
       };
       volumes = [
-        (bind "${dataDir}/telegram" "/state")
+        (bind telegramState "/state")
         (bind downloads "/downloads")
       ];
     };
@@ -69,6 +70,17 @@ in
       warnEcho ${lib.escapeShellArg "Telegram MCP credentials not found. Put TELEGRAM_API_ID and TELEGRAM_API_HASH in ${envFile}."}
     fi
   '';
+
+  # The bind mounts need writable user directories before the agent can start.
+  home.activation.prepareMusicLibrary =
+    lib.hm.dag.entryBetween [ "setupLaunchAgents" ] [ "writeBoundary" ]
+      ''
+        run ${lib.getExe' pkgs.coreutils "install"} -d -m 0700 -- \
+          ${lib.escapeShellArgs [
+            telegramState
+            downloads
+          ]}
+      '';
 
   services.hermes-agent = {
     environment.METAWEAVE_DOWNLOADS = downloads;

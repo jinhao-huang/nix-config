@@ -80,11 +80,7 @@ uv sync --locked --no-dev --no-build --managed-python
 
 打开 OrbStack，并设为登录时启动。[Nix 配置](../profiles/home/music-library.nix)会声明用户 launch agent，固定已有的 [Telegram MCP 镜像](https://github.com/users/jinhao-huang/packages/container/package/telegram-mcp)，并让 Hermes 通过本机回环地址连接容器。SSH 切换配置不要求 Docker 运行；agent 在 macOS 登录会话中运行。
 
-使用默认 XDG 路径时，先创建运行目录：
-
-```sh
-install -d -m 0700 ~/.local/share/metaweave/{telegram,downloads}
-```
+使用默认 XDG 路径时，`switch` 会在 `~/.local/share/metaweave/` 下创建 `telegram/` 和 `downloads/`，权限为 `0700`。
 
 用[上游登录和迁移工具](https://github.com/chigwell/telegram-mcp/tree/v3.3.20#quick-start)生成独立的 Telegram 会话，将 `telegram.session` 放在 `telegram/` 目录。最后在 `~/.config/nix-config/telegram-mcp.env` 中以不带引号的 `KEY=value` 格式写入 `TELEGRAM_API_ID` 和 `TELEGRAM_API_HASH`。文件就绪后，launch agent 会启动。两个凭据文件都使用 `0600` 权限。如需代理，设置上游的 `TELEGRAM_PROXY_*`，代理地址须能从 OrbStack 访问。
 

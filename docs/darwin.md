@@ -107,11 +107,8 @@ sets up a user launch agent and pins the existing [Telegram MCP image](https://g
 It connects Hermes to the container over loopback. Switching over SSH does not
 require Docker; the agent runs in the logged-in macOS session.
 
-With default XDG paths, create the runtime directories first:
-
-```sh
-install -d -m 0700 ~/.local/share/metaweave/{telegram,downloads}
-```
+With default XDG paths, `switch` creates `telegram/` and `downloads/` under
+`~/.local/share/metaweave/` with mode `0700`.
 
 Use the [upstream login and migration tools](https://github.com/chigwell/telegram-mcp/tree/v3.3.20#quick-start)
 to create a separate Telegram session and save `telegram.session` in the
