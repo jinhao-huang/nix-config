@@ -1,5 +1,6 @@
 """Synchronize private Hermes state and restart services after native activation."""
 
+from contextlib import ExitStack
 import json
 import os
 from pathlib import Path
@@ -7,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 
+from hermes_constants import clear_named_profile_deleted
 from validate import validate
 
 
@@ -26,41 +28,60 @@ def read_existing(path):
 
 def apply(policy, injected=None):
     # Read and validate all external inputs before changing usable state.
-    config, environment = validate(policy, injected)
-    home = Path(policy["hermesHome"])
-    config_path, env_path = home / "config.yaml", home / ".env"
-    previous_config, previous_env = read_existing(config_path), read_existing(env_path)
-    changed = previous_config != config or previous_env != environment
-    for directory in [home, *(home / name for name in policy["stateDirs"])]:
-        directory.mkdir(mode=0o700, parents=True, exist_ok=True)
-        directory.chmod(0o700)
-
+    states = validate(policy, injected)
+    root = Path(policy["hermesHome"])
+    profiles = {name: root / "profiles" / name for name in states if name != "default"}
     old_umask = os.umask(0o077)
     try:
-        with tempfile.TemporaryDirectory(prefix=".activation-", dir=home) as temporary:
-            stage = Path(temporary)
-            # Reserve rollback copies before upstream can overwrite config.yaml.
-            # Renaming these back does not require free space for another copy.
-            backups = [(config_path, previous_config), (env_path, previous_env)]
-            for index, (_, content) in enumerate(backups):
-                if content is not None:
-                    (stage / f"previous-{index}").write_bytes(content)
-            candidate = stage / "environment"
-            candidate.write_bytes(environment)
+        with ExitStack() as cleanup:
+            backups = {}
+            candidates = {}
+            changed = had_state = False
+            for name, (config, environment) in states.items():
+                home = profiles.get(name, root)
+                for directory in [home, *(home / subdir for subdir in policy["stateDirs"])]:
+                    directory.mkdir(mode=0o700, parents=True, exist_ok=True)
+                    directory.chmod(0o700)
+
+                config_path, env_path = home / "config.yaml", home / ".env"
+                managed = [config_path, env_path, home / ".managed"]
+                if name != "default":
+                    managed.extend([home / "SOUL.md", home / ".no-bundled-skills"])
+                previous = {path: read_existing(path) for path in managed}
+                changed |= previous[config_path] != config or previous[env_path] != environment
+                had_state |= previous[config_path] is not None or previous[env_path] is not None
+
+                stage = Path(
+                    cleanup.enter_context(tempfile.TemporaryDirectory(prefix=".activation-", dir=home))
+                )
+                # Stage on the destination filesystem so rollback needs only renames.
+                for index, (path, content) in enumerate(previous.items()):
+                    backup = stage / f"previous-{index}" if content is not None else None
+                    if backup is not None:
+                        backup.write_bytes(content)
+                    backups[path] = backup
+                candidate = stage / "environment"
+                candidate.write_bytes(environment)
+                candidates[env_path] = candidate
+
             # Retain pending work across interruptions and failed restarts.
-            if changed and (previous_config is not None or previous_env is not None):
-                replace_file(home / ".restart-needed", b"")
+            if changed and had_state:
+                replace_file(root / ".restart-needed", b"")
             try:
                 subprocess.run([policy["stateSetup"]], check=True)
-                # Empty declarations publish an empty file, revoking old values.
-                os.replace(candidate, env_path)
+                for path, candidate in candidates.items():
+                    os.replace(candidate, path)
             except (OSError, subprocess.CalledProcessError):
-                for index, (path, content) in enumerate(backups):
-                    if content is None:
+                for path, backup in backups.items():
+                    if backup is None:
                         path.unlink(missing_ok=True)
                     else:
-                        os.replace(stage / f"previous-{index}", path)
+                        os.replace(backup, path)
                 raise
+
+            # Make recreated profiles visible only after their state is complete.
+            for home in profiles.values():
+                clear_named_profile_deleted(home)
     finally:
         os.umask(old_umask)
 

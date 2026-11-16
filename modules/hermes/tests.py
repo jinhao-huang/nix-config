@@ -11,6 +11,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, os.environ["HERMES_SOURCE"])
+import hermes_constants
 import runtime
 
 
@@ -65,6 +66,26 @@ class RuntimeTests(unittest.TestCase):
             runtime.apply(self.policy)
         finally:
             os.umask(previous)
+
+    def add_music_profile(self):
+        home = self.home / "profiles/music-library"
+        config = self.root / "music-config.json"
+        config.write_text(json.dumps({"model": {"provider": "custom", "default": "music"}}))
+        self.policy["namedProfiles"] = {
+            "music-library": {
+                "configFile": str(config),
+                "environmentKeys": ["MINIMAX_CN_API_KEY"],
+            },
+        }
+        self.policy["environment"]["MINIMAX_CN_API_KEY"] = "initial"
+        self.setup.write_text(
+            self.setup.read_text()
+            + f"Path({str(home / 'config.yaml')!r}).write_bytes(Path({str(config)!r}).read_bytes())\n"
+            + f"Path({str(home / '.managed')!r}).write_text('home-manager')\n"
+            + f"Path({str(home / 'SOUL.md')!r}).write_text('Manage the music library.')\n"
+            + f"Path({str(home / '.no-bundled-skills')!r}).touch()\n"
+        )
+        return home
 
     def test_initial_private_state_and_unchanged_activation(self):
         self.home.mkdir(mode=0o755)
@@ -133,6 +154,56 @@ class RuntimeTests(unittest.TestCase):
                 runtime.apply(self.policy, f"DEEPSEEK_API_KEY={value}\n")
             self.assertEqual(path.read_bytes(), previous)
         self.assertFalse((self.home / ".restart-needed").exists())
+
+    def test_named_profile_receives_only_selected_credentials(self):
+        music = self.add_music_profile()
+        self.policy["protonPassKeys"] = ["MINIMAX_CN_API_KEY", "HERMES_DASHBOARD_BASIC_AUTH_PASSWORD"]
+        model_assignment = "MINIMAX_CN_API_KEY='updated # model key'\n"
+        injected = model_assignment + "HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=dashboard\n"
+        runtime.apply(self.policy, injected)
+        self.assertIn("HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=dashboard", (self.home / ".env").read_text())
+        self.assertEqual((music / ".env").read_text(), model_assignment)
+        self.assertEqual(stat.S_IMODE((music / ".env").stat().st_mode), 0o600)
+        for subdir in self.policy["stateDirs"]:
+            self.assertEqual(stat.S_IMODE((music / subdir).stat().st_mode), 0o700)
+        session = music / "sessions/existing"
+        session.write_text("session data")
+        runtime.apply(self.policy, injected)
+        self.assertEqual(session.read_text(), "session data")
+        self.assertFalse((self.home / ".restart-needed").exists())
+
+    def test_missing_named_profile_key_preserves_both_homes(self):
+        music = self.add_music_profile()
+        self.apply()
+        paths = [root / name for root in (self.home, music) for name in ("config.yaml", ".env")]
+        before = {path: path.read_bytes() for path in paths}
+        self.policy["environment"].clear()
+        with self.assertRaisesRegex(ValueError, "music-library needs MINIMAX_CN_API_KEY"):
+            self.apply()
+        self.assertEqual({path: path.read_bytes() for path in paths}, before)
+        self.assertFalse((self.home / ".restart-needed").exists())
+
+    def test_recreates_deleted_declared_profile(self):
+        music = self.add_music_profile()
+        other = music.with_name("other")
+        hermes_constants.mark_named_profile_deleted(music)
+        hermes_constants.mark_named_profile_deleted(other)
+        self.apply()
+        self.assertTrue(hermes_constants.named_profile_is_live(music))
+        self.assertTrue(hermes_constants.named_profile_is_deleted(other))
+
+    def test_failed_named_setup_does_not_publish_an_incomplete_profile(self):
+        self.apply()
+        config = (self.home / "config.yaml").read_bytes()
+        self.config.write_text(json.dumps({"model": {"provider": "custom", "default": "changed"}}))
+        music = self.add_music_profile()
+        self.setup.write_text(self.setup.read_text() + "raise SystemExit(1)\n")
+        with self.assertRaises(subprocess.CalledProcessError):
+            self.apply()
+        self.assertEqual((self.home / "config.yaml").read_bytes(), config)
+        self.assertEqual((self.home / ".env").read_bytes(), b"")
+        for name in ("config.yaml", ".env", ".managed", "SOUL.md", ".no-bundled-skills"):
+            self.assertFalse((music / name).exists(), name)
 
     def test_setup_failure_restores_config_and_keeps_environment(self):
         self.apply()

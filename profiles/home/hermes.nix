@@ -4,9 +4,6 @@
   pkgs,
   ...
 }:
-let
-  externalSkills = config.modules.ai-agents.externalSkills;
-in
 {
   imports = [ ../../modules/hermes ];
 
@@ -27,22 +24,16 @@ in
       };
       providers.minimax-cn.models."MiniMax-M3.1-Flash".supports_vision = true;
       skills.external_dirs = [
-        (pkgs.linkFarm "hermes-skills" (
-          [
-            {
-              name = "research";
-              path = ../../modules/ai-agents/skills/research;
-            }
-            {
-              name = "humanizer-zh";
-              path = ../../modules/ai-agents/skills/humanizer-zh;
-            }
-          ]
-          ++ lib.optional (externalSkills ? music-library) {
-            name = "music-library";
-            path = config.lib.file.mkOutOfStoreSymlink externalSkills.music-library;
+        (pkgs.linkFarm "hermes-skills" [
+          {
+            name = "research";
+            path = ../../modules/ai-agents/skills/research;
           }
-        ))
+          {
+            name = "humanizer-zh";
+            path = ../../modules/ai-agents/skills/humanizer-zh;
+          }
+        ])
       ];
     };
   };

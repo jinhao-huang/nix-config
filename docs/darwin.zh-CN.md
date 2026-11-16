@@ -78,17 +78,17 @@ Surge 负责出站网络。之后需要启用或升级 Hermes 时，按 [Hermes 
 uv sync --locked --no-dev --no-build --managed-python
 ```
 
-打开 OrbStack，并设为登录时启动。[Nix 配置](../profiles/home/music-library.nix)会声明用户 launch agent，固定已有的 [Telegram MCP 镜像](https://github.com/users/jinhao-huang/packages/container/package/telegram-mcp)，并让 Hermes 通过本机回环地址连接容器。SSH 切换配置不要求 Docker 运行；agent 在 macOS 登录会话中运行。
+打开 OrbStack，并设为登录时启动。[Nix 配置](../profiles/home/music-library.nix)会声明用户 launch agent，固定已有的 [Telegram MCP 镜像](https://github.com/users/jinhao-huang/packages/container/package/telegram-mcp)，并让 Hermes 的 `music-library` profile 通过本机回环地址连接容器。Docker 停止时也能通过 SSH 切换配置。Agent 在 macOS 登录会话中运行。
 
-使用默认 XDG 路径时，`switch` 会在 `~/.local/share/metaweave/` 下创建 `telegram/` 和 `downloads/`，权限为 `0700`。
+`switch` 会创建 `music-library` profile，它有独立的会话和记忆，模型凭据由 `default` 所用的 Proton Pass 条目下发。使用默认 XDG 路径时，`switch` 也会在 `~/.local/share/metaweave/` 下创建 `telegram/` 和 `downloads/`，权限为 `0700`。
 
 用[上游登录和迁移工具](https://github.com/chigwell/telegram-mcp/tree/v3.3.20#quick-start)生成独立的 Telegram 会话，将 `telegram.session` 放在 `telegram/` 目录。最后在 `~/.config/nix-config/telegram-mcp.env` 中以不带引号的 `KEY=value` 格式写入 `TELEGRAM_API_ID` 和 `TELEGRAM_API_HASH`。文件就绪后，launch agent 会启动。两个凭据文件都使用 `0600` 权限。如需代理，设置上游的 `TELEGRAM_PROXY_*`，代理地址须能从 OrbStack 访问。
 
 要限定 MCP 可访问的聊天，在同一个文件中设置 `TELEGRAM_ALLOWED_CHAT_IDS`，填入以逗号分隔的 Telegram 聊天 ID 或 `@用户名`。
 
-运行 `hermes mcp test telegram-music` 检查连接，启动日志在 `~/Library/Logs/telegram-music.log`。编辑环境文件后，运行 `launchctl kickstart -k "gui/$UID/org.nix-community.home.telegram-music"` 重启。
+运行 `hermes -p music-library mcp test telegram-music` 检查连接，启动日志在 `~/Library/Logs/telegram-music.log`。编辑环境文件后，运行 `launchctl kickstart -k "gui/$UID/org.nix-community.home.telegram-music"` 重启。
 
-在 Hermes 中调用 `music-library`，说明频道和任务，发送前审阅确切内容。Telegram MCP 将不超过 200 MiB 的附件保存到 Mac 的下载目录。超过上限时，用 Telegram 客户端下载到这台 Mac。收到网页分享时，按 Skill 的流程下载并把文件交到这台 Mac，再开始验收。任务记录放在曲库之外。就地整理通过已配置的 SSH 主机在 NAS 上执行，首次就地整理前需在 NAS 上安装 Skill 的独立运行环境。
+在现有 Dashboard 中选择 `music-library` profile，然后新建聊天。说明频道和任务，发送前审阅确切内容。Telegram MCP 将不超过 200 MiB 的附件保存到 Mac 的下载目录。超过上限时，用 Telegram 客户端下载到这台 Mac。收到网页分享时，按 Skill 的流程下载并把文件交到这台 Mac，再开始验收。任务记录放在曲库之外。就地整理通过已配置的 SSH 主机在 NAS 上执行，首次就地整理前需在 NAS 上安装 Skill 的独立运行环境。
 
 ## 远程访问与 Harness
 

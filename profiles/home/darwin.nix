@@ -23,7 +23,7 @@ in
     ../../modules/typst
     ../../modules/ghostty
   ]
-  ++ lib.optional (musicLibrary != null) (import ./music-library.nix musicLibrary.checkout);
+  ++ lib.optional (musicLibrary != null) (import ./music-library.nix musicLibrary);
 
   home.stateVersion = "25.05";
   home.sessionPath = [ "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin" ];
@@ -49,11 +49,6 @@ in
       Home Manager and nix-darwin manage this macOS environment.
       Network access is normally handled by Surge. Run commands normally;
       inspect the active takeover and routing state if access fails.
-    ''
-    + lib.optionalString (musicLibrary != null) ''
-      For music-library tasks, use the Metaweave checkout at ${musicLibrary.checkout}
-      and its .venv on this Mac. For in-place library work, use SSH host ${musicLibrary.nasHost}.
-      Telegram MCP /downloads maps to the Mac directory in METAWEAVE_DOWNLOADS.
     '';
     security.fake_ip_ranges = [ "198.18.0.0/15" ];
   };

@@ -104,10 +104,13 @@ uv sync --locked --no-dev --no-build --managed-python
 
 Open OrbStack and set it to start at login. The [Nix profile](../profiles/home/music-library.nix)
 sets up a user launch agent and pins the existing [Telegram MCP image](https://github.com/users/jinhao-huang/packages/container/package/telegram-mcp).
-It connects Hermes to the container over loopback. Switching over SSH does not
-require Docker; the agent runs in the logged-in macOS session.
+It connects the Hermes `music-library` profile to the container over loopback.
+Switching over SSH works with Docker stopped. The agent runs in the logged-in
+macOS session.
 
-With default XDG paths, `switch` creates `telegram/` and `downloads/` under
+`switch` creates the `music-library` profile with its own sessions, memory, and
+model credentials from the same Proton Pass entries used by `default`. With
+default XDG paths it creates `telegram/` and `downloads/` under
 `~/.local/share/metaweave/` with mode `0700`.
 
 Use the [upstream login and migration tools](https://github.com/chigwell/telegram-mcp/tree/v3.3.20#quick-start)
@@ -120,13 +123,14 @@ comma-separated Telegram IDs or `@usernames`.
 For proxy settings, use upstream `TELEGRAM_PROXY_*` keys and a host reachable
 from OrbStack.
 
-Run `hermes mcp test telegram-music` to check the connection. The launch agent logs
-to `~/Library/Logs/telegram-music.log`. After editing the environment file, run
+Run `hermes -p music-library mcp test telegram-music` to check the connection.
+The launch agent logs to `~/Library/Logs/telegram-music.log`. After editing the environment file, run
 `launchctl kickstart -k "gui/$UID/org.nix-community.home.telegram-music"`.
 
-In Hermes, invoke `music-library` and name the channel and task. Review the exact
-request before sending. Telegram MCP saves attachments up to 200 MiB in the Mac
-downloads directory. For larger attachments, download them to this Mac using a
+In the existing Dashboard, select the `music-library` profile and open a new
+chat. Name the channel and task, and review the exact request before sending.
+Telegram MCP saves attachments up to 200 MiB in the Mac downloads directory.
+For larger attachments, download them to this Mac using a
 Telegram client. For web shares, follow the skill's download workflow and put the
 files on this Mac before intake. Keep task records outside the music root and use
 the configured SSH host for in-place NAS work. Install the standalone skill

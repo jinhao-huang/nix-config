@@ -1,4 +1,8 @@
-checkout:
+{
+  checkout,
+  nasHost,
+  modelEnvironmentKeys,
+}:
 {
   config,
   lib,
@@ -6,6 +10,7 @@ checkout:
   ...
 }:
 let
+  hermesSettings = config.services.hermes-agent.settings;
   skillDir = "${checkout}/skills/music-library";
   dataDir = "${config.xdg.dataHome}/metaweave";
   telegramState = "${dataDir}/telegram";
@@ -60,8 +65,6 @@ let
   };
 in
 {
-  modules.ai-agents.externalSkills.music-library = skillDir;
-
   home.activation.checkMusicLibrary = lib.hm.dag.entryBefore [ "writeBoundary" ] ''
     if [[ ! -f ${lib.escapeShellArg "${skillDir}/SKILL.md"} ]]; then
       warnEcho ${lib.escapeShellArg "Metaweave skill not found. Clone Metaweave into ${checkout} before using music-library."}
@@ -82,16 +85,53 @@ in
           ]}
       '';
 
-  services.hermes-agent = {
-    environment.METAWEAVE_DOWNLOADS = downloads;
-    settings.mcp_servers.telegram-music = {
-      url = "http://127.0.0.1:${port}/mcp";
-      connect_timeout = 5;
-      timeout = 600;
-      tools = {
-        include = writeTools ++ readOnlyTools;
-        prompts = false;
-        resources = false;
+  modules.hermes.namedProfiles.music-library = {
+    workingDirectory = downloads;
+    environmentKeys = modelEnvironmentKeys;
+    soul = ''
+      You manage the music library. Follow the music-library skill for its workflows and approvals.
+      For unrelated requests, ask the user to switch to the default profile.
+    '';
+    settings = {
+      inherit (hermesSettings)
+        model
+        providers
+        security
+        updates
+        ;
+      auth.adopt_external_logins = hermesSettings.auth.adopt_external_logins;
+      agent = {
+        inherit (hermesSettings.agent) coding_context reasoning_overrides;
+        environment_hint = ''
+          ${hermesSettings.agent.environment_hint}
+          Use the Metaweave checkout at ${checkout} and its .venv on this Mac.
+          For in-place library work, use SSH host ${nasHost}.
+          Telegram MCP /downloads maps to ${downloads} on this Mac.
+        '';
+      };
+      terminal.backend = "local";
+      skills = {
+        external_dirs = [ skillDir ];
+        write_approval = true;
+      };
+      platform_toolsets.cli = [
+        "terminal"
+        "file"
+        "skills"
+        "web"
+        "browser"
+        "memory"
+        "clarify"
+      ];
+      mcp_servers.telegram-music = {
+        url = "http://127.0.0.1:${port}/mcp";
+        connect_timeout = 5;
+        timeout = 600;
+        tools = {
+          include = writeTools ++ readOnlyTools;
+          prompts = false;
+          resources = false;
+        };
       };
     };
   };

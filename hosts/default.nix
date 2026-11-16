@@ -74,6 +74,11 @@ let
           url = "https://${host.tailnetHost}:${toString hermesHttpsPort}";
         };
       }
+      // lib.optionalAttrs ((host.musicLibrary or null) != null) {
+        musicLibrary = host.musicLibrary // {
+          modelEnvironmentKeys = builtins.attrNames modelKeyReferences;
+        };
+      }
     ) inventory
   ) inventories;
 in

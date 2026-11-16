@@ -8,11 +8,12 @@ import stat
 import sys
 
 from dotenv import dotenv_values
+from dotenv.parser import parse_stream
 from hermes_yaml import safe_load
 
 
-def validate(policy, injected=None):
-    config = Path(policy["configFile"]).read_bytes()
+def validate_config(filename, environment):
+    config = Path(filename).read_bytes()
     settings = safe_load(config) or {}
     model = settings.get("model", {})
     if not isinstance(model, dict) or not all(
@@ -24,6 +25,20 @@ def validate(policy, injected=None):
             "in the inventory or hosts/inventory.local.nix."
         )
 
+    if settings.get("platforms", {}).get("telegram", {}).get("enabled", False):
+        if not (environment.get("TELEGRAM_BOT_TOKEN") or "").strip():
+            raise ValueError("Telegram is enabled; provide TELEGRAM_BOT_TOKEN in an environment file.")
+        allow_all = (environment.get("TELEGRAM_ALLOW_ALL_USERS") or "").strip().lower()
+        if allow_all not in ("", "0", "false", "no", "off"):
+            raise ValueError("Use explicit TELEGRAM_ALLOWED_USERS instead of TELEGRAM_ALLOW_ALL_USERS.")
+        users = (environment.get("TELEGRAM_ALLOWED_USERS") or "").split(",")
+        if not users or any(not re.fullmatch(r"[1-9][0-9]*", user.strip()) for user in users):
+            raise ValueError("Telegram needs TELEGRAM_ALLOWED_USERS with comma-separated numeric user IDs.")
+
+    return config
+
+
+def validate(policy, injected=None):
     content = "".join(f"{key}={value}\n" for key, value in policy["environment"].items())
     for filename in policy["environmentFiles"]:
         path = Path(filename)
@@ -44,18 +59,24 @@ def validate(policy, injected=None):
 
     # Public environment first, then private files in order, then injected values.
     environment = dotenv_values(stream=StringIO(content), interpolate=False)
-
-    if settings.get("platforms", {}).get("telegram", {}).get("enabled", False):
-        if not (environment.get("TELEGRAM_BOT_TOKEN") or "").strip():
-            raise ValueError("Telegram is enabled; provide TELEGRAM_BOT_TOKEN in an environment file.")
-        allow_all = (environment.get("TELEGRAM_ALLOW_ALL_USERS") or "").strip().lower()
-        if allow_all not in ("", "0", "false", "no", "off"):
-            raise ValueError("Use explicit TELEGRAM_ALLOWED_USERS instead of TELEGRAM_ALLOW_ALL_USERS.")
-        users = (environment.get("TELEGRAM_ALLOWED_USERS") or "").split(",")
-        if not users or any(not re.fullmatch(r"[1-9][0-9]*", user.strip()) for user in users):
-            raise ValueError("Telegram needs TELEGRAM_ALLOWED_USERS with comma-separated numeric user IDs.")
-
-    return config, content.encode()
+    states = {"default": (validate_config(policy["configFile"], environment), content.encode())}
+    if profiles := policy.get("namedProfiles"):
+        # Retain the quoting of the last assignment for each selected key.
+        assignments = {
+            binding.key: binding.original.string.strip("\r\n")
+            for binding in parse_stream(StringIO(content))
+            if binding.key is not None
+        }
+        for name, profile in profiles.items():
+            selected = {}
+            for key in profile["environmentKeys"]:
+                value = environment.get(key) or ""
+                if not value.strip():
+                    raise ValueError(f"Hermes profile {name} needs {key} in the configured environment.")
+                selected[key] = value
+            profile_content = "".join(f"{assignments[key]}\n" for key in selected).encode()
+            states[name] = (validate_config(profile["configFile"], selected), profile_content)
+    return states
 
 
 if __name__ == "__main__":
