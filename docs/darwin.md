@@ -90,6 +90,51 @@ Surge handles egress. To enable Hermes later or update it, follow the
 [Hermes configuration and maintenance guide](../modules/hermes/README.md), then
 use the routine rebuild flow. Do not run `hermes update`.
 
+## Music library
+
+On the desktop Mac, clone [Metaweave](https://github.com/jinhao-huang/metaweave)
+into the `musicLibrary.checkout` path in [the host inventory](../hosts/darwin.nix).
+Switch warns if the skill or Telegram credentials file is missing and prints
+the expected path. After switching, install the locked runtime from the
+checkout. Repeat this step after a lockfile update.
+
+```sh
+uv sync --locked --no-dev --no-build --managed-python
+```
+
+Open OrbStack and set it to start at login. The [Nix profile](../profiles/home/music-library.nix)
+sets up a user launch agent and pins the existing [Telegram MCP image](https://github.com/users/jinhao-huang/packages/container/package/telegram-mcp).
+It connects Hermes to the container over loopback. Switching over SSH does not
+require Docker; the agent runs in the logged-in macOS session.
+
+With default XDG paths, create the runtime directories first:
+
+```sh
+install -d -m 0700 ~/.local/share/metaweave/{telegram,downloads}
+```
+
+Use the [upstream login and migration tools](https://github.com/chigwell/telegram-mcp/tree/v3.3.20#quick-start)
+to create a separate Telegram session and save `telegram.session` in the
+`telegram/` directory. Last, put `TELEGRAM_API_ID` and `TELEGRAM_API_HASH` in
+`~/.config/nix-config/telegram-mcp.env` as unquoted `KEY=value` lines. The file
+starts the launch agent when present. Use mode `0600` for both credential files.
+To limit MCP access to specific chats, set `TELEGRAM_ALLOWED_CHAT_IDS` to their
+comma-separated Telegram IDs or `@usernames`.
+For proxy settings, use upstream `TELEGRAM_PROXY_*` keys and a host reachable
+from OrbStack.
+
+Run `hermes mcp test telegram-music` to check the connection. The launch agent logs
+to `~/Library/Logs/telegram-music.log`. After editing the environment file, run
+`launchctl kickstart -k "gui/$UID/org.nix-community.home.telegram-music"`.
+
+In Hermes, invoke `music-library` and name the channel and task. Review the exact
+request before sending. Telegram MCP saves attachments up to 200 MiB in the Mac
+downloads directory. For larger attachments, download them to this Mac using a
+Telegram client. For web shares, follow the skill's download workflow and put the
+files on this Mac before intake. Keep task records outside the music root and use
+the configured SSH host for in-place NAS work. Install the standalone skill
+runtime there before the first such task.
+
 ## Remote access and Harness
 
 - [Tailscale ingress](../modules/tailscale/README.md) covers enrollment,

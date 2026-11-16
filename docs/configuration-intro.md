@@ -46,6 +46,7 @@ Edit [hosts/darwin.nix](../hosts/darwin.nix). Each top-level attribute names a
 | `pi` | Optional Pi startup defaults passed to `modules.pi.defaults`; see [the schema](../modules/pi/startup-defaults-type.nix). |
 | `hermes` | Attribute set passed to the official `services.hermes-agent` module. See [Hermes configuration](../modules/hermes/README.md). |
 | `tailnetHost` | MagicDNS hostname for an enabled [Hermes Dashboard](../modules/tailscale/README.md#hermes-over-https). |
+| `musicLibrary` | Optional Metaweave `checkout` path on this Mac and existing `nasHost` SSH alias. See [music library setup](darwin.md#music-library). |
 
 ## Linux host fields
 

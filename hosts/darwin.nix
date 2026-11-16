@@ -23,6 +23,10 @@ in
   };
   desktop = common // {
     tailnetHost = (import ../modules/ssh/inventory.nix).mac-mini.settings.HostName;
+    musicLibrary = {
+      checkout = "${common.homeDirectory}/Codes/personal/metaweave";
+      nasHost = "fn-evo2";
+    };
     hermes = common.hermes // {
       enable = true;
       backend.mode = "dashboard";

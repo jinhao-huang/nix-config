@@ -34,6 +34,7 @@
 | `pi` | 可选 Pi 启动默认值，传给 `modules.pi.defaults`；见 [schema](../modules/pi/startup-defaults-type.nix)。 |
 | `hermes` | 传给官方 `services.hermes-agent` 模块的属性集。见 [Hermes 配置](../modules/hermes/README.zh-CN.md)。 |
 | `tailnetHost` | 已启用的 [Hermes Dashboard](../modules/tailscale/README.zh-CN.md#hermes-over-https) 使用的 MagicDNS 主机名。 |
+| `musicLibrary` | 可选。指定这台 Mac 上 Metaweave 的 `checkout` 路径，以及已有的 `nasHost` SSH 别名。见[音乐库设置](darwin.zh-CN.md#music-library)。 |
 
 ## Linux 主机字段
 

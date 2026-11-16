@@ -68,6 +68,32 @@ tail -n 50 ~/Library/Logs/hermes-agent.err.log
 
 Surge 负责出站网络。之后需要启用或升级 Hermes 时，按 [Hermes 配置与维护指南](../modules/hermes/README.zh-CN.md)准备，再使用日常重新构建流程，不运行 `hermes update`。
 
+<a id="music-library"></a>
+
+## 音乐库
+
+在桌面 Mac 上把 [Metaweave](https://github.com/jinhao-huang/metaweave) 克隆到[主机清单](../hosts/darwin.nix)的 `musicLibrary.checkout` 路径。如果缺少技能文件或 Telegram 凭据文件，`switch` 会提示并打印预期路径。切换配置后，在该检出目录安装锁定的运行环境。锁文件更新后重跑此命令。
+
+```sh
+uv sync --locked --no-dev --no-build --managed-python
+```
+
+打开 OrbStack，并设为登录时启动。[Nix 配置](../profiles/home/music-library.nix)会声明用户 launch agent，固定已有的 [Telegram MCP 镜像](https://github.com/users/jinhao-huang/packages/container/package/telegram-mcp)，并让 Hermes 通过本机回环地址连接容器。SSH 切换配置不要求 Docker 运行；agent 在 macOS 登录会话中运行。
+
+使用默认 XDG 路径时，先创建运行目录：
+
+```sh
+install -d -m 0700 ~/.local/share/metaweave/{telegram,downloads}
+```
+
+用[上游登录和迁移工具](https://github.com/chigwell/telegram-mcp/tree/v3.3.20#quick-start)生成独立的 Telegram 会话，将 `telegram.session` 放在 `telegram/` 目录。最后在 `~/.config/nix-config/telegram-mcp.env` 中以不带引号的 `KEY=value` 格式写入 `TELEGRAM_API_ID` 和 `TELEGRAM_API_HASH`。文件就绪后，launch agent 会启动。两个凭据文件都使用 `0600` 权限。如需代理，设置上游的 `TELEGRAM_PROXY_*`，代理地址须能从 OrbStack 访问。
+
+要限定 MCP 可访问的聊天，在同一个文件中设置 `TELEGRAM_ALLOWED_CHAT_IDS`，填入以逗号分隔的 Telegram 聊天 ID 或 `@用户名`。
+
+运行 `hermes mcp test telegram-music` 检查连接，启动日志在 `~/Library/Logs/telegram-music.log`。编辑环境文件后，运行 `launchctl kickstart -k "gui/$UID/org.nix-community.home.telegram-music"` 重启。
+
+在 Hermes 中调用 `music-library`，说明频道和任务，发送前审阅确切内容。Telegram MCP 将不超过 200 MiB 的附件保存到 Mac 的下载目录。超过上限时，用 Telegram 客户端下载到这台 Mac。收到网页分享时，按 Skill 的流程下载并把文件交到这台 Mac，再开始验收。任务记录放在曲库之外。就地整理通过已配置的 SSH 主机在 NAS 上执行，首次就地整理前需在 NAS 上安装 Skill 的独立运行环境。
+
 ## 远程访问与 Harness
 
 - [Tailscale 入站访问](../modules/tailscale/README.zh-CN.md)说明设备注册、连接检查和日志查看方法；出站流量继续由 Surge 处理。

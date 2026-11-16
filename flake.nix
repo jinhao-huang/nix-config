@@ -175,7 +175,7 @@ rec {
                 in
                 {
                   imports = [
-                    ./profiles/home/darwin.nix
+                    (import ./profiles/home/darwin.nix { inherit darwinHost; })
                     cachedHermes
                   ];
 
