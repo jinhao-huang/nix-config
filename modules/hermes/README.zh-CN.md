@@ -78,6 +78,8 @@ nix build --no-link .#checks.aarch64-darwin.hermes-runtime
 
 升级前备份 `~/.hermes`，因为 Home Manager 回滚不会恢复应用状态。两平台使用 `llm-agents` 提供的缓存包，Home Manager 模块来自 `hermes-agent` 输入。更新输入后执行切换。如果 `hermes --version` 显示 `v0.0.0`，结合输出的 commit 和 `flake.lock` 识别版本。Nix 属于上游的 [Tier 2 平台](https://hermes-agent.nousresearch.com/docs/getting-started/platform-support/)。
 
+更新 `llm-agents` 时，直接验证上游缓存包。取消设置 `PYTHONPATH` 后，启动器的 `HERMES_PYTHON` 应能导入 `packaging`。开启认证后，在 Dashboard 新建聊天应能收到回复。两项通过后，从 [`flake.nix` 的 `cachedHermes`](../../flake.nix) 删除启动器补丁和额外添加的 `packaging`。上游缓存包也提供 Home Manager 所需的 `hermesVenv` 解释器后，即可直接使用该包。
+
 ## 配置归属与隔离
 
 受管模式会阻止常规 setup、配置修改、更新和 gateway 安装命令。持久默认值应修改 Nix 后切换。受管标记属于应用约定，并非文件系统权限边界：账号所有者仍可编辑普通文件，切换会恢复受管理的 YAML 和环境值。

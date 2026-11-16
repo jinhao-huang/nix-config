@@ -113,7 +113,13 @@ rec {
           hermes = config.services.hermes-agent;
           hermesPackage = llm-agents.packages.${system}.hermes-agent;
           hermesPython = llm-agents.inputs.nixpkgs.legacyPackages.${system}.python3;
-          hermesPythonEnv = hermesPython.withPackages (ps: hermesPackage.dependencies ++ [ ps.packaging ]);
+          stockPython = hermesPython.withPackages (_: hermesPackage.dependencies);
+          hermesVenv = stockPython.override (args: {
+            extraLibs = args.extraLibs ++ [ hermesPython.pkgs.packaging ];
+            postBuild = ''
+              printf '%s\n' ${hermesPackage}/${hermesPython.sitePackages} > "$out/${hermesPython.sitePackages}/hermes.pth"
+            '';
+          });
         in
         {
           services.hermes-agent.package = lib.mkDefault (
@@ -122,20 +128,20 @@ rec {
             pkgs.symlinkJoin {
               inherit (hermesPackage) name meta;
               paths = [ hermesPackage ];
-              nativeBuildInputs = [ pkgs.makeWrapper ];
-              # Numtide 0.23.0 omits the packaging runtime dependency.
+              # Chat resets PYTHONPATH before launching the gateway via HERMES_PYTHON.
               postBuild = ''
-                for executable in "$out"/bin/*; do
-                  wrapProgram "$executable" --prefix PYTHONPATH : ${hermesPython.pkgs.packaging}/${hermesPython.sitePackages}
+                for program in hermes hermes-agent hermes-acp; do
+                  rm "$out/bin/$program"
+                  substitute ${hermesPackage}/bin/"$program" "$out/bin/$program" \
+                    --replace-fail "export HERMES_PYTHON='${stockPython}/bin/python3'" \
+                                   "export HERMES_PYTHON='${hermesVenv}/bin/python3'" \
+                    --replace-fail 'exec -a "$0"' 'exec "$HERMES_PYTHON"'
+                  chmod +x "$out/bin/$program"
                 done
               '';
               passthru = {
                 inherit (hermesPackage) version;
-                # The upstream module imports Hermes through this interpreter.
-                hermesVenv = pkgs.writeShellScriptBin "python3" ''
-                  export PYTHONPATH=${lib.escapeShellArg "${hermesPackage}/${hermesPython.sitePackages}"}
-                  exec ${hermesPythonEnv}/bin/python3 "$@"
-                '';
+                inherit hermesVenv;
               };
             }
           );

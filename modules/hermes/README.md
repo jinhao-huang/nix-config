@@ -133,6 +133,13 @@ updates by switching. If `hermes --version` shows `v0.0.0`, identify the build b
 its printed commit and `flake.lock`. Nix is an upstream
 [Tier 2 platform](https://hermes-agent.nousresearch.com/docs/getting-started/platform-support/).
 
+When updating `llm-agents`, test the unpatched cached Hermes package. The
+launcher's `HERMES_PYTHON` must import `packaging` with `PYTHONPATH` unset, and a
+new Dashboard chat must receive a reply with authentication enabled. Once both
+pass, remove the launcher changes and the added `packaging` dependency from
+[`cachedHermes` in `flake.nix`](../../flake.nix). Use the cached package directly
+once it also exposes the `hermesVenv` interpreter required by Home Manager.
+
 ## Configuration ownership and isolation
 
 Managed mode blocks ordinary setup, config mutation, update, and gateway
