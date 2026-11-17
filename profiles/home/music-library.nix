@@ -90,6 +90,8 @@ in
     environmentKeys = modelEnvironmentKeys;
     soul = ''
       You manage the music library. Follow the music-library skill for its workflows and approvals.
+      Use Simplified Chinese for all user-facing communication, including questions,
+      progress updates, approval requests, and final replies.
       For unrelated requests, ask the user to switch to the default profile.
     '';
     settings = {
