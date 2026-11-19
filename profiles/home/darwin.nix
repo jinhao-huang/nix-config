@@ -6,7 +6,7 @@ in
 {
   imports = [
     ./common.nix
-    ./hermes.nix
+    ./hermes
     ../../modules/fonts
     ../../modules/proton-pass
     ../../modules/go
@@ -24,7 +24,7 @@ in
     ../../modules/ghostty
     ../../modules/telegram-mcp
   ]
-  ++ lib.optional (musicLibrary != null) (import ./music-library.nix musicLibrary);
+  ++ lib.optional (musicLibrary != null) (import ./hermes/music-library.nix musicLibrary);
 
   home.stateVersion = "25.05";
   home.sessionPath = [ "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin" ];

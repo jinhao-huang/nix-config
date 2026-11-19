@@ -47,7 +47,7 @@ in
 {
   imports = [
     ./common.nix
-    ./hermes.nix
+    ./hermes
     ../../modules/mise
     ../../modules/docker-ghcr
     ../../modules/pi

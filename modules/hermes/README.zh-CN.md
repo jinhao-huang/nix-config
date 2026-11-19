@@ -10,7 +10,7 @@ Linux 和 macOS 均使用官方 Home Manager 模块。Nix 管理程序、服务�
 
 在 [hosts/linux.nix](../../hosts/linux.nix) 或 [hosts/darwin.nix](../../hosts/darwin.nix) 中设置 `hermes`，字段对应官方 [`services.hermes-agent` 选项](https://hermes-agent.nousresearch.com/docs/getting-started/nix-setup#home-manager-module)。Hermes 与消息 gateway 按主机分别启用。`hermes.enable = true` 安装 CLI 并管理配置。再设置 `hermes.gateway.enable = true`，就会在 Linux 运行 systemd 用户服务，在 macOS 运行 launchd agent。只使用 CLI/TUI 时保持 gateway 关闭。`desktop` 和 Linux 主机清单通过 `hermes.backend.mode = "dashboard"` 启用 Dashboard。
 
-[共享策略](../../profiles/home/hermes.nix) 关闭更新检查、自动借用 Codex／Claude 登录（`auth.adopt_external_logins`）和按需安装依赖（`security.allow_lazy_installs`）。通过 `extraPackages` 添加命令行工具。如需更改 Python 依赖，选择已包含所需依赖且有缓存的 Hermes 包。各平台 profile 负责环境提示和代理配置。
+[共享策略](../../profiles/home/hermes/default.nix) 关闭更新检查、自动借用 Codex／Claude 登录（`auth.adopt_external_logins`）和按需安装依赖（`security.allow_lazy_installs`）。通过 `extraPackages` 添加命令行工具。如需更改 Python 依赖，选择已包含所需依赖且有缓存的 Hermes 包。各平台 profile 负责环境提示和代理配置。
 
 <a id="local-overrides"></a>
 

@@ -5,7 +5,7 @@
   ...
 }:
 {
-  imports = [ ../../modules/hermes ];
+  imports = [ ../../../modules/hermes ];
 
   services.hermes-agent = {
     # Reserve the upstream port for HTTPS on the userspace Tailscale node.
@@ -27,11 +27,11 @@
         (pkgs.linkFarm "hermes-skills" [
           {
             name = "research";
-            path = ../../modules/ai-agents/skills/research;
+            path = ../../../modules/ai-agents/skills/research;
           }
           {
             name = "humanizer-zh";
-            path = ../../modules/ai-agents/skills/humanizer-zh;
+            path = ../../../modules/ai-agents/skills/humanizer-zh;
           }
         ])
       ];

@@ -18,8 +18,8 @@ service on Linux or a launchd agent on macOS. Leave the gateway disabled for
 CLI/TUI use only. The `desktop` and Linux inventories enable the Dashboard
 with `hermes.backend.mode = "dashboard"`.
 
-[Shared policy](../../profiles/home/hermes.nix) disables update checks, automatic
-borrowing of Codex/Claude logins (`auth.adopt_external_logins`), and on-demand
+[Shared policy](../../profiles/home/hermes/default.nix) disables update checks,
+automatic borrowing of Codex/Claude logins (`auth.adopt_external_logins`), and on-demand
 dependency installation (`security.allow_lazy_installs`). Use `extraPackages`
 for command-line tools. Changing Python dependencies requires selecting a
 cached Hermes package that already includes them. Platform profiles own
