@@ -84,7 +84,7 @@ uv run --no-sync python migrate_session.py --target PATH
 
 迁移成功后，删除临时 `.env`，再写入 `~/.config/nix-config/telegram-mcp.env`。以不带引号的 `KEY=value` 格式填写 `TELEGRAM_API_ID` 和 `TELEGRAM_API_HASH`，两台可复用同一组值。在 `TELEGRAM_ALLOWED_CHAT_IDS` 中填入需要访问的 Telegram 聊天 ID 或 `@用户名`，用逗号分隔。会话文件和凭据文件都使用 `0600` 权限。若设置 `TELEGRAM_PROXY_*`，代理地址须能从 OrbStack 访问。
 
-将 MCP 客户端的 Streamable HTTP 地址设为 `http://127.0.0.1:8765/mcp`。笔记本开放只读工具和 `download_media`。连接后检查容器状态和客户端列出的工具，再下载一份小附件，确认文件写入本机 `downloads/` 目录。
+将 MCP 客户端的 Streamable HTTP 地址设为 `http://127.0.0.1:8765/mcp`。两台 Mac 都开放只读工具和同一组[写工具](../profiles/home/darwin.nix)。连接后检查容器状态和客户端列出的工具，再下载一份小附件，确认文件写入本机 `downloads/` 目录。
 
 ```sh
 docker --context orbstack compose -f ~/.config/nix-config/telegram-mcp/compose.yaml ps

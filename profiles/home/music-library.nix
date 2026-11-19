@@ -26,13 +26,7 @@ in
     fi
   '';
 
-  modules.telegram-mcp = {
-    dataDirectory = "${config.xdg.dataHome}/metaweave";
-    writeTools = lib.mkBefore [
-      "send_message"
-      "press_inline_button"
-    ];
-  };
+  modules.telegram-mcp.dataDirectory = "${config.xdg.dataHome}/metaweave";
 
   modules.hermes.namedProfiles.music-library = {
     workingDirectory = telegramMcp.downloadDirectory;
@@ -86,5 +80,4 @@ in
       };
     };
   };
-
 }

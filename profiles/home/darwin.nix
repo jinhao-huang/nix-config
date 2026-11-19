@@ -46,7 +46,11 @@ in
   modules.deepseek-harness.enable = true;
   modules.telegram-mcp = {
     enable = true;
-    writeTools = [ "download_media" ];
+    writeTools = [
+      "send_message"
+      "press_inline_button"
+      "download_media"
+    ];
   };
   services.hermes-agent.settings = lib.mkBefore {
     agent.environment_hint = ''

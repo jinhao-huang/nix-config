@@ -122,9 +122,10 @@ both Macs. Set `TELEGRAM_ALLOWED_CHAT_IDS` to the comma-separated Telegram IDs o
 files. If you configure `TELEGRAM_PROXY_*`, use an address reachable from OrbStack.
 
 Set your MCP client's Streamable HTTP URL to `http://127.0.0.1:8765/mcp`.
-The laptop exposes read-only tools and `download_media`. Check the container and
-the tools listed by the client after connecting, then download a small attachment
-to verify the local `downloads/` directory.
+Both Macs expose read-only tools and the same
+[write tools](../profiles/home/darwin.nix). Check the container and the tools
+listed by the client after connecting, then download a small attachment to verify
+the local `downloads/` directory.
 
 ```sh
 docker --context orbstack compose -f ~/.config/nix-config/telegram-mcp/compose.yaml ps
