@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ../../modules/ai-agents
     ../../modules/bash
     ../../modules/cli-tools
     ../../modules/ssh
@@ -18,6 +19,10 @@
   home.sessionPath = [ "$HOME/.local/bin" ];
   programs.home-manager.enable = true;
 
+  modules.ai-agents = {
+    enable = true;
+    repoRelativePath = "nix-config";
+  };
   modules.cli-tools.enable = true;
   modules.tmux.enable = true;
   modules.vim.enable = true;

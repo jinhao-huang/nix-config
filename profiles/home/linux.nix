@@ -52,7 +52,6 @@ in
     ../../modules/docker-ghcr
     ../../modules/pi
     ../../modules/deepseek-harness
-    ../../modules/ai-agents
     ../../modules/sing-box
     ../../modules/tailscale/home-manager.nix
   ];
@@ -98,8 +97,6 @@ in
     };
   };
   modules.ai-agents = {
-    enable = true;
-    repoRelativePath = "nix-config";
     environment = ''
       ## Local Execution Environment
 

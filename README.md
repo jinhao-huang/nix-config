@@ -10,9 +10,9 @@ Home Manager and leaves the host OS and Nix daemon to its administrator.
 
 Have Nix or Lix and Git available, then check out the repository at
 `~/nix-config`. The profiles use that location for live AI skill links; if you
-choose another location, update `modules.ai-agents.repoRelativePath` in the home
-profile before activation. Follow one platform guide through its preparation,
-first activation, and authentication steps.
+choose another location, update `modules.ai-agents.repoRelativePath` in the
+[shared home profile](profiles/home/common.nix) before activation. Follow the
+platform guide through preparation, first activation, and authentication.
 
 | Task | Guide |
 | --- | --- |

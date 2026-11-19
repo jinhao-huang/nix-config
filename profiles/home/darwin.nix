@@ -16,7 +16,6 @@ in
     ../../modules/opencode
     ../../modules/pi
     ../../modules/deepseek-harness
-    ../../modules/ai-agents
     ../../modules/lima
     ../../modules/zed
     ../../modules/mise
@@ -62,8 +61,6 @@ in
     security.fake_ip_ranges = [ "198.18.0.0/15" ];
   };
   modules.ai-agents = {
-    enable = true;
-    repoRelativePath = "nix-config";
     externalSkills.surge = "/Applications/Surge.app/Contents/Resources/Skills/surge";
     environment = ''
       ## Local Execution Environment

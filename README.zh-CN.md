@@ -6,7 +6,7 @@
 
 ## 安装与文档
 
-先准备 Nix 或 Lix 和 Git，再将仓库检出到 `~/nix-config`。profile 使用此位置建立 AI 技能的实时链接；若选择其他位置，激活前修改用户 profile 中的 `modules.ai-agents.repoRelativePath`。按对应平台指南依次完成准备、首次激活和认证。
+先准备 Nix 或 Lix 和 Git，再将仓库检出到 `~/nix-config`。profile 使用此位置建立 AI 技能的实时链接；若选择其他位置，激活前修改[共享用户 profile](profiles/home/common.nix) 中的 `modules.ai-agents.repoRelativePath`。按对应平台指南依次完成准备、首次激活和认证。
 
 | 任务 | 文档 |
 | --- | --- |
