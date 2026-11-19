@@ -1,6 +1,8 @@
 { darwinHost }:
 { config, lib, ... }:
 let
+  # Surge Enhanced Mode resolves proxied domains into this range.
+  surgeFakeIpRanges = [ "198.18.0.0/15" ];
   musicLibrary = darwinHost.musicLibrary or null;
 in
 {
@@ -39,8 +41,7 @@ in
   modules.opencode.enable = false;
   modules.pi = {
     enable = true;
-    # Surge Enhanced Mode resolves proxied domains into this fake-IP range.
-    webSearch.allowRanges = [ "198.18.0.0/15" ];
+    webSearch.allowRanges = surgeFakeIpRanges;
   };
   modules.deepseek-harness.enable = true;
   modules.telegram-mcp = {
@@ -58,7 +59,7 @@ in
       Network access is normally handled by Surge. Run commands normally;
       inspect the active takeover and routing state if access fails.
     '';
-    security.fake_ip_ranges = [ "198.18.0.0/15" ];
+    security.fake_ip_ranges = surgeFakeIpRanges;
   };
   modules.ai-agents = {
     externalSkills.surge = "/Applications/Surge.app/Contents/Resources/Skills/surge";
