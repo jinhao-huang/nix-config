@@ -22,6 +22,7 @@ in
     ../../modules/mise
     ../../modules/typst
     ../../modules/ghostty
+    ../../modules/telegram-mcp
   ]
   ++ lib.optional (musicLibrary != null) (import ./music-library.nix musicLibrary);
 
@@ -43,6 +44,10 @@ in
     webSearch.allowRanges = [ "198.18.0.0/15" ];
   };
   modules.deepseek-harness.enable = true;
+  modules.telegram-mcp = {
+    enable = true;
+    writeTools = [ "download_media" ];
+  };
   services.hermes-agent.settings = lib.mkBefore {
     agent.environment_hint = ''
       Respond in Chinese unless the user requests another language.

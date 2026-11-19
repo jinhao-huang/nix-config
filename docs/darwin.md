@@ -90,42 +90,64 @@ Surge handles egress. To enable Hermes later or update it, follow the
 [Hermes configuration and maintenance guide](../modules/hermes/README.md), then
 use the routine rebuild flow. Do not run `hermes update`.
 
+## Telegram MCP
+
+Both Macs run a [pinned image](https://github.com/users/jinhao-huang/packages/container/package/telegram-mcp)
+through a [Home Manager launch agent](../modules/telegram-mcp/default.nix).
+Open OrbStack and set it to start at login. Switching over SSH works with Docker
+stopped. The agent runs in the logged-in macOS session.
+
+`switch` creates `telegram/` and `downloads/` with mode `0700`. With default XDG
+paths, they are under `~/.local/share/telegram-mcp/` on the laptop and
+`~/.local/share/metaweave/` on the desktop. It reports the expected paths for
+missing credentials.
+
+Check out `v3.3.20` and follow the [upstream login and migration guide](https://github.com/chigwell/telegram-mcp/blob/v3.3.20/README.md#quick-start)
+to sign in separately on each Mac. Put the API credentials in a temporary
+`.env` in that checkout and save the generated session string there before
+running the migration. Replace `PATH` with the full path to `telegram.session`
+in that Mac's `telegram/` directory.
+
+```sh
+uv sync --locked --no-dev --no-install-project --no-build
+uv run --no-sync python session_string_generator.py
+uv run --no-sync python migrate_session.py --target PATH
+```
+
+After migration, remove the temporary `.env` and add the service credentials.
+Use `~/.config/nix-config/telegram-mcp.env` with unquoted `KEY=value`
+lines for `TELEGRAM_API_ID` and `TELEGRAM_API_HASH`. You can reuse this pair on
+both Macs. Set `TELEGRAM_ALLOWED_CHAT_IDS` to the comma-separated Telegram IDs or
+`@usernames` you want the service to access. Use mode `0600` for both credential
+files. If you configure `TELEGRAM_PROXY_*`, use an address reachable from OrbStack.
+
+Set your MCP client's Streamable HTTP URL to `http://127.0.0.1:8765/mcp`.
+The laptop exposes read-only tools and `download_media`. Check the container and
+the tools listed by the client after connecting, then download a small attachment
+to verify the local `downloads/` directory.
+
+```sh
+docker --context orbstack compose -f ~/.config/nix-config/telegram-mcp/compose.yaml ps
+```
+
+The launch agent logs to `~/Library/Logs/telegram-music.log`. After editing the
+environment file, run `launchctl kickstart -k "gui/$UID/org.nix-community.home.telegram-music"`.
+
 ## Music library
 
 On the desktop Mac, clone [Metaweave](https://github.com/jinhao-huang/metaweave)
 into the `musicLibrary.checkout` path in [the host inventory](../hosts/darwin.nix).
-Switch warns if the skill or Telegram credentials file is missing and prints
-the expected path. After switching, install the locked runtime from the
-checkout. Repeat this step after a lockfile update.
+`switch` warns if the skill is missing. After switching, install the locked
+runtime from the checkout. Repeat this step after a lockfile update.
 
 ```sh
 uv sync --locked --no-dev --no-build --managed-python
 ```
 
-Open OrbStack and set it to start at login. The [Nix profile](../profiles/home/music-library.nix)
-sets up a user launch agent and pins the existing [Telegram MCP image](https://github.com/users/jinhao-huang/packages/container/package/telegram-mcp).
-It connects the Hermes `music-library` profile to the container over loopback.
-Switching over SSH works with Docker stopped. The agent runs in the logged-in
-macOS session.
-
-`switch` creates the `music-library` profile with its own sessions, memory, and
-model credentials from the same Proton Pass entries used by `default`. With
-default XDG paths it creates `telegram/` and `downloads/` under
-`~/.local/share/metaweave/` with mode `0700`.
-
-Use the [upstream login and migration tools](https://github.com/chigwell/telegram-mcp/tree/v3.3.20#quick-start)
-to create a separate Telegram session and save `telegram.session` in the
-`telegram/` directory. Last, put `TELEGRAM_API_ID` and `TELEGRAM_API_HASH` in
-`~/.config/nix-config/telegram-mcp.env` as unquoted `KEY=value` lines. The file
-starts the launch agent when present. Use mode `0600` for both credential files.
-To limit MCP access to specific chats, set `TELEGRAM_ALLOWED_CHAT_IDS` to their
-comma-separated Telegram IDs or `@usernames`.
-For proxy settings, use upstream `TELEGRAM_PROXY_*` keys and a host reachable
-from OrbStack.
-
-Run `hermes -p music-library mcp test telegram-music` to check the connection.
-The launch agent logs to `~/Library/Logs/telegram-music.log`. After editing the environment file, run
-`launchctl kickstart -k "gui/$UID/org.nix-community.home.telegram-music"`.
+`switch` creates the `music-library` profile with its own sessions and memory.
+It uses the same Proton Pass model credentials as `default`. Set up [Telegram
+MCP](#telegram-mcp) on the desktop, then run
+`hermes -p music-library mcp test telegram-music` to check the connection.
 
 In the existing Dashboard, select the `music-library` profile and open a new
 chat. Name the channel and task, and review the exact request before sending.
