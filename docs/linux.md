@@ -143,9 +143,9 @@ Use the Linux inventory key as the SSH alias. Before tailnet enrollment, point
 that alias at the reachable system SSH endpoint in `~/.ssh/config.local` on the
 Mac. Remove the override once the tailnet hostname works. The publisher resolves the
 [shared Hermes credentials](../modules/hermes/README.md#secrets-and-activation).
-The command replaces `~/.config/nix-config/hermes.env` over SSH. Remove old
-Hermes secret-file and Telegram overrides from the server's local inventory
-before switching. Linux reads the published file on `switch`.
+The command replaces the file selected by `hermesCredentialFile` over SSH. Linux
+reads it on `switch`. Remove obsolete secret-file and Telegram overrides
+from the server’s local inventory before switching.
 
 With MagicDNS and HTTPS certificates enabled, confirm the new Serve mapping
 before granting your identity access to TCP `9119`. Restrict direct access to

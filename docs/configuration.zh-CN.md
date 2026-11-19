@@ -51,6 +51,7 @@
 | `dockerGhcr` | 可选属性集，传给 `modules.docker-ghcr`；通过指定的 GitHub CLI 账号认证 GHCR。见[安装与登录](../modules/docker-ghcr/README.zh-CN.md)。 |
 | `singBox` | 传给 `modules.sing-box` 的属性集，提供 `listenPort` 和至少一个节点来源。 |
 | `hermes` | 传给官方 `services.hermes-agent` 的属性集，包含模型、状态路径、私有环境文件路径和消息平台设置。 |
+| `hermesCredentialFile` | 可选绝对路径，供使用共享 Proton Pass 引用的主机接收 `hermes-secrets` 发布的凭据。Hermes 先读此文件，再读 `hermes.environmentFiles` 中的其他文件。 |
 
 例如，主机中可以包含：
 

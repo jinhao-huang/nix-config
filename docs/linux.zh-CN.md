@@ -85,7 +85,7 @@ tailscale-user status --json
 nix run .#hermes-secrets -- example-host
 ```
 
-把 `example-host` 换成 Linux 清单中对应的 SSH 别名。注册到 tailnet 前，在 Mac 的 `~/.ssh/config.local` 中将该别名指向可连接的系统 SSH 地址。tailnet 主机名可用后，移除这项覆盖。命令读取[共用的 Hermes 凭据](../modules/hermes/README.zh-CN.md#秘密文件与激活)，经 SSH 替换 `~/.config/nix-config/hermes.env`。如果服务器的本地清单还有旧的 Hermes 密钥路径或 Telegram 覆盖，先移除再切换。Linux 执行 `switch` 时读取发布后的文件。
+把 `example-host` 换成 Linux 清单中对应的 SSH 别名。注册到 tailnet 前，在 Mac 的 `~/.ssh/config.local` 中将该别名指向可连接的系统 SSH 地址。tailnet 主机名可用后，移除这项覆盖。命令读取[共用的 Hermes 凭据](../modules/hermes/README.zh-CN.md#秘密文件与激活)，经 SSH 替换主机清单中 `hermesCredentialFile` 指定的文件。如果服务器的本地清单还有旧的 Hermes 密钥路径或 Telegram 覆盖，先移除再切换。Linux 执行 `switch` 时读取发布后的文件。
 
 开启 MagicDNS 和 HTTPS 证书后，用以下命令确认新的 Serve 映射，再向自己的身份放行 TCP `9119`，并限制对后端端口的直接访问。打开 `https://<node>.ts.net:9119/chat`，确认未登录时会跳转到登录页，然后登录并发送一条消息。
 

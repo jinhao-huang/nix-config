@@ -160,11 +160,12 @@ Codex/Claude logins; it does not restrict shell access to those files.
 
 ## Data paths and removal
 
+On both platforms, `hermesHome` defaults to `~/.hermes` and the default
+profile’s `workingDirectory` to `~/hermes-workspace`.
+
 | Data | Linux | macOS when enabled |
 | --- | --- | --- |
-| State root (`hermesHome`) | `~/.hermes` | `~/.hermes` |
-| Workspace (`workingDirectory`) | `~/hermes-workspace` | `~/hermes-workspace` |
-| Credential source | Published `~/.config/nix-config/hermes.env` | Proton Pass on `desktop` |
+| Credential source | Published `hermesCredentialFile` | Proton Pass on `desktop` |
 | Service logs | User journal for `hermes-agent` / `hermes-backend` | `~/Library/Logs/hermes-agent.log`, `hermes-agent.err.log`; corresponding `hermes-backend` files if enabled |
 
 Here `~` denotes the managed user's home directory.

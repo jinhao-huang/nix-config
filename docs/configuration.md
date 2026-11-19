@@ -64,6 +64,7 @@ Edit [hosts/linux.nix](../hosts/linux.nix). Each top-level attribute names a
 | `dockerGhcr` | Optional attribute set passed to `modules.docker-ghcr`; enables GHCR authentication through a named GitHub CLI account. See [setup and login](../modules/docker-ghcr/README.md). |
 | `singBox` | Attribute set passed to `modules.sing-box`; supply `listenPort` and at least one node source. |
 | `hermes` | Attribute set passed to official `services.hermes-agent`; model, state paths, private env-file paths, and messaging settings. |
+| `hermesCredentialFile` | Optional absolute destination for `hermes-secrets` on a host using the shared Proton Pass references. Hermes reads this file before additional `hermes.environmentFiles`. |
 
 For example, a host can include:
 

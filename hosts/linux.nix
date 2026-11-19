@@ -15,7 +15,6 @@
     hermes = {
       enable = true;
       backend.mode = "dashboard";
-      environmentFiles = [ hermesCredentialFile ];
     };
     singBox = {
       listenPort = 21009;

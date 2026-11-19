@@ -45,7 +45,14 @@ let
       in
       host
       // {
-        inherit hermes;
+        hermes =
+          hermes
+          // lib.optionalAttrs (managedHermes && host ? hermesCredentialFile) {
+            environmentFiles = [
+              host.hermesCredentialFile
+            ]
+            ++ lib.remove host.hermesCredentialFile (hermes.environmentFiles or [ ]);
+          };
         pi =
           (lib.evalModules {
             modules = [

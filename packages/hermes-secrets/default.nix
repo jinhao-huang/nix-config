@@ -8,24 +8,14 @@
   linuxHosts,
 }:
 let
-  targets =
-    lib.mapAttrs
-      (name: host: {
-        destination = "${host.username}@${name}";
-        path = host.hermesCredentialFile;
-        references = writeText "hermes-${name}.env.refs" (
-          lib.concatLines (lib.mapAttrsToList (key: ref: "${key}=${ref}") host.hermesProtonPass)
-        );
-        keys = builtins.attrNames host.hermesProtonPass;
-      })
-      (
-        lib.filterAttrs (
-          _: host:
-          host ? hermesProtonPass
-          && host ? hermesCredentialFile
-          && lib.elem host.hermesCredentialFile (host.hermes.environmentFiles or [ ])
-        ) linuxHosts
-      );
+  targets = lib.mapAttrs (name: host: {
+    destination = "${host.username}@${name}";
+    path = host.hermesCredentialFile;
+    references = writeText "hermes-${name}.env.refs" (
+      lib.concatLines (lib.mapAttrsToList (key: ref: "${key}=${ref}") host.hermesProtonPass)
+    );
+    keys = builtins.attrNames host.hermesProtonPass;
+  }) (lib.filterAttrs (_: host: host ? hermesProtonPass && host ? hermesCredentialFile) linuxHosts);
   inventory = writeText "hermes-secret-targets.json" (builtins.toJSON targets);
 in
 writeShellApplication {

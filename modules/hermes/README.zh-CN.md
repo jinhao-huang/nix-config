@@ -90,11 +90,11 @@ nix build --no-link .#checks.aarch64-darwin.hermes-runtime
 
 ## 数据路径与移除
 
+两个平台的 `hermesHome` 都默认为 `~/.hermes`，默认 profile 的 `workingDirectory` 为 `~/hermes-workspace`。
+
 | 数据 | Linux | macOS 启用后 |
 | --- | --- | --- |
-| 状态根目录（`hermesHome`） | `~/.hermes` | `~/.hermes` |
-| 工作目录（`workingDirectory`） | `~/hermes-workspace` | `~/hermes-workspace` |
-| 凭据来源 | 发布到 `~/.config/nix-config/hermes.env` | `desktop` 从 Proton Pass 取值 |
+| 凭据来源 | 发布到 `hermesCredentialFile` 指定的文件 | `desktop` 从 Proton Pass 取值 |
 | 服务日志 | `hermes-agent`／`hermes-backend` 的用户 journal | `~/Library/Logs/hermes-agent.log`、`hermes-agent.err.log`；启用后端时还有对应的 `hermes-backend` 文件 |
 
 这里的 `~` 表示受管理用户的 home 目录。状态根目录包含 `config.yaml`、凭据副本 `.env`、`.managed`、可能产生的 `auth.json` 和 MCP tokens，以及 `state.db`、会话、记忆、cron 任务及输出、技能、插件、缓存和应用日志。`.restart-needed` 是私有的空文件，用于标记待处理的服务重启。路径可以按主机覆盖，删除前应核对实际配置。
