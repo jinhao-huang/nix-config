@@ -72,39 +72,41 @@ Surge 负责出站网络。之后需要启用或升级 Hermes 时，按 [Hermes 
 
 两台 Mac 都通过 [Home Manager launch agent](../modules/telegram-mcp/default.nix) 运行同一个[固定版本的镜像](https://github.com/users/jinhao-huang/packages/container/package/telegram-mcp)。打开 OrbStack，并设为登录时启动。Docker 停止时也能通过 SSH 切换配置。Agent 在 macOS 登录会话中运行。
 
-`switch` 会创建 `telegram/` 和 `downloads/`，权限为 `0700`。使用默认 XDG 路径时，笔记本在 `~/.local/share/telegram-mcp/` 下创建，桌面机在 `~/.local/share/metaweave/` 下创建。缺少凭据时，`switch` 会提示预期路径。
+两台 Mac 默认都在 `~/.local/share/telegram-mcp/` 保存会话和下载的文件。`switch` 会创建 `telegram/` 和 `downloads/` 两个子目录，权限为 `0700`。缺少会话文件或凭据文件时，`switch` 会提示对应路径。
 
-检出 `v3.3.20`，按[上游登录与迁移指南](https://github.com/chigwell/telegram-mcp/blob/v3.3.20/README.md#quick-start)分别在两台 Mac 上登录。先把 API 凭据写入检出目录下的临时 `.env`，生成会话字符串后也存入该文件，再执行迁移。将 `PATH` 换成对应 Mac 上 `telegram/` 目录中 `telegram.session` 的完整路径。
+每台 Mac 都需要独立的 Telegram 会话。在缺少会话文件的 Mac 上，检出 `v3.3.20`，按[上游登录与迁移指南](https://github.com/chigwell/telegram-mcp/blob/v3.3.20/README.md#quick-start)操作。把 API 凭据和会话字符串存入检出目录下的临时 `.env`。已有本机专用的会话字符串可跳过生成步骤。下面的迁移命令读取 `TELEGRAM_SESSION_STRING`（账号标签留空）。如果生成时填了标签，迁移时要加上对应的 `--account` 参数。例如，`TELEGRAM_SESSION_STRING_SECONDARY` 对应 `--account secondary`。
 
 ```sh
 uv sync --locked --no-dev --no-install-project --no-build
 uv run --no-sync python session_string_generator.py
-uv run --no-sync python migrate_session.py --target PATH
+session_dir="${XDG_DATA_HOME:-$HOME/.local/share}/telegram-mcp/telegram"
+install -d -m 0700 "$session_dir"
+uv run --no-sync python migrate_session.py --target "$session_dir/telegram.session"
 ```
 
-迁移成功后，删除临时 `.env`，再写入 `~/.config/nix-config/telegram-mcp.env`。以不带引号的 `KEY=value` 格式填写 `TELEGRAM_API_ID` 和 `TELEGRAM_API_HASH`，两台可复用同一组值。在 `TELEGRAM_ALLOWED_CHAT_IDS` 中填入需要访问的 Telegram 聊天 ID 或 `@用户名`，用逗号分隔。会话文件和凭据文件都使用 `0600` 权限。若设置 `TELEGRAM_PROXY_*`，代理地址须能从 OrbStack 访问。
+迁移成功后，把服务凭据写入 `${XDG_CONFIG_HOME:-$HOME/.config}/nix-config/telegram-mcp.env`（父目录缺失时先创建），再删除临时 `.env`。以不带引号的 `KEY=value` 格式填写 `TELEGRAM_API_ID` 和 `TELEGRAM_API_HASH`，两台可复用同一组值。在 `TELEGRAM_ALLOWED_CHAT_IDS` 中填入需要访问的 Telegram 聊天 ID 或 `@用户名`，用逗号分隔。会话文件和服务凭据文件都使用 `0600` 权限。若设置 `TELEGRAM_PROXY_*`，代理地址须能从 OrbStack 访问。
 
 将 MCP 客户端的 Streamable HTTP 地址设为 `http://127.0.0.1:8765/mcp`。两台 Mac 都开放只读工具和同一组[写工具](../profiles/home/darwin.nix)。连接后检查容器状态和客户端列出的工具，再下载一份小附件，确认文件写入本机 `downloads/` 目录。
 
 ```sh
-docker --context orbstack compose -f ~/.config/nix-config/telegram-mcp/compose.yaml ps
+docker --context orbstack compose -f "${XDG_CONFIG_HOME:-$HOME/.config}/nix-config/telegram-mcp/compose.yaml" ps
 ```
 
-启动日志在 `~/Library/Logs/telegram-music.log`。编辑环境文件后，运行 `launchctl kickstart -k "gui/$UID/org.nix-community.home.telegram-music"` 重启。
+启动日志在 `~/Library/Logs/telegram-mcp.log`。编辑环境文件后，运行 `launchctl kickstart -k "gui/$UID/org.nix-community.home.telegram-mcp"` 重启。
 
 <a id="music-library"></a>
 
 ## 音乐库
 
-在桌面 Mac 上把 [Metaweave](https://github.com/jinhao-huang/metaweave) 克隆到[主机清单](../hosts/darwin.nix)的 `musicLibrary.checkout` 路径。缺少技能文件时，`switch` 会提示。切换配置后，在检出目录安装锁定的运行环境。锁文件更新后重跑此命令。
+在桌面 Mac 上把 [Metaweave](https://github.com/jinhao-huang/metaweave) 克隆到[主机清单](../hosts/darwin.nix)的 `musicLibrary.checkout` 路径。启用 Hermes 后，若缺少技能文件，`switch` 会提示。切换配置后，在检出目录安装锁定的运行环境。锁文件更新后重跑此命令。
 
 ```sh
 uv sync --locked --no-dev --no-build --managed-python
 ```
 
-`switch` 会创建 `music-library` profile，它有独立的会话和记忆，与 `default` 共用 Proton Pass 中的模型凭据。在桌面 Mac 配好 [Telegram MCP](#telegram-mcp)，再运行 `hermes -p music-library mcp test telegram-music` 检查连接。
+`switch` 会创建 `music-library` profile，它有独立的会话和记忆，与 `default` 共用 Proton Pass 中的模型凭据。在桌面 Mac 配好 [Telegram MCP](#telegram-mcp)，再运行 `hermes -p music-library mcp test telegram-mcp` 检查连接。
 
-在现有 Dashboard 中选择 `music-library` profile，然后新建聊天。说明频道和任务，发送前审阅确切内容。Telegram MCP 将不超过 200 MiB 的附件保存到 Mac 的下载目录。超过上限时，用 Telegram 客户端下载到这台 Mac。收到网页分享时，按 Skill 的流程下载并把文件交到这台 Mac，再开始验收。任务记录放在曲库之外。就地整理通过已配置的 SSH 主机在 NAS 上执行，首次就地整理前需在 NAS 上安装 Skill 的独立运行环境。
+在现有 Dashboard 中选择 `music-library` profile，然后新建聊天。说明频道和任务，发送前审阅确切内容。Telegram MCP 将不超过 200 MiB 的附件保存到服务的 `downloads/` 子目录，音乐库 profile 以这里为工作目录。超过上限时，用 Telegram 客户端下载到这台 Mac。收到网页分享时，按 Skill 的流程下载并把文件交到这台 Mac，再开始验收。任务记录放在曲库之外。就地整理通过已配置的 SSH 主机在 NAS 上执行，首次就地整理前需在 NAS 上安装 Skill 的独立运行环境。
 
 ## 远程访问与 Harness
 

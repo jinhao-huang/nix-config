@@ -6,20 +6,21 @@
 }:
 let
   cfg = config.modules.telegram-mcp;
-  sessionDirectory = "${cfg.dataDirectory}/telegram";
+  dataDirectory = "${config.xdg.dataHome}/telegram-mcp";
+  sessionDirectory = "${dataDirectory}/telegram";
   sessionName = "telegram";
   sessionFile = "${sessionDirectory}/${sessionName}.session";
   envFile = "${config.xdg.configHome}/nix-config/telegram-mcp.env";
   port = "8765";
   orbstackBin = "/Applications/OrbStack.app/Contents/MacOS/xbin";
-  logFile = "${config.home.homeDirectory}/Library/Logs/telegram-music.log";
+  logFile = "${config.home.homeDirectory}/Library/Logs/telegram-mcp.log";
   bind = source: target: {
     type = "bind";
     inherit source target;
     bind.create_host_path = false;
   };
-  compose = (pkgs.formats.json { }).generate "telegram-music-compose.json" {
-    name = "telegram-music";
+  compose = (pkgs.formats.json { }).generate "telegram-mcp-compose.json" {
+    name = "telegram-mcp";
     services.telegram-mcp = {
       image = "ghcr.io/jinhao-huang/telegram-mcp:v3.3.20-3@sha256:8d622d81e4c07d3c0e5185edc99bd08523330c529f9b93d9a3fc8a9e606f6bde";
       ports = [ "127.0.0.1:${port}:${port}" ];
@@ -55,15 +56,6 @@ in
   options.modules.telegram-mcp = {
     enable = lib.mkEnableOption "a local Telegram MCP service in OrbStack";
 
-    dataDirectory = lib.mkOption {
-      type = lib.types.pathWith {
-        absolute = true;
-        inStore = false;
-      };
-      default = "${config.xdg.dataHome}/telegram-mcp";
-      description = "Directory for the Telegram session and downloaded files.";
-    };
-
     writeTools = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [ ];
@@ -72,7 +64,7 @@ in
 
     downloadDirectory = lib.mkOption {
       type = lib.types.str;
-      default = "${cfg.dataDirectory}/downloads";
+      default = "${dataDirectory}/downloads";
       readOnly = true;
       internal = true;
       description = "Host directory mounted at /downloads in the container.";
@@ -118,7 +110,7 @@ in
     xdg.configFile."nix-config/telegram-mcp/compose.yaml".source = compose;
 
     # Keep Docker startup out of switch; the login agent owns the foreground job.
-    launchd.agents.telegram-music = {
+    launchd.agents.telegram-mcp = {
       enable = true;
       config = {
         ProgramArguments = [
